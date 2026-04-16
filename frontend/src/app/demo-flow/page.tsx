@@ -42,7 +42,7 @@ export default function DemoFlowPage() {
   return (
     <main className="container-page py-8 sm:py-10">
       <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/85 p-5 sm:p-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(99,102,241,0.24),transparent_40%),radial-gradient(circle_at_95%_10%,rgba(34,211,238,0.18),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(249,115,22,0.24),transparent_40%),radial-gradient(circle_at_95%_10%,rgba(244,63,94,0.18),transparent_34%)]" />
         <div className="relative">
           <Badge className="gap-1.5 border-brand/40 bg-brand/10 text-slate-100">
             <WandSparkles size={13} /> Demo Flow

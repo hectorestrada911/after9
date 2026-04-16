@@ -49,7 +49,7 @@ const trustStats = [
 export default function HomePage() {
   return (
     <main className="relative overflow-hidden bg-black pb-20 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(99,102,241,0.2),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(34,211,238,0.16),transparent_32%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(249,115,22,0.2),transparent_38%),radial-gradient(circle_at_90%_8%,rgba(244,63,94,0.16),transparent_32%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.35),rgba(2,6,23,0.95))]" />
 
       <section className="relative border-b border-slate-900/90">
@@ -60,7 +60,7 @@ export default function HomePage() {
             </Badge>
             <h1 className="max-w-3xl text-5xl font-semibold leading-[0.95] tracking-tight sm:text-7xl">
               Turn your event
-              <span className="block bg-gradient-to-r from-slate-100 via-sky-200 to-indigo-300 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-slate-100 via-amber-200 to-rose-300 bg-clip-text text-transparent">
                 into income.
               </span>
             </h1>
@@ -90,7 +90,7 @@ export default function HomePage() {
           </div>
 
           <Card className="relative overflow-hidden rounded-3xl border-slate-800/80 bg-slate-950/80 p-0 backdrop-blur-xl">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(99,102,241,0.16),transparent_40%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(249,115,22,0.18),transparent_40%)]" />
             <div className="relative">
               <div className="relative h-56 w-full sm:h-64">
                 <Image

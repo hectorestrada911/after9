@@ -9,9 +9,9 @@
 body {
   @apply bg-[#04070f] text-slate-100 antialiased;
   background-image:
-    radial-gradient(circle at 12% -10%, rgba(91, 140, 255, 0.32) 0, rgba(91, 140, 255, 0) 38%),
-    radial-gradient(circle at 92% 10%, rgba(34, 211, 238, 0.22) 0, rgba(34, 211, 238, 0) 32%),
-    linear-gradient(180deg, #030712 0%, #070d1b 42%, #0a1122 100%);
+    radial-gradient(circle at 12% -10%, rgba(249, 115, 22, 0.28) 0, rgba(249, 115, 22, 0) 40%),
+    radial-gradient(circle at 92% 10%, rgba(244, 63, 94, 0.2) 0, rgba(244, 63, 94, 0) 34%),
+    linear-gradient(180deg, #050507 0%, #0b0908 42%, #120d0b 100%);
   background-attachment: fixed;
 }
 
@@ -20,7 +20,7 @@ body {
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(249, 115, 22, 0.35);
   color: #ffffff;
 }
 

@@ -3,6 +3,7 @@
 
 # Root
 .env
+.next/
 
 # Frontend
 frontend/node_modules/

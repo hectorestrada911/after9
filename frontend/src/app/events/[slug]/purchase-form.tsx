@@ -21,6 +21,7 @@ export default function PurchaseForm({
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     const form = new FormData(e.currentTarget);
     const body = {
       eventId,
@@ -47,6 +48,7 @@ export default function PurchaseForm({
       <Input name="buyerEmail" type="email" placeholder="Email" required />
       <Input name="quantity" type="number" defaultValue={1} min={1} max={10} required />
       {error && <p className="text-xs text-red-600">{error}</p>}
+      <p className="text-xs text-slate-500">Tickets are delivered to email with QR and entry code.</p>
       <Button className="w-full" disabled={loading || soldOut}>{soldOut ? "Sold out" : loading ? "Redirecting..." : "Buy ticket"}</Button>
     </form>
   );

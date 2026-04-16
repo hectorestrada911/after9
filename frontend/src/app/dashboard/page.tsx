@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card } from "@/components/ui";
+import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui";
 import { centsToDollars } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import CopyEventLink from "@/components/copy-event-link";
@@ -56,48 +56,56 @@ export default async function DashboardPage() {
 
   return (
     <main className="container-page py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Host dashboard</h1>
-        <Link href="/dashboard/events/new" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white">Create event</Link>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <SectionTitle
+          eyebrow="Host workspace"
+          title="Host dashboard"
+          subtitle="Track sales, attendance, and performance at a glance."
+        />
+        <Link href="/dashboard/events/new" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-soft transition hover:bg-brand-dark">Create event</Link>
       </div>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card><p className="text-sm text-slate-500">Total revenue</p><p className="mt-1 text-2xl font-bold">${centsToDollars(revenue)}</p></Card>
-        <Card><p className="text-sm text-slate-500">Tickets sold</p><p className="mt-1 text-2xl font-bold">{ticketsSold}</p></Card>
-        <Card><p className="text-sm text-slate-500">Upcoming events</p><p className="mt-1 text-2xl font-bold">{events?.length ?? 0}</p></Card>
-        <Card><p className="text-sm text-slate-500">Checked-in guests</p><p className="mt-1 text-2xl font-bold">{checkedIn ?? 0}</p></Card>
+        <StatCard label="Total revenue" value={`$${centsToDollars(revenue)}`} />
+        <StatCard label="Tickets sold" value={ticketsSold} />
+        <StatCard label="Upcoming events" value={events?.length ?? 0} />
+        <StatCard label="Checked-in guests" value={checkedIn ?? 0} />
       </section>
 
       <section className="mt-6 space-y-3">
-        {(events ?? []).map((event) => (
-          <Card key={event.id} className="space-y-3">
-            <div className="flex items-center justify-between">
+        {(events ?? []).length === 0 ? (
+          <EmptyState title="No events yet" subtitle="Create your first event to start selling tickets." />
+        ) : (
+          (events ?? []).map((event) => (
+            <Card key={event.id} className="space-y-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-semibold">{event.title}</p>
+                  <p className="text-sm text-slate-500">{event.date}</p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <Link className="rounded-lg border px-3 py-1 hover:bg-slate-50" href={`/events/${event.slug}`}>View</Link>
+                  <Link className="rounded-lg border px-3 py-1 hover:bg-slate-50" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
+                  <CopyEventLink slug={event.slug} />
+                </div>
+              </div>
               <div>
-                <p className="font-semibold">{event.title}</p>
-                <p className="text-sm text-slate-500">{event.date}</p>
+                <div className="mb-1 flex justify-between text-xs text-slate-500">
+                  <span>Ticket sales progress</span>
+                  <span>{Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-slate-200">
+                  <div
+                    className="h-2 rounded-full bg-brand"
+                    style={{
+                      width: `${Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%`,
+                    }}
+                  />
+                </div>
               </div>
-              <div className="flex gap-2 text-sm">
-                <Link className="rounded-lg border px-3 py-1" href={`/events/${event.slug}`}>View</Link>
-                <Link className="rounded-lg border px-3 py-1" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
-                <CopyEventLink slug={event.slug} />
-              </div>
-            </div>
-            <div>
-              <div className="mb-1 flex justify-between text-xs text-slate-500">
-                <span>Ticket sales progress</span>
-                <span>{Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-200">
-                <div
-                  className="h-2 rounded-full bg-brand"
-                  style={{
-                    width: `${Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </section>
 
       <section className="mt-8">

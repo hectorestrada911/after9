@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Input, Select } from "@/components/ui";
+import { Button, Card, Input, SectionTitle, Select } from "@/components/ui";
 import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -72,7 +72,11 @@ export default function NewEventPage() {
   return (
     <main className="container-page py-8">
       <Card className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-bold">Create event</h1>
+        <SectionTitle
+          eyebrow="Host tools"
+          title="Create event"
+          subtitle="Keep it simple. Fill in the essentials and publish a professional ticket page."
+        />
         <form onSubmit={onSubmit} className="mt-4 grid gap-3">
           <Input name="title" placeholder="Event title" required />
           <Input name="description" placeholder="Event description" required />

@@ -65,19 +65,19 @@ export default async function DashboardPage() {
         <Link href="/dashboard/events/new" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-soft transition hover:bg-brand-dark">Create event</Link>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 animate-fadeUp">
         <StatCard label="Total revenue" value={`$${centsToDollars(revenue)}`} />
         <StatCard label="Tickets sold" value={ticketsSold} />
         <StatCard label="Upcoming events" value={events?.length ?? 0} />
         <StatCard label="Checked-in guests" value={checkedIn ?? 0} />
       </section>
 
-      <section className="mt-6 space-y-3">
+      <section className="mt-6 space-y-3 animate-fadeUp">
         {(events ?? []).length === 0 ? (
           <EmptyState title="No events yet" subtitle="Create your first event to start selling tickets." />
         ) : (
           (events ?? []).map((event) => (
-            <Card key={event.id} className="space-y-3">
+            <Card key={event.id} className="space-y-3 transition hover:-translate-y-0.5 hover:shadow-soft">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">{event.title}</p>
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="mt-8">
+      <section className="mt-8 animate-fadeUp">
         <Card className="mb-4">
           <h2 className="mb-3 text-lg font-semibold">Sales analytics</h2>
           <SalesChart data={salesData} />

@@ -13,11 +13,11 @@ export default function SalesChart({ data }: { data: Item[] }) {
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis allowDecimals={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+          <XAxis dataKey="name" tick={{ fill: "#64748B", fontSize: 12 }} />
+          <YAxis allowDecimals={false} tick={{ fill: "#64748B", fontSize: 12 }} />
           <Tooltip />
-          <Bar dataKey="sold" fill="#4F46E5" radius={[8, 8, 0, 0]} />
+          <Bar dataKey="sold" fill="#4F46E5" radius={[10, 10, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

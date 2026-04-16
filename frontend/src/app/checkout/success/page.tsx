@@ -14,7 +14,8 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
 
   return (
     <main className="container-page py-10">
-      <Card className="mx-auto max-w-xl text-center">
+      <Card className="mx-auto max-w-xl text-center animate-fadeUp">
+        <p className="mx-auto mb-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Payment successful</p>
         <h1 className="text-2xl font-bold">Purchase confirmed</h1>
         <p className="mt-2 text-slate-600">Your tickets are ready. Save your order code for entry.</p>
         <p className="mt-4 rounded-lg bg-slate-100 p-2 text-sm">Order: {params.order_id || "Pending"}</p>

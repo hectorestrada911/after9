@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </Link>
             <nav className="hidden items-center gap-1 rounded-full border border-slate-800 bg-slate-950/80 p-1 text-sm sm:flex">
               <Link href="/" className="rounded-full px-3 py-1.5 text-slate-300 transition hover:bg-slate-800 hover:text-slate-100">Overview</Link>
-              <Link href="/events/campus-lights-fest" className="rounded-full px-3 py-1.5 text-slate-300 transition hover:bg-slate-800 hover:text-slate-100">Demo Event</Link>
+              <Link href="/demo-flow" className="rounded-full px-3 py-1.5 text-slate-300 transition hover:bg-slate-800 hover:text-slate-100">Demo Event</Link>
               <Link href="/login" className="rounded-full px-3 py-1.5 text-slate-300 transition hover:bg-slate-800 hover:text-slate-100">Host Login</Link>
             </nav>
             <Link href="/signup" className="rounded-full bg-brand px-3.5 py-1.5 text-sm font-semibold text-white shadow-glow transition hover:bg-brand-dark">

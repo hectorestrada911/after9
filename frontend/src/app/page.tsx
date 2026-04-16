@@ -72,7 +72,7 @@ export default function HomePage() {
                 Create an Event <ArrowRight size={15} />
               </Link>
               <Link
-                href="/events/campus-lights-fest"
+                href="/demo-flow"
                 className="inline-flex items-center rounded-full border border-slate-700 bg-slate-950 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-slate-500"
               >
                 See Demo Event

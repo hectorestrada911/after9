@@ -1,21 +1,48 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
 import { Button, Card, Input, SectionTitle, Select } from "@/components/ui";
 import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function NewEventPage() {
   const supabase = getSupabaseBrowserClient();
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [createdLink, setCreatedLink] = useState<string | null>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    async function generateQr() {
+      if (!createdLink) {
+        setQrCodeUrl(null);
+        return;
+      }
+      const { toDataURL } = await import("qrcode");
+      const qr = await toDataURL(createdLink, { width: 220, margin: 1 });
+      if (!ignore) setQrCodeUrl(qr);
+    }
+    generateQr().catch(() => setQrCodeUrl(null));
+    return () => {
+      ignore = true;
+    };
+  }, [createdLink]);
+
+  async function copyCreatedLink() {
+    if (!createdLink) return;
+    await navigator.clipboard.writeText(createdLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setCreatedLink(null);
+    setQrCodeUrl(null);
+    setCopied(false);
     const formData = new FormData(e.currentTarget);
     const coverImage = formData.get("coverImage");
     const file = coverImage instanceof File && coverImage.size > 0 ? coverImage : null;
@@ -64,9 +91,6 @@ export default function NewEventPage() {
     if (error) return setError(error.message);
     const link = `${window.location.origin}/events/${slug}`;
     setCreatedLink(link);
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 1000);
   }
 
   return (
@@ -101,9 +125,41 @@ export default function NewEventPage() {
           <Input name="locationNote" placeholder="Approximate location note (optional)" />
           {error && <p className="text-sm text-red-400">{error}</p>}
           {createdLink && (
-            <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-300">
-              Event created. Share this link: {createdLink}
-            </p>
+            <div className="space-y-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+              <p className="text-sm text-emerald-300">Event created. Share this access link with guests:</p>
+              <p className="break-all rounded-lg border border-emerald-500/30 bg-slate-950/60 px-2 py-1.5 text-xs text-slate-100">
+                {createdLink}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={copyCreatedLink}
+                  className="min-h-10 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-100 transition hover:bg-slate-800"
+                >
+                  {copied ? "Copied" : "Copy event link"}
+                </button>
+                <Link
+                  href={createdLink}
+                  target="_blank"
+                  className="inline-flex min-h-10 items-center rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-100 transition hover:bg-slate-800"
+                >
+                  Open event page
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex min-h-10 items-center rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-100 transition hover:bg-slate-800"
+                >
+                  Back to dashboard
+                </Link>
+              </div>
+              {qrCodeUrl && (
+                <div className="w-fit rounded-xl border border-slate-700 bg-slate-950/70 p-3">
+                  <p className="mb-2 text-xs text-slate-300">Guest entry QR (scan to open event page)</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrCodeUrl} alt="Event page QR code" className="h-40 w-40 rounded-md" />
+                </div>
+              )}
+            </div>
           )}
           <Button className="text-base">Create event</Button>
         </form>

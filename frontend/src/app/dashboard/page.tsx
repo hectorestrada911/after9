@@ -1,0 +1,135 @@
+import Link from "next/link";
+import { Card } from "@/components/ui";
+import { centsToDollars } from "@/lib/utils";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
+import CopyEventLink from "@/components/copy-event-link";
+import SalesChart from "@/components/sales-chart";
+
+export default async function DashboardPage() {
+  const supabase = await getSupabaseServerClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+  if (!userId) {
+    return (
+      <main className="container-page py-10">
+        <Card className="mx-auto max-w-xl">
+          <h1 className="text-xl font-bold">Login required</h1>
+          <p className="mt-1 text-sm text-slate-600">Sign in to access your host dashboard.</p>
+          <Link href="/login" className="mt-4 inline-block rounded-xl bg-brand px-4 py-2 font-semibold text-white">Go to login</Link>
+        </Card>
+      </main>
+    );
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
+  if (!profile) {
+    return (
+      <main className="container-page py-10">
+        <Card className="mx-auto max-w-xl">
+          <h1 className="text-xl font-bold">Finish onboarding</h1>
+          <p className="mt-1 text-sm text-slate-600">Set up your organizer profile before creating events.</p>
+          <Link href="/onboarding" className="mt-4 inline-block rounded-xl bg-brand px-4 py-2 font-semibold text-white">Continue onboarding</Link>
+        </Card>
+      </main>
+    );
+  }
+
+  const { data: events } = await supabase
+    .from("events")
+    .select("id,slug,title,date,ticket_price,tickets_available")
+    .eq("host_id", userId)
+    .order("date", { ascending: true });
+  const eventIds = (events ?? []).map((e) => e.id);
+  const { data: orders } = await supabase
+    .from("orders")
+    .select("id,event_id,buyer_name,buyer_email,total_amount,quantity,created_at")
+    .in("event_id", eventIds);
+  const { count: checkedIn } = await supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", (events ?? []).map((e) => e.id));
+
+  const revenue = (orders ?? []).reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
+  const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);
+  const attendeeRows = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
+  const salesData = (events ?? []).map((event) => ({
+    name: event.title.length > 16 ? `${event.title.slice(0, 16)}...` : event.title,
+    sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
+  }));
+
+  return (
+    <main className="container-page py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Host dashboard</h1>
+        <Link href="/dashboard/events/new" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white">Create event</Link>
+      </div>
+
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card><p className="text-sm text-slate-500">Total revenue</p><p className="mt-1 text-2xl font-bold">${centsToDollars(revenue)}</p></Card>
+        <Card><p className="text-sm text-slate-500">Tickets sold</p><p className="mt-1 text-2xl font-bold">{ticketsSold}</p></Card>
+        <Card><p className="text-sm text-slate-500">Upcoming events</p><p className="mt-1 text-2xl font-bold">{events?.length ?? 0}</p></Card>
+        <Card><p className="text-sm text-slate-500">Checked-in guests</p><p className="mt-1 text-2xl font-bold">{checkedIn ?? 0}</p></Card>
+      </section>
+
+      <section className="mt-6 space-y-3">
+        {(events ?? []).map((event) => (
+          <Card key={event.id} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold">{event.title}</p>
+                <p className="text-sm text-slate-500">{event.date}</p>
+              </div>
+              <div className="flex gap-2 text-sm">
+                <Link className="rounded-lg border px-3 py-1" href={`/events/${event.slug}`}>View</Link>
+                <Link className="rounded-lg border px-3 py-1" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
+                <CopyEventLink slug={event.slug} />
+              </div>
+            </div>
+            <div>
+              <div className="mb-1 flex justify-between text-xs text-slate-500">
+                <span>Ticket sales progress</span>
+                <span>{Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-200">
+                <div
+                  className="h-2 rounded-full bg-brand"
+                  style={{
+                    width: `${Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </section>
+
+      <section className="mt-8">
+        <Card className="mb-4">
+          <h2 className="mb-3 text-lg font-semibold">Sales analytics</h2>
+          <SalesChart data={salesData} />
+        </Card>
+        <Card>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Recent attendees</h2>
+            <Link className="rounded-lg border px-3 py-1 text-sm" href="/api/attendees/csv">Download CSV</Link>
+          </div>
+          {attendeeRows.length === 0 ? (
+            <p className="text-sm text-slate-600">No ticket purchases yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {attendeeRows.map((order) => (
+                <div key={order.id} className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-sm">
+                  <div>
+                    <p className="font-medium">{order.buyer_name}</p>
+                    <p className="text-slate-500">{order.buyer_email}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{order.quantity} tickets</p>
+                    <p className="text-slate-500">${centsToDollars(order.total_amount)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </section>
+    </main>
+  );
+}

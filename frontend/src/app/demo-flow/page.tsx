@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle2, CircleDollarSign, QrCode, ScanLine, WandSparkles } from "lucide-react";
 import { Badge, Card } from "@/components/ui";
 
@@ -102,6 +103,36 @@ export default function DemoFlowPage() {
           <p className="mt-2 text-sm text-slate-200">
             Hosts get a shareable page link and QR right after publishing, and guests use that same flow to enter events.
           </p>
+        </Card>
+      </section>
+
+      <section className="mt-6">
+        <Card className="overflow-hidden rounded-3xl border-slate-800 bg-slate-950/70 p-0">
+          <div className="grid lg:grid-cols-[1.15fr,0.85fr]">
+            <div className="relative h-64 w-full sm:h-80">
+              <Image
+                src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1800&q=80"
+                alt="Students at an event venue"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+            </div>
+            <div className="p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Real event feel</p>
+              <h3 className="mt-2 text-2xl font-semibold text-slate-100">From promotion to entry in one clean flow</h3>
+              <p className="mt-3 text-sm text-slate-300">
+                Use the same modern journey every time: publish, share, sell, and check in.
+                Fewer steps, better trust, faster execution on event night.
+              </p>
+              <Link
+                href="/signup"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:bg-brand-dark"
+              >
+                Launch your first event <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
         </Card>
       </section>
     </main>

@@ -24,7 +24,7 @@ export function Card({
   children,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <div className={cn("rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-soft", className)}>
+    <div className={cn("rounded-2xl border border-slate-800/90 bg-slate-900/55 p-4 shadow-soft backdrop-blur-sm", className)}>
       {children}
     </div>
   );
@@ -35,7 +35,7 @@ export function Badge({
   children,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <span className={cn("inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs font-medium text-slate-200", className)}>
+    <span className={cn("inline-flex items-center rounded-full border border-slate-700/90 bg-slate-900/75 px-2.5 py-1 text-xs font-medium text-slate-200", className)}>
       {children}
     </span>
   );
@@ -97,7 +97,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        "min-h-11 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-slate-100 shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20",
+        "min-h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20",
         props.className,
       )}
     />
@@ -109,7 +109,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={cn(
-        "min-h-11 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-slate-100 shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20",
+        "min-h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20",
         props.className,
       )}
     />

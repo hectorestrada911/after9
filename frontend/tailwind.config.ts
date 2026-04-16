@@ -10,18 +10,18 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#4F46E5",
-          dark: "#3730A3",
-          soft: "#EEF2FF",
+          DEFAULT: "#5B8CFF",
+          dark: "#3F6EE8",
+          soft: "#E8F0FF",
         },
         accent: {
-          mint: "#10B981",
-          sky: "#0EA5E9",
+          mint: "#34D399",
+          sky: "#22D3EE",
         },
       },
       boxShadow: {
-        soft: "0 10px 30px rgba(15, 23, 42, 0.08)",
-        glow: "0 12px 35px rgba(79, 70, 229, 0.25)",
+        soft: "0 14px 45px rgba(2, 10, 26, 0.35)",
+        glow: "0 16px 42px rgba(91, 140, 255, 0.32)",
       },
       borderRadius: {
         xl2: "1rem",

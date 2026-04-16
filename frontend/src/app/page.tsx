@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   CheckCircle2,
@@ -18,6 +19,7 @@ const chapters = [
     copy: "Use premium typography, clear structure, and high-signal details so guests immediately understand value and legitimacy.",
     points: ["Clean structure and hierarchy", "Professional visual confidence", "Share-ready from day one"],
     icon: Sparkles,
+    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80",
   },
   {
     eyebrow: "Chapter 02",
@@ -25,6 +27,7 @@ const chapters = [
     copy: "Strong trust cues, simple quantity decisions, and familiar payment flow remove hesitation and improve completed orders.",
     points: ["Secure checkout messaging", "Mobile-first purchase flow", "Cleaner decision path"],
     icon: CircleDollarSign,
+    image: "https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&w=1600&q=80",
   },
   {
     eyebrow: "Chapter 03",
@@ -32,6 +35,7 @@ const chapters = [
     copy: "Attendee search, duplicate prevention, and check-in clarity let your team move confidently when lines get long.",
     points: ["Fast code and name lookup", "Duplicate entry prevention", "Live attendance visibility"],
     icon: ScanLine,
+    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1600&q=80",
   },
 ];
 
@@ -49,7 +53,7 @@ export default function HomePage() {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.35),rgba(2,6,23,0.95))]" />
 
       <section className="relative border-b border-slate-900/90">
-        <div className="container-page grid min-h-[78vh] items-center gap-10 py-16 lg:grid-cols-[1.1fr,0.9fr]">
+        <div className="container-page grid min-h-[78vh] items-center gap-10 py-16 lg:grid-cols-[1.05fr,0.95fr]">
           <div className="space-y-6">
             <Badge className="gap-1.5 border-brand/35 bg-brand/10 text-slate-100">
               <Sparkles size={14} /> Built for serious college hosts
@@ -85,26 +89,35 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Card className="relative overflow-hidden rounded-3xl border-slate-800/80 bg-slate-950/80 p-6 backdrop-blur-xl">
+          <Card className="relative overflow-hidden rounded-3xl border-slate-800/80 bg-slate-950/80 p-0 backdrop-blur-xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(99,102,241,0.16),transparent_40%)]" />
             <div className="relative">
-              <p className="text-sm font-semibold text-slate-100">Live host pulse</p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {[
-                  ["Revenue", "$2,430"],
-                  ["Tickets sold", "81"],
-                  ["Checked in", "67"],
-                  ["Upcoming", "4"],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
-                    <p className="text-xs text-slate-400">{label}</p>
-                    <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
-                  </div>
-                ))}
+              <div className="relative h-56 w-full sm:h-64">
+                <Image
+                  src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80"
+                  alt="Crowd at a modern night event"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
               </div>
-              <p className="mt-4 rounded-xl border border-brand/35 bg-brand/10 px-3 py-2 text-xs text-slate-200">
-                Demand is accelerating. Launch final story push now.
-              </p>
+              <div className="p-5">
+                <p className="text-sm font-semibold text-slate-100">Live host pulse</p>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {[
+                    ["Revenue", "$2,430"],
+                    ["Tickets sold", "81"],
+                    ["Checked in", "67"],
+                    ["Upcoming", "4"],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4">
+                      <p className="text-xs text-slate-400">{label}</p>
+                      <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </Card>
         </div>
@@ -151,28 +164,24 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-black p-6 shadow-[0_40px_80px_rgba(2,6,23,0.7)]">
-                  <div className="rounded-2xl border border-slate-800 bg-black/70 p-5">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-slate-200">After9 control panel</p>
-                      <Icon size={16} className="text-brand" />
+                <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-950 to-black p-4 shadow-[0_40px_80px_rgba(2,6,23,0.7)]">
+                  <div className="overflow-hidden rounded-2xl border border-slate-800 bg-black/70">
+                    <div className="relative h-60 w-full">
+                      <Image src={chapter.image} alt={chapter.title} fill className="object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent" />
                     </div>
-                    <div className="mt-4 space-y-3">
-                      <div className="h-2 w-2/3 rounded-full bg-slate-700" />
-                      <div className="h-2 w-full rounded-full bg-slate-800" />
-                      <div className="h-2 w-5/6 rounded-full bg-slate-800" />
-                    </div>
-                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
-                        <p className="text-xs text-slate-400">Ticket velocity</p>
-                        <p className="mt-1 text-xl font-semibold text-slate-100">+18% today</p>
+                    <div className="p-5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-slate-200">After9 control panel</p>
+                        <Icon size={16} className="text-brand" />
                       </div>
-                      <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
-                        <p className="text-xs text-slate-400">Door throughput</p>
-                        <p className="mt-1 text-xl font-semibold text-slate-100">1 guest / 4.2s</p>
+                      <div className="mt-4 h-2 w-full rounded-full bg-slate-800">
+                        <div className="h-2 w-2/3 rounded-full bg-brand" />
                       </div>
+                      <p className="mt-3 text-sm text-slate-300">
+                        Event momentum and operational signals update in real time.
+                      </p>
                     </div>
-                    <div className="mt-4 h-32 rounded-2xl border border-slate-800 bg-[linear-gradient(120deg,rgba(99,102,241,0.25),rgba(2,6,23,0.1),rgba(34,211,238,0.2))]" />
                   </div>
                 </div>
               </div>

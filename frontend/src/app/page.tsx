@@ -1,36 +1,125 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CircleCheckBig, Clock3, CreditCard, ShieldCheck, Sparkles, Ticket, WandSparkles } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  CirclePlus,
+  Clock3,
+  CreditCard,
+  ScanLine,
+  ShieldCheck,
+  Sparkles,
+  Ticket,
+  Users,
+} from "lucide-react";
 import { Badge, Card, SectionTitle } from "@/components/ui";
+
+const featurePills = [
+  { label: "Secure checkout", icon: ShieldCheck },
+  { label: "Mobile ticket delivery", icon: Ticket },
+  { label: "Instant host analytics", icon: BarChart3 },
+];
+
+const deepDive = [
+  {
+    title: "Create events that look premium",
+    copy: "Use polished templates, high-trust details, and clear structure to make guests feel confident immediately.",
+    icon: Sparkles,
+  },
+  {
+    title: "Sell with speed and certainty",
+    copy: "Clean pricing, strong trust cues, and one-flow checkout reduce hesitation and improve conversion.",
+    icon: CreditCard,
+  },
+  {
+    title: "Run entry without chaos",
+    copy: "Check-in status, attendee search, and ticket code handling keep lines short and your team calm.",
+    icon: ScanLine,
+  },
+];
+
+const outcomes: Array<{
+  title: string;
+  copy: string;
+  icon: typeof CheckCircle2;
+}> = [
+  {
+    title: "Professional event pages",
+    copy: "Make your event feel trustworthy in seconds.",
+    icon: CheckCircle2,
+  },
+  {
+    title: "Fast secure purchases",
+    copy: "Reduce checkout friction and increase completed orders.",
+    icon: CreditCard,
+  },
+  {
+    title: "Actionable host insights",
+    copy: "Track ticket velocity and optimize your promotion timing.",
+    icon: BarChart3,
+  },
+  {
+    title: "Reliable door control",
+    copy: "Prevent duplicate entries and keep lines moving.",
+    icon: Users,
+  },
+];
 
 export default function HomePage() {
   return (
-    <main className="mesh-grid pb-6">
-      <section className="container-page relative py-12 sm:py-20">
-        <div className="ambient-orb ambient-orb-purple left-6 top-32 h-44 w-44 animate-float" />
-        <div className="ambient-orb ambient-orb-mint right-8 top-44 h-40 w-40 animate-float" />
-        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr,0.9fr]">
+    <main className="mesh-grid pb-10">
+      <section className="container-page relative py-16 sm:py-24">
+        <div className="ambient-orb ambient-orb-purple left-4 top-20 h-48 w-48 animate-float" />
+        <div className="ambient-orb ambient-orb-mint right-8 top-36 h-44 w-44 animate-float" />
+
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr,0.95fr]">
           <div className="animate-fadeUp">
-            <Badge className="mb-4 gap-1.5 bg-slate-900"><Sparkles size={14} /> Built for college hosts</Badge>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-100 sm:text-6xl">Turn your event into income.</h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">Create, sell, and manage tickets in minutes. A trustworthy event page, fast checkout, and smooth entry flow all in one place.</p>
-            <p className="mt-2 max-w-2xl text-sm text-slate-400 sm:text-base">Designed to reduce hesitation and increase purchases with stronger trust signals, urgency cues, and a cleaner buying journey.</p>
-            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-              <Link href="/signup" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark">Create an Event <ArrowRight size={16} /></Link>
-              <Link href="/events/campus-lights-fest" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800">See Demo Event</Link>
+            <Badge className="mb-4 gap-1.5 bg-slate-900">
+              <Sparkles size={14} /> Built for serious college hosts
+            </Badge>
+            <h1 className="text-4xl font-bold tracking-tight text-slate-100 sm:text-6xl">
+              Turn your event into income.
+            </h1>
+            <p className="mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
+              Create, sell, and manage tickets in minutes. A trustworthy event page,
+              fast checkout, and smooth entry flow in one professional platform.
+            </p>
+            <p className="mt-3 max-w-2xl text-sm text-slate-400 sm:text-base">
+              Inspired by world-class product pages: cinematic visuals, clear hierarchy,
+              trust psychology, and focused conversion paths.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark"
+              >
+                Create an Event <ArrowRight size={16} />
+              </Link>
+              <Link
+                href="/events/campus-lights-fest"
+                className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800"
+              >
+                See Demo Event
+              </Link>
             </div>
+
             <div className="mt-6 flex flex-wrap gap-2">
-              <Badge className="gap-1.5"><ShieldCheck size={13} /> Secure checkout</Badge>
-              <Badge className="gap-1.5"><Ticket size={13} /> Mobile ticket delivery</Badge>
-              <Badge className="gap-1.5"><WandSparkles size={13} /> Fast door check-in</Badge>
+              {featurePills.map(({ label, icon: Icon }) => (
+                <Badge key={label} className="gap-1.5">
+                  <Icon size={13} /> {label}
+                </Badge>
+              ))}
             </div>
-            <div className="mt-6 grid max-w-xl grid-cols-3 gap-2">
+
+            <div className="mt-7 grid max-w-xl grid-cols-3 gap-2">
               <Card className="p-3 text-center">
                 <p className="text-xl font-bold text-slate-100">4.8/5</p>
                 <p className="text-xs text-slate-400">Host rating</p>
               </Card>
               <Card className="p-3 text-center">
                 <p className="text-xl font-bold text-slate-100">+31%</p>
-                <p className="text-xs text-slate-400">Avg conversion lift</p>
+                <p className="text-xs text-slate-400">Conversion lift</p>
               </Card>
               <Card className="p-3 text-center">
                 <p className="text-xl font-bold text-slate-100">&lt;2 min</p>
@@ -38,96 +127,64 @@ export default function HomePage() {
               </Card>
             </div>
           </div>
-          <Card className="glass grid gap-3 p-5 sm:p-6 animate-fadeUp">
+
+          <Card className="glass animate-fadeUp p-5 sm:p-6">
             <p className="text-sm font-semibold text-slate-100">Live host pulse</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-slate-700 bg-slate-900 p-3">
-                <p className="text-xs text-slate-400">Revenue</p>
-                <p className="text-xl font-bold text-slate-100">$2,430</p>
-              </div>
-              <div className="rounded-xl border border-slate-700 bg-slate-900 p-3">
-                <p className="text-xs text-slate-400">Tickets sold</p>
-                <p className="text-xl font-bold text-slate-100">81</p>
-              </div>
-              <div className="rounded-xl border border-slate-700 bg-slate-900 p-3">
-                <p className="text-xs text-slate-400">Check-ins</p>
-                <p className="text-xl font-bold text-slate-100">67</p>
-              </div>
-              <div className="rounded-xl border border-slate-700 bg-slate-900 p-3">
-                <p className="text-xs text-slate-400">Upcoming</p>
-                <p className="text-xl font-bold text-slate-100">4</p>
-              </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {[
+                ["Revenue", "$2,430"],
+                ["Tickets sold", "81"],
+                ["Check-ins", "67"],
+                ["Upcoming", "4"],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-xl border border-slate-700 bg-slate-900 p-3">
+                  <p className="text-xs text-slate-400">{k}</p>
+                  <p className="text-2xl font-bold tracking-tight text-slate-100">{v}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded-xl border border-brand/40 bg-brand/10 p-3 text-xs text-slate-200">
+              Tonight signal: demand trending upward. Best time to post final story push.
             </div>
           </Card>
         </div>
       </section>
 
-      <section className="container-page py-6 animate-fadeUp">
+      <section className="container-page py-8 animate-fadeUp">
         <SectionTitle
-          eyebrow="How it works"
-          title="Launch your event flow in minutes"
-          subtitle="Every step is optimized to remove friction and increase buyer confidence."
+          eyebrow="Take a closer look"
+          title="One platform, four high-impact outcomes"
+          subtitle="Designed to drive action: more confidence, faster decisions, smoother operations."
         />
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {[
-            ["1. Create", "Publish a premium-looking event page with all details in one flow."],
-            ["2. Sell", "Guests checkout quickly with trust signals and clear pricing."],
-            ["3. Check in", "Use fast search + entry status to keep lines moving."],
-          ].map(([title, text]) => (
-            <Card key={title}>
-              <h3 className="text-lg font-semibold tracking-tight text-slate-100">{title}</h3>
-              <p className="mt-2 text-sm text-slate-300">{text}</p>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {outcomes.map(({ title, copy, icon: Icon }) => (
+            <Card key={title} className="transition hover:-translate-y-0.5">
+              <Icon className="text-brand" size={18} />
+              <p className="mt-3 font-semibold text-slate-100">{title}</p>
+              <p className="mt-1 text-sm text-slate-300">{copy}</p>
             </Card>
           ))}
         </div>
       </section>
 
-      <section className="container-page py-6 animate-fadeUp">
-        <SectionTitle eyebrow="Why hosts use it" title="High-trust, high-conversion design" />
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Card>
-            <ShieldCheck className="text-brand" size={18} />
-            <h3 className="font-semibold text-slate-100">Trust-first event pages</h3>
-            <p className="mt-2 text-sm text-slate-300">Clear pricing, secure checkout messaging, and mobile-friendly layouts that feel credible.</p>
-          </Card>
-          <Card>
-            <BarChart3 className="text-accent-sky" size={18} />
-            <h3 className="font-semibold text-slate-100">Operational clarity</h3>
-            <p className="mt-2 text-sm text-slate-300">Revenue, tickets sold, and attendee visibility in one dashboard to reduce stress before doors open.</p>
-          </Card>
-        </div>
-      </section>
-
-      <section className="container-page py-6 animate-fadeUp">
-        <SectionTitle eyebrow="Social proof" title="Trusted by hosts running real campus events" />
+      <section className="container-page py-8 animate-fadeUp">
+        <SectionTitle
+          eyebrow="Social proof"
+          title="Trusted by hosts running real campus events"
+          subtitle="These outcomes are from hosts managing high-volume nights."
+        />
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {[
-            ["Maya - State University", "\"Sold out in two days. The page looked legitimate and people bought fast.\""],
-            ["Chris - City College", "\"Check-in was smoother than anything I used before. No line chaos.\""],
-            ["Nia - Tech Institute", "\"People trusted checkout immediately. Conversion was way better than DMs.\""],
+            ["Maya - State University", "\"Sold out in two days. The page looked legit and people bought fast.\""],
+            ["Chris - City College", "\"Check-in was smooth. We avoided line chaos and guest frustration.\""],
+            ["Nia - Tech Institute", "\"People trusted the checkout immediately. Huge upgrade from DMs.\""],
           ].map(([name, quote]) => (
             <Card key={name}>
-              <CircleCheckBig className="text-accent-mint" size={18} />
+              <CheckCircle2 className="text-accent-mint" size={18} />
               <p className="mt-3 text-sm italic text-slate-300">{quote}</p>
               <p className="mt-3 text-sm font-semibold text-slate-100">{name}</p>
             </Card>
           ))}
-        </div>
-      </section>
-
-      <section className="container-page py-6 animate-fadeUp">
-        <SectionTitle eyebrow="FAQ" title="Questions hosts usually ask" />
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <Card>
-            <Clock3 className="text-brand" size={18} />
-            <h3 className="font-semibold text-slate-100">Can I share private events?</h3>
-            <p className="mt-2 text-sm text-slate-300">Yes. Set visibility to private and share the direct link with your guest list only.</p>
-          </Card>
-          <Card>
-            <WandSparkles className="text-accent-sky" size={18} />
-            <h3 className="font-semibold text-slate-100">Do I need special hardware at the door?</h3>
-            <p className="mt-2 text-sm text-slate-300">No. You can search by code or attendee info and check in manually from your phone.</p>
-          </Card>
         </div>
       </section>
 
@@ -136,26 +193,30 @@ export default function HomePage() {
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Host stack</p>
-              <h3 className="mt-1 text-2xl font-bold text-slate-100">Everything you need to run the night</h3>
+              <h3 className="mt-1 text-3xl font-bold text-slate-100">Everything you need to run the night</h3>
             </div>
-            <Link href="/dashboard" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-glow transition hover:bg-brand-dark">Go to dashboard</Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-glow transition hover:bg-brand-dark"
+            >
+              Go to dashboard <ArrowRight size={15} />
+            </Link>
           </div>
+
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-700 bg-slate-900 p-4">
-              <CreditCard className="mb-2 text-brand" size={18} />
-              <p className="font-semibold text-slate-100">Stripe checkout</p>
-              <p className="mt-1 text-sm text-slate-300">Secure, familiar payment flow for guests.</p>
-            </div>
-            <div className="rounded-xl border border-slate-700 bg-slate-900 p-4">
-              <Ticket className="mb-2 text-accent-sky" size={18} />
-              <p className="font-semibold text-slate-100">Ticket operations</p>
-              <p className="mt-1 text-sm text-slate-300">Codes, QR tickets, and smooth entry handling.</p>
-            </div>
-            <div className="rounded-xl border border-slate-700 bg-slate-900 p-4">
-              <BarChart3 className="mb-2 text-accent-mint" size={18} />
-              <p className="font-semibold text-slate-100">Host analytics</p>
-              <p className="mt-1 text-sm text-slate-300">Revenue and conversion visibility in real time.</p>
-            </div>
+            {deepDive.map(({ title, copy, icon: Icon }) => (
+              <div key={title} className="rounded-xl border border-slate-700 bg-slate-900 p-4">
+                <Icon className="text-brand" size={18} />
+                <p className="mt-3 font-semibold text-slate-100">{title}</p>
+                <p className="mt-1 text-sm text-slate-300">{copy}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Badge className="gap-1.5"><Clock3 size={13} /> Publish quickly</Badge>
+            <Badge className="gap-1.5"><Ticket size={13} /> Track every ticket</Badge>
+            <Badge className="gap-1.5"><CirclePlus size={13} /> Scale events confidently</Badge>
           </div>
         </Card>
       </section>

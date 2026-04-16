@@ -70,14 +70,14 @@ export default function NewEventPage() {
   }
 
   return (
-    <main className="container-page py-8">
-      <Card className="mx-auto max-w-2xl">
+    <main className="container-page py-6 sm:py-8">
+      <Card className="mx-auto max-w-2xl p-5 sm:p-6">
         <SectionTitle
           eyebrow="Host tools"
           title="Create event"
           subtitle="Keep it simple. Fill in the essentials and publish a professional ticket page."
         />
-        <form onSubmit={onSubmit} className="mt-4 grid gap-3">
+        <form onSubmit={onSubmit} className="mt-4 grid gap-3.5">
           <Input name="title" placeholder="Event title" required />
           <Input name="description" placeholder="Event description" required />
           <Input name="coverImage" type="file" accept="image/*" />
@@ -105,7 +105,7 @@ export default function NewEventPage() {
               Event created. Share this link: {createdLink}
             </p>
           )}
-          <Button>Create event</Button>
+          <Button className="text-base">Create event</Button>
         </form>
       </Card>
     </main>

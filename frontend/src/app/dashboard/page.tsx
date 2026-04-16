@@ -56,14 +56,14 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <main className="container-page py-8">
+    <main className="container-page py-6 sm:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <SectionTitle
           eyebrow="Host workspace"
           title="Host dashboard"
           subtitle="Track sales, attendance, and performance at a glance."
         />
-        <Link href="/dashboard/events/new" className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-glow transition hover:bg-brand-dark">
+        <Link href="/dashboard/events/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 font-semibold text-white shadow-glow transition hover:bg-brand-dark">
           Create event <ArrowUpRight size={16} />
         </Link>
       </div>
@@ -80,15 +80,15 @@ export default async function DashboardPage() {
           <EmptyState title="No events yet" subtitle="Create your first event to start selling tickets." />
         ) : (
           (events ?? []).map((event) => (
-            <Card key={event.id} className="space-y-3 transition hover:-translate-y-0.5 hover:shadow-soft">
+            <Card key={event.id} className="space-y-3 p-4 sm:p-5 transition hover:-translate-y-0.5 hover:shadow-soft">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold text-slate-100">{event.title}</p>
                   <p className="text-sm text-slate-400">{event.date}</p>
                 </div>
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <Link className="rounded-lg border border-slate-700 px-3 py-1 text-slate-200 hover:bg-slate-800" href={`/events/${event.slug}`}>View</Link>
-                  <Link className="rounded-lg border border-slate-700 px-3 py-1 text-slate-200 hover:bg-slate-800" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
+                <div className="grid grid-cols-2 gap-2 text-sm sm:flex sm:flex-wrap">
+                  <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 transition hover:bg-slate-800" href={`/events/${event.slug}`}>View</Link>
+                  <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-700 px-3 py-2 text-slate-200 transition hover:bg-slate-800" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
                   <CopyEventLink slug={event.slug} />
                 </div>
               </div>
@@ -116,22 +116,22 @@ export default async function DashboardPage() {
           <h2 className="mb-3 text-lg font-semibold">Sales analytics</h2>
           <SalesChart data={salesData} />
         </Card>
-        <Card>
-          <div className="mb-3 flex items-center justify-between">
+        <Card className="p-4 sm:p-5">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold text-slate-100">Recent attendees</h2>
-            <Link className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800" href="/api/attendees/csv"><Download size={14} /> Download CSV</Link>
+            <Link className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800" href="/api/attendees/csv"><Download size={14} /> Download CSV</Link>
           </div>
           {attendeeRows.length === 0 ? (
             <p className="text-sm text-slate-400">No ticket purchases yet.</p>
           ) : (
             <div className="space-y-2">
               {attendeeRows.map((order) => (
-                <div key={order.id} className="flex items-center justify-between rounded-xl border border-slate-700 p-3 text-sm">
+                <div key={order.id} className="flex flex-col gap-2 rounded-xl border border-slate-700 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-slate-100">{order.buyer_name}</p>
-                    <p className="text-slate-400">{order.buyer_email}</p>
+                    <p className="break-all text-slate-400">{order.buyer_email}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="sm:text-right">
                     <p className="font-semibold text-slate-100">{order.quantity} tickets</p>
                     <p className="text-slate-400">${centsToDollars(order.total_amount)}</p>
                   </div>

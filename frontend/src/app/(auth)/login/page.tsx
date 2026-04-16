@@ -26,16 +26,16 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="container-page py-12">
-      <Card className="mx-auto max-w-md animate-fadeUp">
+    <main className="container-page py-8 sm:py-12">
+      <Card className="mx-auto max-w-md animate-fadeUp p-5 sm:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Welcome back</p>
-        <h1 className="mt-1 text-2xl font-bold">Host login</h1>
-        <p className="mt-1 text-sm text-slate-300">Access event analytics, ticket sales, and check-in tools.</p>
+        <h1 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">Host login</h1>
+        <p className="mt-1 text-sm text-slate-300 sm:text-base">Access event analytics, ticket sales, and check-in tools.</p>
         <form onSubmit={onSubmit} className="mt-4 space-y-3">
           <Input name="email" type="email" placeholder="you@school.edu" required />
           <Input name="password" type="password" placeholder="Password" required />
           {error && <p className="text-sm text-red-400">{error}</p>}
-          <Button className="w-full" disabled={loading}>{loading ? "Logging in..." : "Login"}</Button>
+          <Button className="w-full text-base" disabled={loading}>{loading ? "Logging in..." : "Login"}</Button>
         </form>
         <p className="mt-3 text-center text-sm text-slate-300">
           New host? <Link className="font-semibold text-brand" href="/signup">Create account</Link>

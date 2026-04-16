@@ -5,18 +5,18 @@ import { Badge, Card, SectionTitle } from "@/components/ui";
 export default function HomePage() {
   return (
     <main className="mesh-grid pb-6">
-      <section className="container-page relative py-14 sm:py-20">
+      <section className="container-page relative py-12 sm:py-20">
         <div className="ambient-orb ambient-orb-purple left-6 top-32 h-44 w-44 animate-float" />
         <div className="ambient-orb ambient-orb-mint right-8 top-44 h-40 w-40 animate-float" />
         <div className="grid items-center gap-8 lg:grid-cols-[1.1fr,0.9fr]">
           <div className="animate-fadeUp">
             <Badge className="mb-4 gap-1.5 bg-slate-900"><Sparkles size={14} /> Built for college hosts</Badge>
-            <h1 className="text-4xl font-bold tracking-tight text-slate-100 sm:text-6xl">Turn your event into income.</h1>
-            <p className="mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">Create, sell, and manage tickets in minutes. A trustworthy event page, fast checkout, and smooth entry flow all in one place.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-100 sm:text-6xl">Turn your event into income.</h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg">Create, sell, and manage tickets in minutes. A trustworthy event page, fast checkout, and smooth entry flow all in one place.</p>
             <p className="mt-2 max-w-2xl text-sm text-slate-400 sm:text-base">Designed to reduce hesitation and increase purchases with stronger trust signals, urgency cues, and a cleaner buying journey.</p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/signup" className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark">Create an Event <ArrowRight size={16} /></Link>
-              <Link href="/events/campus-lights-fest" className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800">See Demo Event</Link>
+            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+              <Link href="/signup" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark">Create an Event <ArrowRight size={16} /></Link>
+              <Link href="/events/campus-lights-fest" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800">See Demo Event</Link>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
               <Badge className="gap-1.5"><ShieldCheck size={13} /> Secure checkout</Badge>

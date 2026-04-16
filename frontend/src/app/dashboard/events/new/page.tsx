@@ -99,9 +99,9 @@ export default function NewEventPage() {
           <Input name="dressCode" placeholder="Dress code (optional)" />
           <Input name="instructions" placeholder="Instructions (optional)" />
           <Input name="locationNote" placeholder="Approximate location note (optional)" />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
           {createdLink && (
-            <p className="rounded-lg bg-emerald-50 p-2 text-sm text-emerald-700">
+            <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-sm text-emerald-300">
               Event created. Share this link: {createdLink}
             </p>
           )}

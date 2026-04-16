@@ -70,8 +70,8 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   return (
     <main className="container-page py-8">
       <Card className="mx-auto max-w-md">
-        <h1 className="text-xl font-bold">Event check-in</h1>
-        <p className="text-sm text-slate-600">Search by attendee name, email, or ticket code.</p>
+        <h1 className="text-xl font-bold text-slate-100">Event check-in</h1>
+        <p className="text-sm text-slate-300">Search by attendee name, email, or ticket code.</p>
         <Input
           className="mt-3"
           value={search}
@@ -80,16 +80,16 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         />
         <form className="mt-4 space-y-2" onSubmit={onSubmit}>
           <Input name="ticketCode" placeholder="Enter ticket code" required />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {message && <p className="text-sm text-green-700">{message}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          {message && <p className="text-sm text-emerald-300">{message}</p>}
           <Button className="w-full">Check in guest</Button>
         </form>
         <div className="mt-4 space-y-2">
           {matches.map((ticket) => (
-            <div key={ticket.id} className="rounded-xl border border-slate-200 p-3 text-sm">
-              <p className="font-semibold">{ticket.orders?.[0]?.buyer_name ?? "Guest"} - {ticket.ticket_code}</p>
-              <p className="text-slate-500">{ticket.orders?.[0]?.buyer_email ?? "No email"}</p>
-              <p className={ticket.status === "checked_in" ? "text-emerald-700" : "text-amber-700"}>
+            <div key={ticket.id} className="rounded-xl border border-slate-700 p-3 text-sm">
+              <p className="font-semibold text-slate-100">{ticket.orders?.[0]?.buyer_name ?? "Guest"} - {ticket.ticket_code}</p>
+              <p className="text-slate-400">{ticket.orders?.[0]?.buyer_email ?? "No email"}</p>
+              <p className={ticket.status === "checked_in" ? "text-emerald-300" : "text-amber-300"}>
                 {ticket.status === "checked_in" ? "Checked in" : "Not checked in"}
               </p>
             </div>

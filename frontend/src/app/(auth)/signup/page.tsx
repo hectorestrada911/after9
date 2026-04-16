@@ -30,14 +30,14 @@ export default function SignupPage() {
       <Card className="mx-auto max-w-md animate-fadeUp">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Get started</p>
         <h1 className="mt-1 text-2xl font-bold">Create host account</h1>
-        <p className="mt-1 text-sm text-slate-600">Launch trusted event pages and monetize your community events.</p>
+        <p className="mt-1 text-sm text-slate-300">Launch trusted event pages and monetize your community events.</p>
         <form onSubmit={onSubmit} className="mt-4 space-y-3">
           <Input name="email" type="email" placeholder="you@school.edu" required />
           <Input name="password" type="password" placeholder="Password" required />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
           <Button className="w-full" disabled={loading}>{loading ? "Creating..." : "Sign up"}</Button>
         </form>
-        <p className="mt-3 text-center text-sm text-slate-600">
+        <p className="mt-3 text-center text-sm text-slate-300">
           Already have an account? <Link className="font-semibold text-brand" href="/login">Log in</Link>
         </p>
       </Card>

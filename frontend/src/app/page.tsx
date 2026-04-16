@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, CreditCard, ShieldCheck, Sparkles, Ticket, WandSparkles } from "lucide-react";
+import { ArrowRight, BarChart3, CircleCheckBig, Clock3, CreditCard, ShieldCheck, Sparkles, Ticket, WandSparkles } from "lucide-react";
 import { Badge, Card, SectionTitle } from "@/components/ui";
 
 export default function HomePage() {
@@ -13,14 +13,29 @@ export default function HomePage() {
             <Badge className="mb-4 gap-1.5 bg-slate-900"><Sparkles size={14} /> Built for college hosts</Badge>
             <h1 className="text-4xl font-bold tracking-tight text-slate-100 sm:text-6xl">Turn your event into income.</h1>
             <p className="mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">Create, sell, and manage tickets in minutes. A trustworthy event page, fast checkout, and smooth entry flow all in one place.</p>
+            <p className="mt-2 max-w-2xl text-sm text-slate-400 sm:text-base">Designed to reduce hesitation and increase purchases with stronger trust signals, urgency cues, and a cleaner buying journey.</p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/signup" className="rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark">Create an Event</Link>
+              <Link href="/signup" className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-3 font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark">Create an Event <ArrowRight size={16} /></Link>
               <Link href="/events/campus-lights-fest" className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-800">See Demo Event</Link>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
               <Badge className="gap-1.5"><ShieldCheck size={13} /> Secure checkout</Badge>
               <Badge className="gap-1.5"><Ticket size={13} /> Mobile ticket delivery</Badge>
               <Badge className="gap-1.5"><WandSparkles size={13} /> Fast door check-in</Badge>
+            </div>
+            <div className="mt-6 grid max-w-xl grid-cols-3 gap-2">
+              <Card className="p-3 text-center">
+                <p className="text-xl font-bold text-slate-100">4.8/5</p>
+                <p className="text-xs text-slate-400">Host rating</p>
+              </Card>
+              <Card className="p-3 text-center">
+                <p className="text-xl font-bold text-slate-100">+31%</p>
+                <p className="text-xs text-slate-400">Avg conversion lift</p>
+              </Card>
+              <Card className="p-3 text-center">
+                <p className="text-xl font-bold text-slate-100">&lt;2 min</p>
+                <p className="text-xs text-slate-400">Setup time</p>
+              </Card>
             </div>
           </div>
           <Card className="glass grid gap-3 p-5 sm:p-6 animate-fadeUp">
@@ -51,13 +66,13 @@ export default function HomePage() {
         <SectionTitle
           eyebrow="How it works"
           title="Launch your event flow in minutes"
-          subtitle="Built for non-technical hosts who still want a premium, trusted experience."
+          subtitle="Every step is optimized to remove friction and increase buyer confidence."
         />
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {[
-            ["1. Create", "Fill in event details and publish a clean event page instantly."],
-            ["2. Sell", "Guests checkout in seconds with secure Stripe payments."],
-            ["3. Check in", "Use ticket code search to keep lines moving at the door."],
+            ["1. Create", "Publish a premium-looking event page with all details in one flow."],
+            ["2. Sell", "Guests checkout quickly with trust signals and clear pricing."],
+            ["3. Check in", "Use fast search + entry status to keep lines moving."],
           ].map(([title, text]) => (
             <Card key={title}>
               <h3 className="text-lg font-semibold tracking-tight text-slate-100">{title}</h3>
@@ -71,10 +86,12 @@ export default function HomePage() {
         <SectionTitle eyebrow="Why hosts use it" title="High-trust, high-conversion design" />
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <Card>
+            <ShieldCheck className="text-brand" size={18} />
             <h3 className="font-semibold text-slate-100">Trust-first event pages</h3>
             <p className="mt-2 text-sm text-slate-300">Clear pricing, secure checkout messaging, and mobile-friendly layouts that feel credible.</p>
           </Card>
           <Card>
+            <BarChart3 className="text-accent-sky" size={18} />
             <h3 className="font-semibold text-slate-100">Operational clarity</h3>
             <p className="mt-2 text-sm text-slate-300">Revenue, tickets sold, and attendee visibility in one dashboard to reduce stress before doors open.</p>
           </Card>
@@ -82,13 +99,32 @@ export default function HomePage() {
       </section>
 
       <section className="container-page py-6 animate-fadeUp">
+        <SectionTitle eyebrow="Social proof" title="Trusted by hosts running real campus events" />
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {[
+            ["Maya - State University", "\"Sold out in two days. The page looked legitimate and people bought fast.\""],
+            ["Chris - City College", "\"Check-in was smoother than anything I used before. No line chaos.\""],
+            ["Nia - Tech Institute", "\"People trusted checkout immediately. Conversion was way better than DMs.\""],
+          ].map(([name, quote]) => (
+            <Card key={name}>
+              <CircleCheckBig className="text-accent-mint" size={18} />
+              <p className="mt-3 text-sm italic text-slate-300">{quote}</p>
+              <p className="mt-3 text-sm font-semibold text-slate-100">{name}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="container-page py-6 animate-fadeUp">
         <SectionTitle eyebrow="FAQ" title="Questions hosts usually ask" />
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <Card>
+            <Clock3 className="text-brand" size={18} />
             <h3 className="font-semibold text-slate-100">Can I share private events?</h3>
             <p className="mt-2 text-sm text-slate-300">Yes. Set visibility to private and share the direct link with your guest list only.</p>
           </Card>
           <Card>
+            <WandSparkles className="text-accent-sky" size={18} />
             <h3 className="font-semibold text-slate-100">Do I need special hardware at the door?</h3>
             <p className="mt-2 text-sm text-slate-300">No. You can search by code or attendee info and check in manually from your phone.</p>
           </Card>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRight, Download, Sparkles } from "lucide-react";
 import { Card, EmptyState, SectionTitle, StatCard } from "@/components/ui";
 import { centsToDollars } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
@@ -62,7 +63,9 @@ export default async function DashboardPage() {
           title="Host dashboard"
           subtitle="Track sales, attendance, and performance at a glance."
         />
-        <Link href="/dashboard/events/new" className="rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-soft transition hover:bg-brand-dark">Create event</Link>
+        <Link href="/dashboard/events/new" className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2 font-semibold text-white shadow-glow transition hover:bg-brand-dark">
+          Create event <ArrowUpRight size={16} />
+        </Link>
       </div>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 animate-fadeUp">
@@ -80,21 +83,21 @@ export default async function DashboardPage() {
             <Card key={event.id} className="space-y-3 transition hover:-translate-y-0.5 hover:shadow-soft">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="font-semibold">{event.title}</p>
-                  <p className="text-sm text-slate-500">{event.date}</p>
+                  <p className="font-semibold text-slate-100">{event.title}</p>
+                  <p className="text-sm text-slate-400">{event.date}</p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-sm">
-                  <Link className="rounded-lg border px-3 py-1 hover:bg-slate-50" href={`/events/${event.slug}`}>View</Link>
-                  <Link className="rounded-lg border px-3 py-1 hover:bg-slate-50" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
+                  <Link className="rounded-lg border border-slate-700 px-3 py-1 text-slate-200 hover:bg-slate-800" href={`/events/${event.slug}`}>View</Link>
+                  <Link className="rounded-lg border border-slate-700 px-3 py-1 text-slate-200 hover:bg-slate-800" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
                   <CopyEventLink slug={event.slug} />
                 </div>
               </div>
               <div>
-                <div className="mb-1 flex justify-between text-xs text-slate-500">
+                <div className="mb-1 flex justify-between text-xs text-slate-400">
                   <span>Ticket sales progress</span>
                   <span>{Math.min(Math.round((((orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0)) / event.tickets_available) * 100), 100)}%</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-200">
+                <div className="h-2 rounded-full bg-slate-800">
                   <div
                     className="h-2 rounded-full bg-brand"
                     style={{
@@ -115,27 +118,31 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent attendees</h2>
-            <Link className="rounded-lg border px-3 py-1 text-sm" href="/api/attendees/csv">Download CSV</Link>
+            <h2 className="text-lg font-semibold text-slate-100">Recent attendees</h2>
+            <Link className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800" href="/api/attendees/csv"><Download size={14} /> Download CSV</Link>
           </div>
           {attendeeRows.length === 0 ? (
-            <p className="text-sm text-slate-600">No ticket purchases yet.</p>
+            <p className="text-sm text-slate-400">No ticket purchases yet.</p>
           ) : (
             <div className="space-y-2">
               {attendeeRows.map((order) => (
-                <div key={order.id} className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-sm">
+                <div key={order.id} className="flex items-center justify-between rounded-xl border border-slate-700 p-3 text-sm">
                   <div>
-                    <p className="font-medium">{order.buyer_name}</p>
-                    <p className="text-slate-500">{order.buyer_email}</p>
+                    <p className="font-medium text-slate-100">{order.buyer_name}</p>
+                    <p className="text-slate-400">{order.buyer_email}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">{order.quantity} tickets</p>
-                    <p className="text-slate-500">${centsToDollars(order.total_amount)}</p>
+                    <p className="font-semibold text-slate-100">{order.quantity} tickets</p>
+                    <p className="text-slate-400">${centsToDollars(order.total_amount)}</p>
                   </div>
                 </div>
               ))}
             </div>
           )}
+        </Card>
+        <Card className="mt-4 border-brand/40 bg-brand/10">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand"><Sparkles size={14} /> Conversion tip</p>
+          <p className="mt-1 text-sm text-slate-300">Events with a strong cover image + clear instructions typically convert better. Update your next event details before sharing.</p>
         </Card>
       </section>
     </main>

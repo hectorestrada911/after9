@@ -1,49 +1,39 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  CheckCircle2,
-  CircleDollarSign,
-  QrCode,
-  ScanLine,
-  Ticket,
-  WandSparkles,
-} from "lucide-react";
-import { Badge, Card, SectionTitle } from "@/components/ui";
+import { ArrowRight, CheckCircle2, CircleDollarSign, QrCode, ScanLine, WandSparkles } from "lucide-react";
+import { Badge, Card } from "@/components/ui";
 
-const stats = [
-  { label: "Setup", value: "< 2 min" },
-  { label: "Avg conversion", value: "+31%" },
-  { label: "Check-in speed", value: "4.2s" },
-];
-
-const steps = [
+const flowSteps = [
   {
-    title: "Create event",
-    subtitle: "Host fills details and publishes",
-    cta: { label: "Create now", href: "/dashboard/events/new" },
+    id: "01",
+    title: "Create Event",
+    hint: "Host publishes",
     icon: WandSparkles,
-    accent: "from-indigo-500/20 to-sky-500/10",
+    href: "/dashboard/events/new",
+    cta: "Start creating",
   },
   {
-    title: "Share link + QR",
-    subtitle: "Guests open event by link or scan",
-    cta: { label: "See share flow", href: "/dashboard/events/new" },
+    id: "02",
+    title: "Get Link + QR",
+    hint: "Share instantly",
     icon: QrCode,
-    accent: "from-fuchsia-500/20 to-indigo-500/10",
+    href: "/dashboard/events/new",
+    cta: "See share output",
   },
   {
-    title: "Buy tickets",
-    subtitle: "Fast secure checkout experience",
-    cta: { label: "Open demo event", href: "/events/campus-lights-fest" },
+    id: "03",
+    title: "Guest Buys",
+    hint: "Fast checkout",
     icon: CircleDollarSign,
-    accent: "from-cyan-500/20 to-indigo-500/10",
+    href: "/events/campus-lights-fest",
+    cta: "Open demo event",
   },
   {
-    title: "Check in at door",
-    subtitle: "Prevent duplicates, scan or search",
-    cta: { label: "Go to host dashboard", href: "/dashboard" },
+    id: "04",
+    title: "Check In",
+    hint: "Scan or search",
     icon: ScanLine,
-    accent: "from-emerald-500/20 to-cyan-500/10",
+    href: "/dashboard",
+    cta: "Open host tools",
   },
 ];
 
@@ -54,80 +44,64 @@ export default function DemoFlowPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(99,102,241,0.24),transparent_40%),radial-gradient(circle_at_95%_10%,rgba(34,211,238,0.18),transparent_34%)]" />
         <div className="relative">
           <Badge className="gap-1.5 border-brand/40 bg-brand/10 text-slate-100">
-            <WandSparkles size={13} /> Interactive product flow demo
+            <WandSparkles size={13} /> Demo Flow
           </Badge>
-          <SectionTitle
-            eyebrow="Demo Event Flow"
-            title="See the full host-to-guest experience"
-            subtitle="A visual map of what happens from publish to entry."
-          />
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            {stats.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-slate-800 bg-slate-950/75 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
-                <p className="mt-1 text-2xl font-semibold text-slate-100">{item.value}</p>
-              </div>
-            ))}
-          </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-100 sm:text-5xl">
+            4 steps from host setup to guest entry
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-300 sm:text-base">
+            Tap any card below to jump into that part of the real product.
+          </p>
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-[1.3fr,0.7fr]">
-        <Card className="rounded-3xl border-slate-800 bg-slate-950/70 p-4 sm:p-6">
-          <div className="mb-4 flex items-center gap-2 text-sm text-slate-300">
-            <Ticket size={15} className="text-brand" />
-            Product flow map
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div
-                  key={step.title}
-                  className={`relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br ${step.accent} p-4`}
-                >
-                  <div className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 bg-slate-900/80 text-xs font-semibold text-slate-300">
-                    {index + 1}
-                  </div>
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-900/90">
-                    <Icon size={18} className="text-brand" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-100">{step.title}</h3>
-                  <p className="mt-1 text-sm text-slate-300">{step.subtitle}</p>
-                  <Link
-                    href={step.cta.href}
-                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-800"
-                  >
-                    {step.cta.label} <ArrowRight size={14} />
-                  </Link>
+      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {flowSteps.map((step) => {
+          const Icon = step.icon;
+          return (
+            <Card key={step.id} className="group rounded-3xl border-slate-800 bg-slate-950/70 p-5 transition hover:-translate-y-1 hover:border-brand/50">
+              <div className="flex items-center justify-between">
+                <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-300">
+                  {step.id}
+                </span>
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 text-brand">
+                  <Icon size={18} />
                 </div>
-              );
-            })}
+              </div>
+              <h2 className="mt-4 text-xl font-semibold text-slate-100">{step.title}</h2>
+              <p className="mt-1 text-sm text-slate-400">{step.hint}</p>
+              <Link
+                href={step.href}
+                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-100 transition hover:border-slate-500 hover:bg-slate-800"
+              >
+                {step.cta} <ArrowRight size={14} />
+              </Link>
+            </Card>
+          );
+        })}
+      </section>
+
+      <section className="mt-6 grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
+        <Card className="rounded-3xl border-slate-800 bg-slate-950/70 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Quick path</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-200">
+            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Create</span>
+            <ArrowRight size={14} className="text-slate-500" />
+            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Share Link + QR</span>
+            <ArrowRight size={14} className="text-slate-500" />
+            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Guest Buys</span>
+            <ArrowRight size={14} className="text-slate-500" />
+            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Check In</span>
           </div>
         </Card>
 
-        <Card className="rounded-3xl border-slate-800 bg-slate-950/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Live preview</p>
-          <div className="mt-3 space-y-3">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3">
-              <p className="text-xs text-slate-400">Host action</p>
-              <p className="text-sm text-slate-100">Publishes Campus Lights Fest</p>
-            </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3">
-              <p className="text-xs text-slate-400">Share asset</p>
-              <p className="text-sm text-slate-100">Link + QR generated instantly</p>
-            </div>
-            <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3">
-              <p className="text-xs text-slate-400">Guest journey</p>
-              <p className="text-sm text-slate-100">Opens page - buys - receives ticket</p>
-            </div>
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-              <p className="inline-flex items-center gap-2 text-sm text-emerald-300">
-                <CheckCircle2 size={14} /> Door check-in completed
-              </p>
-            </div>
-          </div>
+        <Card className="rounded-3xl border-emerald-500/30 bg-emerald-500/10 p-5">
+          <p className="inline-flex items-center gap-2 text-sm font-medium text-emerald-300">
+            <CheckCircle2 size={15} /> Easy to understand. Easy to run.
+          </p>
+          <p className="mt-2 text-sm text-slate-200">
+            Hosts get a shareable page link and QR right after publishing, and guests use that same flow to enter events.
+          </p>
         </Card>
       </section>
     </main>

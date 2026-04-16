@@ -15,6 +15,15 @@ body {
   background-attachment: fixed;
 }
 
+* {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.35);
+  color: #ffffff;
+}
+
 .container-page {
   @apply mx-auto w-full max-w-6xl px-4;
 }

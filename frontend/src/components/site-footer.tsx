@@ -12,7 +12,7 @@ export function SiteFooter() {
       <div className="container-page py-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <span className="text-xl font-black tracking-tightest">AFTER9</span>
+            <img src="/rage-logo.svg" alt="RAGE" className="h-9 w-auto object-contain" />
             <p className="mt-3 text-sm leading-relaxed text-neutral-500">Student events, upfront pricing, mobile tickets.</p>
           </div>
           <div>

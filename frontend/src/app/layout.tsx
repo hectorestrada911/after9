@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { Inter } from "next/font/google";
 import { Search } from "lucide-react";
 import "./globals.css";
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="container-page py-12">
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Image src="/rage-logo.png" alt="RAGE" width={115} height={61} className="object-contain" />
+                <img src="/rage-logo.svg" alt="RAGE" height={40} className="object-contain" />
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Student events, upfront pricing, mobile tickets.
                 </p>

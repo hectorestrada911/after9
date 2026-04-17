@@ -13,7 +13,10 @@ export default function CopyEventLink({ slug }: { slug: string }) {
   }
 
   return (
-    <button onClick={onCopy} className="min-h-10 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800">
+    <button
+      onClick={onCopy}
+      className="inline-flex h-10 items-center justify-center rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:border-black"
+    >
       {copied ? "Copied" : "Copy link"}
     </button>
   );

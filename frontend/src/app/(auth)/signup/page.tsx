@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { Button, Card, Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 export default function SignupPage() {
   const supabase = getSupabaseBrowserClient();
@@ -26,21 +26,28 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="container-page py-8 sm:py-12">
-      <Card className="mx-auto max-w-md animate-fadeUp p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Get started</p>
-        <h1 className="mt-1 text-2xl font-bold leading-tight sm:text-3xl">Create host account</h1>
-        <p className="mt-1 text-sm text-slate-300 sm:text-base">Launch trusted event pages and monetize your community events.</p>
-        <form onSubmit={onSubmit} className="mt-4 space-y-3">
+    <main className="container-page py-16 sm:py-24">
+      <div className="mx-auto max-w-md">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted">Get started</p>
+        <h1 className="mt-3 text-5xl sm:text-6xl font-black tracking-tighter leading-[0.9]">
+          Create<br />account
+        </h1>
+        <p className="mt-4 text-base text-muted">
+          Launch trusted event pages and monetize your community.
+        </p>
+        <form onSubmit={onSubmit} className="mt-8 space-y-3">
           <Input name="email" type="email" placeholder="you@school.edu" required />
           <Input name="password" type="password" placeholder="Password" required />
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          <Button className="w-full text-base" disabled={loading}>{loading ? "Creating..." : "Sign up"}</Button>
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+          <Button className="w-full" disabled={loading}>{loading ? "Creating…" : "Sign up"}</Button>
         </form>
-        <p className="mt-3 text-center text-sm text-slate-300">
-          Already have an account? <Link className="font-semibold text-brand" href="/login">Log in</Link>
+        <p className="mt-6 text-sm text-muted">
+          Already have an account?{" "}
+          <Link className="font-bold text-black underline underline-offset-4" href="/login">
+            Log in
+          </Link>
         </p>
-      </Card>
+      </div>
     </main>
   );
 }

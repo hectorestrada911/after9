@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { Button, Card, Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 
 export default function OnboardingPage() {
   const supabase = getSupabaseBrowserClient();
@@ -27,18 +27,23 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="container-page py-12">
-      <Card className="mx-auto max-w-lg">
-        <h1 className="text-2xl font-bold">Host onboarding</h1>
-        <p className="mt-1 text-sm text-slate-600">Set your profile so guests trust your event pages.</p>
-        <form onSubmit={onSubmit} className="mt-4 space-y-3">
+    <main className="container-page py-16 sm:py-24">
+      <div className="mx-auto max-w-lg">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted">Step 1 of 1</p>
+        <h1 className="mt-3 text-5xl sm:text-6xl font-black tracking-tighter leading-[0.9]">
+          Host<br />onboarding
+        </h1>
+        <p className="mt-4 text-base text-muted">
+          Set your profile so guests trust your event pages.
+        </p>
+        <form onSubmit={onSubmit} className="mt-8 space-y-3">
           <Input name="fullName" placeholder="Full name" required />
           <Input name="school" placeholder="School" required />
           <Input name="organizerName" placeholder="Organizer name" required />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
           <Button className="w-full">Continue</Button>
         </form>
-      </Card>
+      </div>
     </main>
   );
 }

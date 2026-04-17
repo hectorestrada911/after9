@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Button, Card, Input } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type TicketRow = {
@@ -68,34 +68,45 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <main className="container-page py-6 sm:py-8">
-      <Card className="mx-auto max-w-md p-5 sm:p-6">
-        <h1 className="text-xl font-bold text-slate-100">Event check-in</h1>
-        <p className="text-sm text-slate-300">Search by attendee name, email, or ticket code.</p>
+    <main className="container-page py-10 sm:py-14">
+      <div className="mx-auto max-w-md">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted">Door tools</p>
+        <h1 className="mt-3 display-section text-5xl sm:text-6xl">Check-in</h1>
+        <p className="mt-4 text-base text-muted">
+          Search by attendee name, email, or ticket code.
+        </p>
+
         <Input
-          className="mt-3"
+          className="mt-8"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search attendee or ticket code"
+          placeholder="Search attendee or code"
         />
-        <form className="mt-4 space-y-2" onSubmit={onSubmit}>
+
+        <form className="mt-4 space-y-3" onSubmit={onSubmit}>
           <Input name="ticketCode" placeholder="Enter ticket code" required />
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          {message && <p className="text-sm text-emerald-300">{message}</p>}
-          <Button className="w-full text-base">Check in guest</Button>
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+          {message && <p className="text-sm font-medium text-green-700">{message}</p>}
+          <Button className="w-full">Check in guest</Button>
         </form>
-        <div className="mt-4 space-y-2.5">
+
+        <div className="mt-8 space-y-3">
           {matches.map((ticket) => (
-            <div key={ticket.id} className="rounded-xl border border-slate-700 p-3.5 text-sm">
-              <p className="font-semibold text-slate-100">{ticket.orders?.[0]?.buyer_name ?? "Guest"} - <span className="break-all">{ticket.ticket_code}</span></p>
-              <p className="text-slate-400">{ticket.orders?.[0]?.buyer_email ?? "No email"}</p>
-              <p className={ticket.status === "checked_in" ? "text-emerald-300" : "text-amber-300"}>
-                {ticket.status === "checked_in" ? "Checked in" : "Not checked in"}
-              </p>
+            <div key={ticket.id} className="rounded-2xl border border-line p-4 text-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-bold">{ticket.orders?.[0]?.buyer_name ?? "Guest"}</p>
+                  <p className="mt-0.5 text-xs font-mono break-all text-muted">{ticket.ticket_code}</p>
+                  <p className="mt-0.5 text-xs text-muted">{ticket.orders?.[0]?.buyer_email ?? "No email"}</p>
+                </div>
+                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${ticket.status === "checked_in" ? "bg-brand-green/40 text-black" : "bg-offwhite text-muted"}`}>
+                  {ticket.status === "checked_in" ? "In" : "Pending"}
+                </span>
+              </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </main>
   );
 }

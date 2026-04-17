@@ -1,139 +1,80 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, CheckCircle2, CircleDollarSign, QrCode, ScanLine, WandSparkles } from "lucide-react";
-import { Badge, Card } from "@/components/ui";
+import { ArrowRight, CircleDollarSign, QrCode, ScanLine, WandSparkles } from "lucide-react";
 
 const flowSteps = [
-  {
-    id: "01",
-    title: "Create Event",
-    hint: "Host publishes",
-    icon: WandSparkles,
-    href: "/dashboard/events/new",
-    cta: "Start creating",
-  },
-  {
-    id: "02",
-    title: "Get Link + QR",
-    hint: "Share instantly",
-    icon: QrCode,
-    href: "/dashboard/events/new",
-    cta: "See share output",
-  },
-  {
-    id: "03",
-    title: "Guest Buys",
-    hint: "Fast checkout",
-    icon: CircleDollarSign,
-    href: "/events/campus-lights-fest",
-    cta: "Open demo event",
-  },
-  {
-    id: "04",
-    title: "Check In",
-    hint: "Scan or search",
-    icon: ScanLine,
-    href: "/dashboard",
-    cta: "Open host tools",
-  },
+  { id: "01", title: "Create event", hint: "Host publishes", icon: WandSparkles, href: "/dashboard/events/new", cta: "Start creating" },
+  { id: "02", title: "Get link + QR", hint: "Share instantly", icon: QrCode, href: "/dashboard/events/new", cta: "See share output" },
+  { id: "03", title: "Guest buys", hint: "Fast checkout", icon: CircleDollarSign, href: "/events/campus-lights-fest", cta: "Open demo event" },
+  { id: "04", title: "Check in", hint: "Scan or search", icon: ScanLine, href: "/dashboard", cta: "Open host tools" },
 ];
 
 export default function DemoFlowPage() {
   return (
-    <main className="container-page py-8 sm:py-10">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/85 p-5 sm:p-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(249,115,22,0.24),transparent_40%),radial-gradient(circle_at_95%_10%,rgba(244,63,94,0.18),transparent_34%)]" />
-        <div className="relative">
-          <Badge className="gap-1.5 border-brand/40 bg-brand/10 text-slate-100">
-            <WandSparkles size={13} /> Demo Flow
-          </Badge>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-100 sm:text-5xl">
-            4 steps from host setup to guest entry
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300 sm:text-base">
-            Tap any card below to jump into that part of the real product.
-          </p>
+    <main className="bg-white">
+      <section className="container-page py-12 sm:py-16">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted">Demo flow</p>
+        <h1 className="mt-4 display-section text-5xl sm:text-7xl">
+          From host setup<br />to guest entry.
+        </h1>
+        <p className="mt-5 max-w-xl text-base sm:text-lg text-muted">
+          Tap any card below to jump into that part of the real product.
+        </p>
+      </section>
+
+      <section className="container-page pb-16">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {flowSteps.map((step) => {
+            const Icon = step.icon;
+            return (
+              <Link
+                key={step.id}
+                href={step.href}
+                className="group rounded-2xl border border-line bg-white p-6 transition hover:border-black"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold">{step.id}</span>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black text-white">
+                    <Icon size={16} />
+                  </span>
+                </div>
+                <h2 className="mt-6 text-2xl font-black tracking-tighter">{step.title}</h2>
+                <p className="mt-1 text-sm text-muted">{step.hint}</p>
+                <span className="mt-6 inline-flex items-center gap-1 text-sm font-bold uppercase tracking-wide group-hover:underline underline-offset-4">
+                  {step.cta} <ArrowRight size={14} />
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {flowSteps.map((step) => {
-          const Icon = step.icon;
-          return (
-            <Card key={step.id} className="group rounded-3xl border-slate-800 bg-slate-950/70 p-5 transition hover:-translate-y-1 hover:border-brand/50">
-              <div className="flex items-center justify-between">
-                <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-xs font-semibold text-slate-300">
-                  {step.id}
-                </span>
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 text-brand">
-                  <Icon size={18} />
-                </div>
-              </div>
-              <h2 className="mt-4 text-xl font-semibold text-slate-100">{step.title}</h2>
-              <p className="mt-1 text-sm text-slate-400">{step.hint}</p>
-              <Link
-                href={step.href}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-100 transition hover:border-slate-500 hover:bg-slate-800"
-              >
-                {step.cta} <ArrowRight size={14} />
-              </Link>
-            </Card>
-          );
-        })}
-      </section>
-
-      <section className="mt-6 grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
-        <Card className="rounded-3xl border-slate-800 bg-slate-950/70 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Quick path</p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-200">
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Create</span>
-            <ArrowRight size={14} className="text-slate-500" />
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Share Link + QR</span>
-            <ArrowRight size={14} className="text-slate-500" />
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Guest Buys</span>
-            <ArrowRight size={14} className="text-slate-500" />
-            <span className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5">Check In</span>
-          </div>
-        </Card>
-
-        <Card className="rounded-3xl border-emerald-500/30 bg-emerald-500/10 p-5">
-          <p className="inline-flex items-center gap-2 text-sm font-medium text-emerald-300">
-            <CheckCircle2 size={15} /> Easy to understand. Easy to run.
-          </p>
-          <p className="mt-2 text-sm text-slate-200">
-            Hosts get a shareable page link and QR right after publishing, and guests use that same flow to enter events.
-          </p>
-        </Card>
-      </section>
-
-      <section className="mt-6">
-        <Card className="overflow-hidden rounded-3xl border-slate-800 bg-slate-950/70 p-0">
-          <div className="grid lg:grid-cols-[1.15fr,0.85fr]">
-            <div className="relative h-64 w-full sm:h-80">
+      <section className="border-t border-line bg-offwhite">
+        <div className="container-page py-16 sm:py-24">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr,0.9fr] items-center">
+            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden">
               <Image
-                src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1800&q=80"
-                alt="Students at an event venue"
+                src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1600&q=80"
+                alt="Event venue"
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
             </div>
-            <div className="p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">Real event feel</p>
-              <h3 className="mt-2 text-2xl font-semibold text-slate-100">From promotion to entry in one clean flow</h3>
-              <p className="mt-3 text-sm text-slate-300">
-                Use the same modern journey every time: publish, share, sell, and check in.
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted">Real event feel</p>
+              <h3 className="mt-3 display-section text-4xl sm:text-5xl">
+                One clean flow,<br />from promo to entry.
+              </h3>
+              <p className="mt-5 text-base text-muted">
+                Same modern journey every time: publish, share, sell, and check in.
                 Fewer steps, better trust, faster execution on event night.
               </p>
-              <Link
-                href="/signup"
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:bg-brand-dark"
-              >
-                Launch your first event <ArrowRight size={14} />
+              <Link href="/signup" className="mt-7 inline-flex items-center gap-2 pill-dark h-12 px-7 text-sm">
+                LAUNCH YOUR EVENT <ArrowRight size={14} />
               </Link>
             </div>
           </div>
-        </Card>
+        </div>
       </section>
     </main>
   );

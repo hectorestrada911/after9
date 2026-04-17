@@ -12,6 +12,13 @@ import { cn } from "@/lib/utils";
 
 const NEXT_AFTER_AUTH = "/dashboard/events/new";
 
+function localDateISO(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 /** Encode draft image under byte budget; resizes JPEG/PNG/WebP in-browser. */
 async function fileToDraftDataUrl(file: File, maxStrLen: number): Promise<string> {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
@@ -165,6 +172,16 @@ export function CreateEventFlow() {
 
   const filteredStock = useMemo(() => filterFlyerStock(search, flyCategory), [search, flyCategory]);
   const selectedStock = FLYER_STOCK.find((i) => i.id === selectedStockId) ?? FLYER_STOCK[0]!;
+  const coverThumbSrc = useMemo(
+    () => (coverMode === "upload" && uploadDataUrl ? uploadDataUrl : selectedStock.thumb),
+    [coverMode, uploadDataUrl, selectedStock.thumb],
+  );
+
+  useEffect(() => {
+    setDate((d) => d || localDateISO());
+    setStartTime((t) => t || "20:00");
+    setEndTime((t) => t || "23:30");
+  }, []);
 
   useEffect(() => {
     if (filteredStock.some((i) => i.id === selectedStockId)) return;
@@ -266,6 +283,33 @@ export function CreateEventFlow() {
     setStep((s) => Math.max(0, s - 1));
   }
 
+  function FlyerAnchor() {
+    return (
+      <div className="mb-5 flex gap-3 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <div className="relative h-[92px] w-[72px] shrink-0 overflow-hidden rounded-xl ring-1 ring-white/12">
+          <Image src={coverThumbSrc} alt="Selected flyer" fill unoptimized className="object-cover" sizes="80px" />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Your flyer</p>
+          <p className="mt-1 line-clamp-2 text-[13px] font-medium leading-snug text-zinc-100">
+            {title.trim() ? title.trim() : "Guests see this first — add a title below when you’re ready."}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              setStep(0);
+              flash("Pick a new look");
+            }}
+            className="mt-2 self-start text-[12px] font-semibold text-brand-green transition hover:brightness-110"
+          >
+            Change flyer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   function continueToAuth(e: FormEvent) {
     e.preventDefault();
     if (step !== 2) return;
@@ -335,7 +379,8 @@ export function CreateEventFlow() {
   const chevron =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E";
 
-  const pct = ((step + 1) / STEPS.length) * 100;
+  const pctRaw = STEPS.length <= 1 ? 100 : (step / (STEPS.length - 1)) * 100;
+  const pct = Math.min(100, Math.max(step === 0 ? 8 : 2, pctRaw));
 
   return (
     <main className="relative min-h-dvh bg-[#030303] text-zinc-300 antialiased">
@@ -491,6 +536,7 @@ export function CreateEventFlow() {
             {/* Step 1 — Story */}
             {step === 1 && (
               <div key="s1" className="animate-fadeUp space-y-4">
+                <FlyerAnchor />
                 <div>
                   <span className={labelClass}>Event title</span>
                   <input className={field} placeholder="e.g. Rooftop sunset social" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -506,10 +552,22 @@ export function CreateEventFlow() {
                 </div>
                 <div>
                   <span className={labelClass}>When</span>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    <input className={field} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                    <input className={field} type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                    <input className={field} type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-600">We prefilled tonight — tweak anything.</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <div>
+                      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-zinc-600">Date</span>
+                      <input className={field} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-zinc-600">Starts</span>
+                        <input className={field} type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                      </div>
+                      <div>
+                        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-zinc-600">Ends</span>
+                        <input className={field} type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -526,6 +584,7 @@ export function CreateEventFlow() {
             {/* Step 2 — Tickets */}
             {step === 2 && (
               <div key="s2" className="animate-fadeUp space-y-4">
+                <FlyerAnchor />
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>
                     <span className={labelClass}>Room capacity</span>

@@ -35,9 +35,14 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        createPop: {
+          "0%": { opacity: "0", transform: "scale(0.92)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
       },
       animation: {
         fadeUp: "fadeUp 500ms ease-out",
+        createPop: "createPop 0.45s ease-out both",
       },
     },
   },

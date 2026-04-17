@@ -64,4 +64,5 @@ export async function dataUrlToFile(dataUrl: string, filename: string): Promise<
   return new File([blob], filename, { type: blob.type || "image/jpeg" });
 }
 
-export const MAX_DRAFT_IMAGE_BYTES = 1_400_000;
+/** Max encoded size for draft image in sessionStorage (~2.5MB string budget). */
+export const MAX_DRAFT_IMAGE_BYTES = 2_500_000;

@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line">
           <div className="container-page flex h-16 items-center gap-4 sm:gap-6">
             <Link href="/" className="flex items-center shrink-0">
-              <Image src="/rage-logo.png" alt="RAGE" width={80} height={40} className="object-contain" priority />
+              <Image src="/rage-logo.png" alt="RAGE" width={115} height={61} className="object-contain" priority />
             </Link>
 
             <div className="flex-1 hidden md:flex items-center bg-offwhite rounded-full h-11 px-4">
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="container-page py-12">
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <Image src="/rage-logo.png" alt="RAGE" width={80} height={40} className="object-contain" />
+                <Image src="/rage-logo.png" alt="RAGE" width={115} height={61} className="object-contain" />
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Student events, upfront pricing, mobile tickets.
                 </p>

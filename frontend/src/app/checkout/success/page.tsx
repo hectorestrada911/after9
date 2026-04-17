@@ -14,12 +14,12 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
     : { data: null };
 
   return (
-    <main className="container-page py-16 sm:py-24">
-      <div className="mx-auto max-w-xl text-center">
+    <main className="container-page min-w-0 py-16 sm:py-24">
+      <div className="mx-auto max-w-xl min-w-0 text-center">
         <div className="inline-flex items-center gap-2 rounded-full bg-brand-green/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
           <CheckCircle2 size={14} /> Payment successful
         </div>
-        <h1 className="mt-5 text-5xl sm:text-6xl font-black tracking-tighter leading-[0.9]">
+        <h1 className="mt-5 heading-display-fluid">
           You&rsquo;re in.
         </h1>
         <p className="mt-4 text-base text-muted">

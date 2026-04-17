@@ -1,68 +1,65 @@
-import { NextResponse } from "next/server";
-import { purchaseSchema } from "@/lib/validations";
-import { getStripe } from "@/lib/stripe";
-import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
 
-export async function POST(req: Request) {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function POST(req: NextRequest) {
   try {
-    const stripe = getStripe();
-    const body = await req.json();
-    const parsed = purchaseSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid purchase info." }, { status: 400 });
+    const { eventId, title, slug, buyerName, buyerEmail, quantity } = await req.json();
+
+    if (!eventId || !title || !slug || !buyerName || !buyerEmail || !quantity) {
+      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    const supabase = await getSupabaseServerClient();
-    const { data: event } = await supabase
+    const { data: event, error: eventErr } = await supabase
       .from("events")
-      .select("id,title,ticket_price,tickets_available")
-      .eq("id", body.eventId)
+      .select("ticket_price, tickets_available")
+      .eq("id", eventId)
       .single();
-    if (!event) return NextResponse.json({ error: "Event not found." }, { status: 404 });
-    const { count: soldCount } = await supabase.from("tickets").select("id", { count: "exact", head: true }).eq("event_id", event.id);
-    const remaining = Math.max((event.tickets_available ?? 0) - (soldCount ?? 0), 0);
-    if (parsed.data.quantity > remaining) {
-      return NextResponse.json({ error: "Not enough tickets remaining." }, { status: 400 });
+
+    if (eventErr || !event) {
+      return NextResponse.json({ error: "Event not found." }, { status: 404 });
     }
 
-    const totalAmount = event.ticket_price * parsed.data.quantity;
-    const { data: order, error } = await supabase
-      .from("orders")
-      .insert({
-        event_id: event.id,
-        buyer_name: parsed.data.buyerName,
-        buyer_email: parsed.data.buyerEmail,
-        quantity: parsed.data.quantity,
-        total_amount: totalAmount,
-        payment_status: "pending",
-      })
-      .select("id")
-      .single();
+    const { count: soldCount } = await supabase
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", eventId);
 
-    if (error || !order) return NextResponse.json({ error: "Unable to create order." }, { status: 500 });
+    const remaining = Math.max((event.tickets_available ?? 0) - (soldCount ?? 0), 0);
+    if (remaining < quantity) {
+      return NextResponse.json({ error: "Not enough tickets remaining." }, { status: 409 });
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?order_id=${order.id}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/events/${body.slug ?? ""}`,
+      customer_email: buyerEmail,
       line_items: [
         {
-          quantity: parsed.data.quantity,
+          quantity,
           price_data: {
             currency: "usd",
             unit_amount: event.ticket_price,
-            product_data: { name: event.title },
+            product_data: { name: title },
           },
         },
       ],
-      metadata: {
-        orderId: order.id,
-        eventId: event.id,
-      },
+      metadata: { eventId, slug, buyerName, buyerEmail, quantity: String(quantity) },
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/events/${slug}`,
     });
 
     return NextResponse.json({ url: session.url });
-  } catch {
-    return NextResponse.json({ error: "Unexpected checkout error." }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Internal error.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

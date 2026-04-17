@@ -58,7 +58,7 @@ export default async function HomePage() {
               <span className="block">alternative</span>
             </h1>
             <p className="mt-7 max-w-sm text-[15px] leading-relaxed text-neutral-500 sm:max-w-md sm:text-base">
-              Incredible live shows. Upfront pricing. Mobile tickets. RAGE makes going out easy.
+              Incredible live shows. Upfront pricing. Mobile tickets. After9 makes going out easy.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
@@ -172,7 +172,7 @@ export default async function HomePage() {
 
       <section className="border-t border-line bg-offwhite py-20 sm:py-28">
         <div className="container-page">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted">How RAGE works</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted">How After9 works</p>
           <h2 className="mt-3 display-section-fluid">
             Built to sell.
             <br />

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { Inter } from "next/font/google";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { Search } from "lucide-react";
 import "./globals.css";
 
 const display = Inter({
@@ -13,17 +14,83 @@ const display = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RAGE — Welcome to the alternative",
-  description: "Live student events. Upfront pricing. Mobile tickets. RAGE makes going out easy.",
+  title: "After9 — Welcome to the alternative",
+  description: "Live student events. Upfront pricing. Mobile tickets. After9 makes going out easy.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={display.variable}>
       <body>
-        <SiteHeader />
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line">
+          <div className="container-page flex h-16 items-center gap-4 sm:gap-6">
+            <Link href="/" className="flex items-center gap-2 shrink-0">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-black text-white text-sm font-black">A9</span>
+              <span className="text-xl font-black tracking-tightest hidden sm:inline">AFTER9</span>
+            </Link>
+
+            <div className="flex-1 hidden md:flex items-center bg-offwhite rounded-full h-11 px-4">
+              <Search size={16} className="text-muted shrink-0" />
+              <input
+                type="text"
+                placeholder="Search by event, venue or city"
+                className="bg-transparent border-0 outline-none w-full ml-3 text-sm placeholder:text-muted"
+              />
+            </div>
+
+            <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
+              <Link href="/dashboard" className="hover:opacity-60 transition">My tickets</Link>
+              <Link href="/" className="hover:opacity-60 transition">Browse events</Link>
+              <Link href="/demo-flow" className="hover:opacity-60 transition">Demo flow</Link>
+              <Link href="/login" className="hover:opacity-60 transition">Host login</Link>
+            </nav>
+
+            <Link href="/signup" className="pill-dark h-11 px-5 text-sm shrink-0">
+              CREATE EVENT
+            </Link>
+          </div>
+        </header>
+
         {children}
-        <SiteFooter />
+
+        <footer className="mt-24 border-t border-line bg-white">
+          <div className="container-page py-12">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <span className="text-xl font-black tracking-tightest">AFTER9</span>
+                <p className="mt-3 text-sm text-muted leading-relaxed">
+                  Student events, upfront pricing, mobile tickets.
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-3">Discover</p>
+                <ul className="space-y-2 text-sm">
+                  <li><Link href="/" className="hover:opacity-60">Browse events</Link></li>
+                  <li><Link href="/demo-flow" className="hover:opacity-60">Demo event</Link></li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-3">Hosts</p>
+                <ul className="space-y-2 text-sm">
+                  <li><Link href="/signup" className="hover:opacity-60">Create event</Link></li>
+                  <li><Link href="/login" className="hover:opacity-60">Host login</Link></li>
+                  <li><Link href="/dashboard" className="hover:opacity-60">Dashboard</Link></li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-3">Company</p>
+                <ul className="space-y-2 text-sm">
+                  <li><span className="text-muted">Get help</span></li>
+                  <li><span className="text-muted">Work with us</span></li>
+                </ul>
+              </div>
+            </div>
+            <div className="mt-10 pt-6 border-t border-line flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted">
+              <p>© {new Date().getFullYear()} After9. All rights reserved.</p>
+              <p>Secure checkout · Mobile tickets · Fast door entry</p>
+            </div>
+          </div>
+        </footer>
       </body>
     </html>
   );

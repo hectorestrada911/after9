@@ -1,4 +1,5 @@
-import { Card } from "@/components/ui";
+import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ order_id?: string }> }) {
@@ -13,24 +14,47 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
     : { data: null };
 
   return (
-    <main className="container-page py-10">
-      <Card className="mx-auto max-w-xl text-center animate-fadeUp">
-        <p className="mx-auto mb-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Payment successful</p>
-        <h1 className="text-2xl font-bold">Purchase confirmed</h1>
-        <p className="mt-2 text-slate-600">Your tickets are ready. Save your order code for entry.</p>
-        <p className="mt-4 rounded-lg bg-slate-100 p-2 text-sm">Order: {params.order_id || "Pending"}</p>
-        {order && <p className="mt-2 text-sm text-slate-600">Buyer: {order.buyer_name} ({order.quantity} ticket{order.quantity > 1 ? "s" : ""})</p>}
+    <main className="container-page py-16 sm:py-24">
+      <div className="mx-auto max-w-xl text-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-brand-green/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wider">
+          <CheckCircle2 size={14} /> Payment successful
+        </div>
+        <h1 className="mt-5 text-5xl sm:text-6xl font-black tracking-tighter leading-[0.9]">
+          You&rsquo;re in.
+        </h1>
+        <p className="mt-4 text-base text-muted">
+          Tickets are ready. Save your order code for entry.
+        </p>
+        <p className="mt-6 inline-block rounded-xl bg-offwhite px-4 py-2 text-sm font-mono">
+          Order: {params.order_id || "Pending"}
+        </p>
+        {order && (
+          <p className="mt-3 text-sm text-muted">
+            {order.buyer_name} · {order.quantity} ticket{order.quantity > 1 ? "s" : ""}
+          </p>
+        )}
+
         {tickets && tickets.length > 0 && (
-          <div className="mt-4 grid gap-3 text-left">
+          <div className="mt-10 grid gap-4 text-left sm:grid-cols-2">
             {tickets.map((ticket) => (
-              <div key={ticket.ticket_code} className="rounded-xl border border-slate-200 p-3">
-                <p className="text-sm font-semibold">Code: {ticket.ticket_code}</p>
-                {ticket.qr_code_url && <img src={ticket.qr_code_url} alt={ticket.ticket_code} className="mt-2 h-28 w-28" />}
+              <div key={ticket.ticket_code} className="rounded-2xl border border-line p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted">Ticket code</p>
+                <p className="mt-1 text-base font-mono font-bold">{ticket.ticket_code}</p>
+                {ticket.qr_code_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={ticket.qr_code_url} alt={ticket.ticket_code} className="mt-3 h-32 w-32 rounded-md" />
+                )}
               </div>
             ))}
           </div>
         )}
-      </Card>
+
+        <div className="mt-10">
+          <Link href="/" className="pill-dark h-12 px-7 text-sm">
+            BACK TO EVENTS
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }

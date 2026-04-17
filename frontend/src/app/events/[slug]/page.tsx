@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Clock3, MapPin, ShieldCheck } from "lucide-react";
-import { Badge, Card, SectionTitle } from "@/components/ui";
+import { Calendar, Clock3, MapPin, ShieldCheck, Ticket, Users } from "lucide-react";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 import PurchaseForm from "./purchase-form";
@@ -17,47 +16,123 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const soldPercent = Math.min(Math.round(((soldCount ?? 0) / Math.max(event.tickets_available ?? 1, 1)) * 100), 100);
 
   return (
-    <main className="container-page py-5 sm:py-8">
-      <Card className="overflow-hidden p-0">
-        <div className="relative h-48 w-full sm:h-64">
-          <Image src={event.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"} alt={event.title} fill className="object-cover" />
-        </div>
-        <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-[1.15fr,0.85fr]">
-          <div className="space-y-3">
-            <Badge className="w-fit">Hosted by {event.profiles?.organizer_name ?? "Host"}</Badge>
-            <SectionTitle title={event.title} subtitle={event.description} />
-            <div className="grid gap-2 text-sm text-slate-300 sm:grid-cols-2">
-              <p className="inline-flex items-center gap-2"><Clock3 size={14} className="text-brand" /><span><span className="font-medium text-slate-100">Date:</span> {event.date}</span></p>
-              <p><span className="font-medium text-slate-100">Time:</span> {event.start_time} - {event.end_time}</p>
-              <p className="inline-flex items-center gap-2"><MapPin size={14} className="text-accent-sky" /><span><span className="font-medium text-slate-100">Location:</span> {event.location}</span></p>
-              <p><span className="font-medium text-slate-100">Age:</span> {event.age_restriction?.replaceAll("_", " ")}</p>
+    <main className="bg-white">
+      <section className="container-page py-8 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-[1.15fr,0.85fr]">
+          <div>
+            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-offwhite">
+              <Image
+                src={event.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"}
+                alt={event.title}
+                fill
+                priority
+                className="object-cover"
+              />
             </div>
-            <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-              <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
-                <span>Demand meter</span>
-                <span>{soldPercent}% sold</span>
+
+            <div className="mt-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted">
+                Hosted by {event.profiles?.organizer_name ?? "Host"}
+              </p>
+              <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tighter leading-[0.95]">
+                {event.title}
+              </h1>
+              <p className="mt-5 text-base sm:text-lg text-black/80 leading-relaxed max-w-2xl">
+                {event.description}
+              </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 max-w-2xl">
+                <div className="flex items-start gap-3">
+                  <Calendar size={18} className="mt-1 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted">Date</p>
+                    <p className="text-base font-semibold">{event.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Clock3 size={18} className="mt-1 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted">Time</p>
+                    <p className="text-base font-semibold">{event.start_time} – {event.end_time}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin size={18} className="mt-1 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted">Location</p>
+                    <p className="text-base font-semibold">{event.location}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Users size={18} className="mt-1 shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted">Age</p>
+                    <p className="text-base font-semibold">{event.age_restriction?.replaceAll("_", " ") ?? "All ages"}</p>
+                  </div>
+                </div>
               </div>
-              <div className="h-2 rounded-full bg-slate-800">
-                <div className="h-2 rounded-full bg-brand" style={{ width: `${soldPercent}%` }} />
-              </div>
+
+              {(event.dress_code || event.instructions || event.location_note) && (
+                <div className="mt-10 border-t border-line pt-8 space-y-5 max-w-2xl">
+                  {event.dress_code && (
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted">Dress code</p>
+                      <p className="mt-1 text-base">{event.dress_code}</p>
+                    </div>
+                  )}
+                  {event.instructions && (
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted">Instructions</p>
+                      <p className="mt-1 text-base">{event.instructions}</p>
+                    </div>
+                  )}
+                  {event.location_note && (
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted">Location note</p>
+                      <p className="mt-1 text-base">{event.location_note}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-slate-700 bg-slate-900/70 p-4 sm:sticky sm:top-4">
-            <p className="text-2xl font-bold text-slate-100">${centsToDollars(event.ticket_price)}</p>
-            <p className="text-sm text-slate-300">{remaining} tickets remaining</p>
-            <div className="rounded-xl bg-slate-950 p-3 text-xs text-slate-300">
-              <p className="inline-flex items-center gap-2"><ShieldCheck size={13} className="text-accent-mint" /> Secure checkout - Mobile ticket delivery - Instant confirmation</p>
-            </div>
-            {remaining <= 0 && (
-              <div className="rounded-xl bg-amber-500/10 p-3 text-xs font-medium text-amber-300">
-                Sold out. Join waitlist by emailing the host.
+          <aside className="lg:sticky lg:top-24 self-start">
+            <div className="rounded-2xl border border-line bg-white p-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted">Price</p>
+              <p className="mt-1 text-5xl font-black tracking-tighter">${centsToDollars(event.ticket_price)}</p>
+              <p className="mt-2 text-sm text-muted inline-flex items-center gap-1.5">
+                <Ticket size={14} /> {remaining} tickets remaining
+              </p>
+
+              <div className="mt-5">
+                <div className="mb-1.5 flex items-center justify-between text-xs font-medium text-muted">
+                  <span>Demand</span>
+                  <span>{soldPercent}% sold</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-offwhite overflow-hidden">
+                  <div className="h-full bg-black" style={{ width: `${soldPercent}%` }} />
+                </div>
               </div>
-            )}
-            <PurchaseForm eventId={event.id} price={event.ticket_price} title={event.title} slug={slug} soldOut={remaining <= 0} />
-          </div>
+
+              <div className="mt-5 rounded-xl bg-offwhite p-3 text-xs text-black/70 inline-flex items-center gap-2 w-full">
+                <ShieldCheck size={14} className="shrink-0" />
+                Secure checkout · Mobile delivery · Instant confirmation
+              </div>
+
+              {remaining <= 0 && (
+                <div className="mt-4 rounded-xl bg-black text-white p-3 text-sm font-semibold">
+                  Sold out · Email host for waitlist
+                </div>
+              )}
+
+              <div className="mt-5">
+                <PurchaseForm eventId={event.id} price={event.ticket_price} title={event.title} slug={slug} soldOut={remaining <= 0} />
+              </div>
+            </div>
+          </aside>
         </div>
-      </Card>
+      </section>
     </main>
   );
 }

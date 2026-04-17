@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, InputHTMLAttributes, PropsWithChildren, SelectHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, InputHTMLAttributes, PropsWithChildren, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export function Button({
@@ -9,7 +9,25 @@ export function Button({
   return (
     <button
       className={cn(
-        "min-h-11 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex items-center justify-center gap-2 min-h-12 rounded-full bg-black px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function ButtonOutline({
+  className,
+  children,
+  ...props
+}: PropsWithChildren<ButtonHTMLAttributes<HTMLButtonElement>>) {
+  return (
+    <button
+      className={cn(
+        "inline-flex items-center justify-center gap-2 min-h-12 rounded-full bg-white border border-line px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:border-black disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}
@@ -24,7 +42,7 @@ export function Card({
   children,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <div className={cn("rounded-2xl border border-slate-800/90 bg-slate-900/55 p-4 shadow-soft backdrop-blur-sm", className)}>
+    <div className={cn("rounded-2xl border border-line bg-white p-5", className)}>
       {children}
     </div>
   );
@@ -35,7 +53,7 @@ export function Badge({
   children,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <span className={cn("inline-flex items-center rounded-full border border-slate-700/90 bg-slate-900/75 px-2.5 py-1 text-xs font-medium text-slate-200", className)}>
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-xs font-semibold text-black", className)}>
       {children}
     </span>
   );
@@ -51,11 +69,11 @@ export function StatCard({
   hint?: string;
 }) {
   return (
-    <Card>
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold tracking-tight text-slate-100">{value}</p>
-      {hint && <p className="mt-1 text-xs text-slate-400">{hint}</p>}
-    </Card>
+    <div className="rounded-2xl border border-line bg-white p-5">
+      <p className="text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
+      <p className="mt-2 text-3xl font-black tracking-tighter text-black">{value}</p>
+      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
+    </div>
   );
 }
 
@@ -70,9 +88,9 @@ export function SectionTitle({
 }) {
   return (
     <div className="space-y-2">
-      {eyebrow && <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">{eyebrow}</p>}
-      <h2 className="text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">{title}</h2>
-      {subtitle && <p className="max-w-2xl text-sm text-slate-300 sm:text-base">{subtitle}</p>}
+      {eyebrow && <p className="text-xs font-bold uppercase tracking-wider text-muted">{eyebrow}</p>}
+      <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-black">{title}</h2>
+      {subtitle && <p className="max-w-2xl text-base text-muted">{subtitle}</p>}
     </div>
   );
 }
@@ -85,9 +103,9 @@ export function EmptyState({
   subtitle: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 p-8 text-center">
-      <p className="text-base font-semibold text-slate-100">{title}</p>
-      <p className="mt-1 text-sm text-slate-300">{subtitle}</p>
+    <div className="rounded-2xl border border-dashed border-line bg-offwhite p-10 text-center">
+      <p className="text-base font-bold text-black">{title}</p>
+      <p className="mt-1 text-sm text-muted">{subtitle}</p>
     </div>
   );
 }
@@ -97,7 +115,19 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        "min-h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20",
+        "min-h-12 w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-black placeholder:text-muted focus:border-black focus:outline-none",
+        props.className,
+      )}
+    />
+  );
+}
+
+export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={cn(
+        "w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-black placeholder:text-muted focus:border-black focus:outline-none",
         props.className,
       )}
     />
@@ -109,7 +139,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={cn(
-        "min-h-11 w-full rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2.5 text-sm text-slate-100 shadow-sm focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20",
+        "min-h-12 w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-black focus:border-black focus:outline-none",
         props.className,
       )}
     />

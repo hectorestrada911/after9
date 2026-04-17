@@ -3,53 +3,53 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+}
+
+html, body {
+  background: #ffffff;
+  color: #000000;
 }
 
 body {
-  @apply bg-[#04070f] text-slate-100 antialiased;
-  background-image:
-    radial-gradient(circle at 12% -10%, rgba(249, 115, 22, 0.28) 0, rgba(249, 115, 22, 0) 40%),
-    radial-gradient(circle at 92% 10%, rgba(244, 63, 94, 0.2) 0, rgba(244, 63, 94, 0) 34%),
-    linear-gradient(180deg, #050507 0%, #0b0908 42%, #120d0b 100%);
-  background-attachment: fixed;
-}
-
-* {
-  scroll-behavior: smooth;
+  @apply antialiased;
+  font-feature-settings: "ss01", "ss02";
 }
 
 ::selection {
-  background: rgba(249, 115, 22, 0.35);
-  color: #ffffff;
+  background: #f2ef1d;
+  color: #000000;
 }
 
 .container-page {
-  @apply mx-auto w-full max-w-6xl px-4;
+  @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6;
 }
 
-.glass {
-  @apply border border-slate-700/70 bg-slate-900/60 backdrop-blur-xl;
+.display-hero {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  text-transform: uppercase;
 }
 
-.ambient-orb {
-  position: absolute;
-  z-index: -1;
-  border-radius: 9999px;
-  filter: blur(60px);
-  opacity: 0.5;
+.display-section {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  text-transform: uppercase;
 }
 
-.ambient-orb-purple {
-  background: linear-gradient(180deg, rgba(129, 140, 248, 0.95), rgba(79, 70, 229, 0.5));
+.pill {
+  @apply inline-flex items-center justify-center rounded-full font-semibold transition;
 }
 
-.ambient-orb-mint {
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.95), rgba(16, 185, 129, 0.5));
+.pill-dark {
+  @apply pill bg-black text-white hover:bg-neutral-800;
 }
 
-.mesh-grid {
-  background-image: linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
-  background-size: 32px 32px;
+.pill-light {
+  @apply pill bg-white text-black border border-line hover:border-black;
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { ArrowRight, CircleDollarSign, QrCode, ScanLine, WandSparkles } from "lucide-react";
 
 const flowSteps = [
-  { id: "01", title: "Create event", hint: "Host publishes", icon: WandSparkles, href: "/dashboard/events/new", cta: "Start creating" },
+  { id: "01", title: "Create event", hint: "Flyer + details, then sign in", icon: WandSparkles, href: "/create-event", cta: "Start creating" },
   { id: "02", title: "Get link + QR", hint: "Share instantly", icon: QrCode, href: "/dashboard/events/new", cta: "See share output" },
   { id: "03", title: "Guest buys", hint: "Fast checkout", icon: CircleDollarSign, href: "/events/campus-lights-fest", cta: "Open demo event" },
   { id: "04", title: "Check in", hint: "Scan or search", icon: ScanLine, href: "/dashboard", cta: "Open host tools" },
@@ -69,7 +69,7 @@ export default function DemoFlowPage() {
                 Same modern journey every time: publish, share, sell, and check in.
                 Fewer steps, better trust, faster execution on event night.
               </p>
-              <Link href="/signup" className="mt-7 inline-flex items-center gap-2 pill-dark h-12 px-7 text-sm">
+              <Link href="/create-event" className="mt-7 inline-flex items-center gap-2 pill-dark h-12 px-7 text-sm">
                 LAUNCH YOUR EVENT <ArrowRight size={14} />
               </Link>
             </div>

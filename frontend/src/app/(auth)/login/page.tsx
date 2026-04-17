@@ -1,14 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { safeNextPath } from "@/lib/event-draft";
 import { Button, Input } from "@/components/ui";
 
-export default function LoginPage() {
+function LoginForm() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get("next"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,8 +25,10 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return setError(error.message);
-    router.push("/dashboard");
+    router.push(next);
   }
+
+  const signupHref = `/signup?next=${encodeURIComponent(next)}`;
 
   return (
     <main className="container-page min-w-0 py-16 sm:py-24">
@@ -39,15 +44,31 @@ export default function LoginPage() {
           <Input name="email" type="email" placeholder="you@school.edu" required />
           <Input name="password" type="password" placeholder="Password" required />
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}
-          <Button className="w-full" disabled={loading}>{loading ? "Logging in…" : "Login"}</Button>
+          <Button className="w-full" disabled={loading}>
+            {loading ? "Logging in…" : "Login"}
+          </Button>
         </form>
         <p className="mt-6 text-sm text-muted">
           New host?{" "}
-          <Link className="font-bold text-black underline underline-offset-4" href="/signup">
+          <Link className="font-bold text-black underline underline-offset-4" href={signupHref}>
             Create account
           </Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="container-page min-w-0 py-16 sm:py-24">
+          <p className="text-center text-sm text-muted">Loading…</p>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

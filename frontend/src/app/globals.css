@@ -43,15 +43,16 @@ body {
   text-transform: uppercase;
 }
 
-/* Fluid display type: ~original 16vw / 140px energy, slightly capped for wrap + narrow phones */
+/* Fluid hero: no mid-word breaks; editorial weight */
 .display-hero-fluid {
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  line-height: 0.88;
+  font-weight: 800;
+  letter-spacing: -0.038em;
+  line-height: 0.94;
   text-transform: uppercase;
   max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
   text-wrap: balance;
   font-size: clamp(2.875rem, 14vw + 0.2rem, 3.85rem);
 }
@@ -75,13 +76,13 @@ body {
 }
 
 .display-section-fluid {
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 0.92;
+  line-height: 0.94;
   text-transform: uppercase;
   max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: normal;
+  word-break: normal;
   text-wrap: balance;
   font-size: clamp(1.75rem, 2.6vw + 0.85rem, 3rem);
 }
@@ -99,13 +100,13 @@ body {
 }
 
 .display-section-fluid-sm {
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 0.95;
   text-transform: uppercase;
   max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: normal;
+  word-break: normal;
   text-wrap: balance;
   font-size: clamp(1.5rem, 2.2vw + 0.75rem, 2.5rem);
 }
@@ -118,12 +119,12 @@ body {
 
 /* Sentence-case fluid headlines (auth, onboarding, etc.) */
 .heading-display-fluid {
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 0.92;
   max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: normal;
+  word-break: normal;
   text-wrap: balance;
   font-size: clamp(1.75rem, 2.6vw + 0.85rem, 3rem);
 }

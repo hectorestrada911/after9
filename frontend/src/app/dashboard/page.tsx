@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Download } from "lucide-react";
+import { ArrowUpRight, Download, ShoppingBag } from "lucide-react";
 import { Card, EmptyState, StatCard } from "@/components/ui";
 import { centsToDollars } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
@@ -50,6 +50,7 @@ export default async function DashboardPage() {
   const revenue = (orders ?? []).reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
   const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);
   const attendeeRows = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
+  const recentOrders = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 12);
   const salesData = (events ?? []).map((event) => ({
     name: event.title.length > 16 ? `${event.title.slice(0, 16)}…` : event.title,
     sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
@@ -72,6 +73,40 @@ export default async function DashboardPage() {
         <StatCard label="Tickets sold" value={ticketsSold} />
         <StatCard label="Upcoming events" value={events?.length ?? 0} />
         <StatCard label="Checked-in guests" value={checkedIn ?? 0} />
+      </section>
+
+      <section className="mt-10">
+        <Card className="border-zinc-800 bg-zinc-950 p-6 text-white">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Recent orders</h2>
+            <p className="text-xs text-zinc-500">Every completed checkout appears here.</p>
+          </div>
+          {recentOrders.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-zinc-700 py-14 text-center">
+              <ShoppingBag className="mx-auto h-10 w-10 text-zinc-600" aria-hidden />
+              <p className="mt-4 text-lg font-bold text-white">No orders yet</p>
+              <p className="mt-1 text-sm text-zinc-500">When someone buys a ticket, it will show up here.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {recentOrders.map((order) => (
+                <li
+                  key={order.id}
+                  className="flex flex-col gap-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-bold text-white">{order.buyer_name}</p>
+                    <p className="text-xs text-zinc-500">{order.buyer_email}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 sm:text-right">
+                    <span className="text-zinc-400">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</span>
+                    <span className="font-bold text-white">${centsToDollars(order.total_amount)}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </section>
 
       <section className="mt-10 space-y-3">

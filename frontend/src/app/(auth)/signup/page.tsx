@@ -1,14 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { safeNextPath } from "@/lib/event-draft";
 import { Button, Input } from "@/components/ui";
 
-export default function SignupPage() {
+function SignupForm() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get("next"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,8 +25,10 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) return setError(error.message);
-    router.push("/onboarding");
+    router.push(`/onboarding?next=${encodeURIComponent(next)}`);
   }
+
+  const loginHref = `/login?next=${encodeURIComponent(next)}`;
 
   return (
     <main className="container-page min-w-0 py-16 sm:py-24">
@@ -39,15 +44,31 @@ export default function SignupPage() {
           <Input name="email" type="email" placeholder="you@school.edu" required />
           <Input name="password" type="password" placeholder="Password" required />
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}
-          <Button className="w-full" disabled={loading}>{loading ? "Creating…" : "Sign up"}</Button>
+          <Button className="w-full" disabled={loading}>
+            {loading ? "Creating…" : "Sign up"}
+          </Button>
         </form>
         <p className="mt-6 text-sm text-muted">
           Already have an account?{" "}
-          <Link className="font-bold text-black underline underline-offset-4" href="/login">
+          <Link className="font-bold text-black underline underline-offset-4" href={loginHref}>
             Log in
           </Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="container-page min-w-0 py-16 sm:py-24">
+          <p className="text-center text-sm text-muted">Loading…</p>
+        </main>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }

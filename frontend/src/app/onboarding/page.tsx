@@ -1,13 +1,16 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { safeNextPath } from "@/lib/event-draft";
 import { Button, Input } from "@/components/ui";
 
-export default function OnboardingPage() {
+function OnboardingForm() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get("next"));
   const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -23,7 +26,7 @@ export default function OnboardingPage() {
     };
     const { error } = await supabase.from("profiles").upsert(payload);
     if (error) return setError(error.message);
-    router.push("/dashboard");
+    router.push(next);
   }
 
   return (
@@ -45,5 +48,19 @@ export default function OnboardingPage() {
         </form>
       </div>
     </main>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="container-page min-w-0 py-16 sm:py-24">
+          <p className="text-center text-sm text-muted">Loading…</p>
+        </main>
+      }
+    >
+      <OnboardingForm />
+    </Suspense>
   );
 }

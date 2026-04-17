@@ -68,10 +68,10 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <main className="container-page py-10 sm:py-14">
-      <div className="mx-auto max-w-md">
+    <main className="container-page min-w-0 py-10 sm:py-14">
+      <div className="mx-auto max-w-md min-w-0">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">Door tools</p>
-        <h1 className="mt-3 display-section text-5xl sm:text-6xl">Check-in</h1>
+        <h1 className="mt-3 display-section-fluid">Check-in</h1>
         <p className="mt-4 text-base text-muted">
           Search by attendee name, email, or ticket code.
         </p>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Download } from "lucide-react";
+import { ArrowUpRight, Download, ShoppingBag } from "lucide-react";
 import { Card, EmptyState, StatCard } from "@/components/ui";
 import { centsToDollars } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
@@ -12,9 +12,9 @@ export default async function DashboardPage() {
   const userId = userData.user?.id;
   if (!userId) {
     return (
-      <main className="container-page py-16 sm:py-24">
+      <main className="container-page min-w-0 py-16 sm:py-24">
         <div className="mx-auto max-w-md text-center">
-          <h1 className="display-section text-5xl">Login required</h1>
+          <h1 className="display-section-fluid">Login required</h1>
           <p className="mt-4 text-base text-muted">Sign in to access your host dashboard.</p>
           <Link href="/login" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">GO TO LOGIN</Link>
         </div>
@@ -25,9 +25,9 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
   if (!profile) {
     return (
-      <main className="container-page py-16 sm:py-24">
+      <main className="container-page min-w-0 py-16 sm:py-24">
         <div className="mx-auto max-w-md text-center">
-          <h1 className="display-section text-5xl">Finish onboarding</h1>
+          <h1 className="display-section-fluid">Finish onboarding</h1>
           <p className="mt-4 text-base text-muted">Set up your organizer profile before creating events.</p>
           <Link href="/onboarding" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">CONTINUE</Link>
         </div>
@@ -50,17 +50,18 @@ export default async function DashboardPage() {
   const revenue = (orders ?? []).reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
   const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);
   const attendeeRows = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
+  const recentOrders = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 12);
   const salesData = (events ?? []).map((event) => ({
     name: event.title.length > 16 ? `${event.title.slice(0, 16)}…` : event.title,
     sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
   }));
 
   return (
-    <main className="container-page py-10 sm:py-14">
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+    <main className="container-page min-w-0 py-10 sm:py-14">
+      <div className="mb-10 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">Host workspace</p>
-          <h1 className="mt-3 display-section text-5xl sm:text-6xl">Dashboard</h1>
+          <h1 className="mt-3 display-section-fluid">Dashboard</h1>
         </div>
         <Link href="/dashboard/events/new" className="inline-flex pill-dark h-12 px-6 text-sm">
           CREATE EVENT <ArrowUpRight size={16} />
@@ -72,6 +73,40 @@ export default async function DashboardPage() {
         <StatCard label="Tickets sold" value={ticketsSold} />
         <StatCard label="Upcoming events" value={events?.length ?? 0} />
         <StatCard label="Checked-in guests" value={checkedIn ?? 0} />
+      </section>
+
+      <section className="mt-10">
+        <Card className="border-zinc-800 bg-zinc-950 p-6 text-white">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Recent orders</h2>
+            <p className="text-xs text-zinc-500">Every completed checkout appears here.</p>
+          </div>
+          {recentOrders.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-zinc-700 py-14 text-center">
+              <ShoppingBag className="mx-auto h-10 w-10 text-zinc-600" aria-hidden />
+              <p className="mt-4 text-lg font-bold text-white">No orders yet</p>
+              <p className="mt-1 text-sm text-zinc-500">When someone buys a ticket, it will show up here.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {recentOrders.map((order) => (
+                <li
+                  key={order.id}
+                  className="flex flex-col gap-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-bold text-white">{order.buyer_name}</p>
+                    <p className="text-xs text-zinc-500">{order.buyer_email}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 sm:text-right">
+                    <span className="text-zinc-400">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</span>
+                    <span className="font-bold text-white">${centsToDollars(order.total_amount)}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </section>
 
       <section className="mt-10 space-y-3">

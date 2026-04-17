@@ -6,6 +6,10 @@
   color-scheme: light;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 html, body {
   background: #ffffff;
   color: #000000;
@@ -37,6 +41,104 @@ body {
   letter-spacing: -0.03em;
   line-height: 0.92;
   text-transform: uppercase;
+}
+
+/* Fluid hero: no mid-word breaks; editorial weight */
+.display-hero-fluid {
+  font-weight: 800;
+  letter-spacing: -0.038em;
+  line-height: 0.94;
+  text-transform: uppercase;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+  text-wrap: balance;
+  font-size: clamp(2.875rem, 14vw + 0.2rem, 3.85rem);
+}
+
+@media (min-width: 640px) {
+  .display-hero-fluid {
+    font-size: clamp(3.25rem, 9vw + 1.25rem, 5.75rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .display-hero-fluid {
+    font-size: clamp(4.25rem, 11vw + 1rem, 7.5rem);
+  }
+}
+
+@media (min-width: 1280px) {
+  .display-hero-fluid {
+    font-size: clamp(5rem, 12vw + 1.25rem, 8.125rem);
+  }
+}
+
+.display-section-fluid {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.94;
+  text-transform: uppercase;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: balance;
+  font-size: clamp(1.75rem, 2.6vw + 0.85rem, 3rem);
+}
+
+@media (min-width: 640px) {
+  .display-section-fluid {
+    font-size: clamp(2rem, 2.2vw + 0.9rem, 4.75rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .display-section-fluid {
+    font-size: clamp(2.5rem, 1.8vw + 0.75rem, 5.75rem);
+  }
+}
+
+.display-section-fluid-sm {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: balance;
+  font-size: clamp(1.5rem, 2.2vw + 0.75rem, 2.5rem);
+}
+
+@media (min-width: 640px) {
+  .display-section-fluid-sm {
+    font-size: clamp(1.75rem, 1.8vw + 0.65rem, 3.25rem);
+  }
+}
+
+/* Sentence-case fluid headlines (auth, onboarding, etc.) */
+.heading-display-fluid {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: balance;
+  font-size: clamp(1.75rem, 2.6vw + 0.85rem, 3rem);
+}
+
+@media (min-width: 640px) {
+  .heading-display-fluid {
+    font-size: clamp(2rem, 2.2vw + 0.9rem, 4.75rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .heading-display-fluid {
+    font-size: clamp(2.5rem, 1.8vw + 0.75rem, 5.75rem);
+  }
 }
 
 .pill {

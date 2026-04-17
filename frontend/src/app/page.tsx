@@ -64,7 +64,7 @@ export default async function HomePage() {
             <p className="mt-6 max-w-md text-base sm:text-lg leading-relaxed">
               Incredible live shows. Upfront pricing. Mobile tickets.
               <br />
-              After9 makes going out easy.
+              RAGE makes going out easy.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href="/signup" className="pill-dark h-12 px-7 text-sm">
@@ -79,14 +79,14 @@ export default async function HomePage() {
           <div className="relative aspect-square w-full max-w-[560px] mx-auto rounded-2xl bg-black overflow-hidden">
             <Image
               src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
-              alt="After9 events"
+              alt="RAGE events"
               fill
               priority
               className="object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/30 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-white/70">After Nine</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>
               <p className="mt-1 text-3xl sm:text-4xl font-black tracking-tighter text-white leading-none">
                 Where the<br />night begins.
               </p>
@@ -109,7 +109,7 @@ export default async function HomePage() {
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 max-w-md">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70">After Nine</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>
             <p className="mt-2 text-3xl sm:text-5xl font-black tracking-tighter text-white leading-[0.9]">
               Real nights.<br />Real rooms.
             </p>
@@ -176,7 +176,7 @@ export default async function HomePage() {
       {/* HOW IT WORKS */}
       <section className="border-t border-line bg-offwhite py-20 sm:py-28">
         <div className="container-page">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted">How After9 works</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted">How RAGE works</p>
           <h2 className="mt-3 display-section text-5xl sm:text-7xl">
             Built to sell.<br />Built to operate.
           </h2>

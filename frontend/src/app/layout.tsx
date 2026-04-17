@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Inter } from "next/font/google";
 import { Search } from "lucide-react";
 import "./globals.css";
@@ -13,8 +14,8 @@ const display = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "After9 — Welcome to the alternative",
-  description: "Live student events. Upfront pricing. Mobile tickets. After9 makes going out easy.",
+  title: "RAGE — Welcome to the alternative",
+  description: "Live student events. Upfront pricing. Mobile tickets. RAGE makes going out easy.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -23,9 +24,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line">
           <div className="container-page flex h-16 items-center gap-4 sm:gap-6">
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-black text-white text-sm font-black">A9</span>
-              <span className="text-xl font-black tracking-tightest hidden sm:inline">AFTER9</span>
+            <Link href="/" className="flex items-center shrink-0">
+              <Image src="/rage-logo.png" alt="RAGE" width={80} height={40} className="object-contain" priority />
             </Link>
 
             <div className="flex-1 hidden md:flex items-center bg-offwhite rounded-full h-11 px-4">
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="container-page py-12">
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <span className="text-xl font-black tracking-tightest">AFTER9</span>
+                <Image src="/rage-logo.png" alt="RAGE" width={80} height={40} className="object-contain" />
                 <p className="mt-3 text-sm text-muted leading-relaxed">
                   Student events, upfront pricing, mobile tickets.
                 </p>
@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="mt-10 pt-6 border-t border-line flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted">
-              <p>© {new Date().getFullYear()} After9. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} RAGE. All rights reserved.</p>
               <p>Secure checkout · Mobile tickets · Fast door entry</p>
             </div>
           </div>

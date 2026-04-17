@@ -12,9 +12,9 @@ export default async function DashboardPage() {
   const userId = userData.user?.id;
   if (!userId) {
     return (
-      <main className="container-page py-16 sm:py-24">
+      <main className="container-page min-w-0 py-16 sm:py-24">
         <div className="mx-auto max-w-md text-center">
-          <h1 className="display-section text-5xl">Login required</h1>
+          <h1 className="display-section-fluid">Login required</h1>
           <p className="mt-4 text-base text-muted">Sign in to access your host dashboard.</p>
           <Link href="/login" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">GO TO LOGIN</Link>
         </div>
@@ -25,9 +25,9 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
   if (!profile) {
     return (
-      <main className="container-page py-16 sm:py-24">
+      <main className="container-page min-w-0 py-16 sm:py-24">
         <div className="mx-auto max-w-md text-center">
-          <h1 className="display-section text-5xl">Finish onboarding</h1>
+          <h1 className="display-section-fluid">Finish onboarding</h1>
           <p className="mt-4 text-base text-muted">Set up your organizer profile before creating events.</p>
           <Link href="/onboarding" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">CONTINUE</Link>
         </div>
@@ -56,11 +56,11 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <main className="container-page py-10 sm:py-14">
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+    <main className="container-page min-w-0 py-10 sm:py-14">
+      <div className="mb-10 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">Host workspace</p>
-          <h1 className="mt-3 display-section text-5xl sm:text-6xl">Dashboard</h1>
+          <h1 className="mt-3 display-section-fluid">Dashboard</h1>
         </div>
         <Link href="/dashboard/events/new" className="inline-flex pill-dark h-12 px-6 text-sm">
           CREATE EVENT <ArrowUpRight size={16} />

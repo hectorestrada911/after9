@@ -50,7 +50,6 @@ export default async function HomePage() {
 
   return (
     <main className="min-w-0 bg-white text-black">
-      {/* HERO */}
       <section className="container-page pb-16 pt-12 sm:pb-24 sm:pt-16">
         <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[1.05fr,0.95fr]">
           <div className="min-w-0">
@@ -98,7 +97,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CINEMATIC VIDEO BANNER */}
       <section className="container-page pb-16 sm:pb-20">
         <div className="relative aspect-video min-h-[200px] w-full overflow-hidden rounded-2xl bg-black sm:aspect-[21/9] sm:min-h-0">
           <video
@@ -122,7 +120,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* TRENDING CAROUSEL */}
       <section className="border-t border-line py-14 sm:py-20">
         <div className="container-page">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -173,7 +170,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
       <section className="border-t border-line bg-offwhite py-20 sm:py-28">
         <div className="container-page">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">How RAGE works</p>
@@ -211,7 +207,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* FOR HOSTS CTA */}
       <section className="border-t border-line bg-black py-20 text-white sm:py-28">
         <div className="container-page">
           <div className="grid min-w-0 gap-10 lg:grid-cols-[1.2fr,0.8fr] lg:items-center">
@@ -238,16 +233,16 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="grid min-w-0 grid-cols-2 gap-3">
+            <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3">
               {[
                 ["4.8/5", "Host satisfaction"],
                 ["+31%", "Conversion lift"],
                 ["<2 min", "Launch time"],
                 ["99.9%", "Checkout uptime"],
               ].map(([v, l]) => (
-                <div key={l} className="rounded-2xl border border-white/15 p-5">
-                  <p className="text-3xl font-black tracking-tighter">{v}</p>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-white/60">{l}</p>
+                <div key={l} className="rounded-2xl border border-white/15 p-4 sm:p-5">
+                  <p className="text-2xl font-black tracking-tighter sm:text-3xl">{v}</p>
+                  <p className="mt-1 text-[10px] uppercase leading-snug tracking-wider text-white/60 sm:text-xs">{l}</p>
                 </div>
               ))}
             </div>

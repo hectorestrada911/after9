@@ -11,10 +11,10 @@ const flowSteps = [
 
 export default function DemoFlowPage() {
   return (
-    <main className="bg-white">
+    <main className="min-w-0 bg-white">
       <section className="container-page py-12 sm:py-16">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">Demo flow</p>
-        <h1 className="mt-4 display-section text-5xl sm:text-7xl">
+        <h1 className="mt-4 display-section-fluid">
           From host setup<br />to guest entry.
         </h1>
         <p className="mt-5 max-w-xl text-base sm:text-lg text-muted">
@@ -51,8 +51,8 @@ export default function DemoFlowPage() {
 
       <section className="border-t border-line bg-offwhite">
         <div className="container-page py-16 sm:py-24">
-          <div className="grid gap-10 lg:grid-cols-[1.1fr,0.9fr] items-center">
-            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden">
+          <div className="grid min-w-0 gap-10 items-center lg:grid-cols-[1.1fr,0.9fr]">
+            <div className="relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl">
               <Image
                 src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1600&q=80"
                 alt="Event venue"
@@ -60,9 +60,9 @@ export default function DemoFlowPage() {
                 className="object-cover"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-widest text-muted">Real event feel</p>
-              <h3 className="mt-3 display-section text-4xl sm:text-5xl">
+              <h3 className="mt-3 display-section-fluid-sm">
                 One clean flow,<br />from promo to entry.
               </h3>
               <p className="mt-5 text-base text-muted">

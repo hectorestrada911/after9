@@ -16,11 +16,11 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const soldPercent = Math.min(Math.round(((soldCount ?? 0) / Math.max(event.tickets_available ?? 1, 1)) * 100), 100);
 
   return (
-    <main className="bg-white">
+    <main className="min-w-0 bg-white">
       <section className="container-page py-8 sm:py-12">
-        <div className="grid gap-8 lg:grid-cols-[1.15fr,0.85fr]">
-          <div>
-            <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-offwhite">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[1.15fr,0.85fr]">
+          <div className="min-w-0">
+            <div className="relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl bg-offwhite">
               <Image
                 src={event.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30"}
                 alt={event.title}
@@ -34,7 +34,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
               <p className="text-xs font-bold uppercase tracking-widest text-muted">
                 Hosted by {event.profiles?.organizer_name ?? "Host"}
               </p>
-              <h1 className="mt-3 text-4xl sm:text-6xl font-black tracking-tighter leading-[0.95]">
+              <h1 className="mt-3 heading-display-fluid">
                 {event.title}
               </h1>
               <p className="mt-5 text-base sm:text-lg text-black/80 leading-relaxed max-w-2xl">
@@ -97,10 +97,10 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-24 self-start">
+          <aside className="min-w-0 self-start lg:sticky lg:top-24">
             <div className="rounded-2xl border border-line bg-white p-6">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Price</p>
-              <p className="mt-1 text-5xl font-black tracking-tighter">${centsToDollars(event.ticket_price)}</p>
+              <p className="mt-1 text-balance text-4xl font-black tracking-tighter sm:text-5xl">${centsToDollars(event.ticket_price)}</p>
               <p className="mt-2 text-sm text-muted inline-flex items-center gap-1.5">
                 <Ticket size={14} /> {remaining} tickets remaining
               </p>

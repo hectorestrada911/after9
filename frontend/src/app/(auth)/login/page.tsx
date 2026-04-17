@@ -26,10 +26,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="container-page py-16 sm:py-24">
-      <div className="mx-auto max-w-md">
+    <main className="container-page min-w-0 py-16 sm:py-24">
+      <div className="mx-auto max-w-md min-w-0">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">Welcome back</p>
-        <h1 className="mt-3 text-5xl sm:text-6xl font-black tracking-tighter leading-[0.9]">
+        <h1 className="mt-3 heading-display-fluid">
           Host<br />login
         </h1>
         <p className="mt-4 text-base text-muted">

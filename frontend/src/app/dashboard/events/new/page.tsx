@@ -94,10 +94,10 @@ export default function NewEventPage() {
   }
 
   return (
-    <main className="container-page py-10 sm:py-14">
-      <div className="mx-auto max-w-2xl">
+    <main className="container-page min-w-0 py-10 sm:py-14">
+      <div className="mx-auto max-w-2xl min-w-0">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">Host tools</p>
-        <h1 className="mt-3 display-section text-5xl sm:text-6xl">Create event</h1>
+        <h1 className="mt-3 display-section-fluid">Create event</h1>
         <p className="mt-4 text-base text-muted max-w-xl">
           Fill in the essentials and publish a professional ticket page.
         </p>

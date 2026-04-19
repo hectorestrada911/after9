@@ -88,13 +88,14 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="relative hidden aspect-square w-full min-w-0 overflow-hidden rounded-2xl bg-zinc-900 lg:col-start-2 lg:row-start-1 lg:block">
+          {/* Still photo under the banner video on mobile; top-right tile on desktop */}
+          <div className="relative mx-auto aspect-square w-full max-w-md min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-900 sm:max-w-lg lg:mx-0 lg:max-w-none lg:col-start-2 lg:row-start-1">
             <Image
               src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
               alt="RAGE — live energy"
               fill
               loading="lazy"
-              sizes="(max-width: 1023px) 0px, min(50vw, 560px)"
+              sizes="(max-width: 1023px) min(100vw, 32rem), min(50vw, 560px)"
               className="object-cover opacity-85"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/30 to-transparent" />

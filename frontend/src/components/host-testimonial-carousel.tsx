@@ -4,26 +4,22 @@ import { useCallback, useEffect, useId, useState } from "react";
 import Image from "next/image";
 
 export type HostReview = {
+  id: string;
   quote: string;
-  who: string;
-  role: string;
 };
 
 const DEFAULT_REVIEWS: HostReview[] = [
   {
+    id: "a",
     quote: "Live page and ticket link in a couple minutes. Dropped it in the chat and people actually checked out.",
-    who: "Jordan",
-    role: "Programming club · Midwest",
   },
   {
+    id: "b",
     quote: "One link replaced our Venmo DM mess. Everyone got a QR for the door.",
-    who: "Sam",
-    role: "House venue · West Coast",
   },
   {
+    id: "c",
     quote: "Search-by-name at check-in when the line was staring. Felt usable, not scary.",
-    who: "Riley",
-    role: "Campus events board · East Coast",
   },
 ];
 
@@ -92,7 +88,7 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
         <div className="relative min-h-[11rem] sm:min-h-[10rem] md:min-h-[9.5rem]">
           {reviews.map((r, i) => (
             <figure
-              key={r.who}
+              key={r.id}
               className={
                 i === index
                   ? "relative z-10 px-1 opacity-100 transition-opacity duration-300 sm:px-4"
@@ -103,9 +99,6 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
               <blockquote className="text-pretty text-xl font-medium leading-relaxed tracking-tight text-white sm:text-2xl sm:leading-relaxed md:text-[1.65rem] md:leading-relaxed">
                 &ldquo;{r.quote}&rdquo;
               </blockquote>
-              <figcaption className="mt-6 text-sm font-medium text-zinc-500 sm:mt-7 sm:text-base">
-                {r.who} · {r.role}
-              </figcaption>
             </figure>
           ))}
         </div>
@@ -113,11 +106,11 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
         <div className="mt-8 flex justify-center gap-2 sm:mt-10" role="tablist" aria-label="Choose testimonial">
           {reviews.map((r, i) => (
             <button
-              key={r.who}
+              key={r.id}
               type="button"
               role="tab"
               aria-selected={i === index}
-              aria-label={`Testimonial ${i + 1}: ${r.who}`}
+              aria-label={`Testimonial ${i + 1} of ${n}`}
               onClick={() => setIndex(i)}
               className={
                 i === index
@@ -138,6 +131,13 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
           sizes="(max-width: 768px) 100vw, 48rem"
           priority={false}
         />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-5 text-left sm:p-7">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">The room</p>
+          <p className="mt-2 max-w-[20rem] text-lg font-semibold leading-snug text-white sm:text-xl">
+            This is what you are selling: bodies, lights, and a night that feels legit.
+          </p>
+        </div>
       </div>
     </div>
   );

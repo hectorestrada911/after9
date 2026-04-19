@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Heart, Play } from "lucide-react";
 import { HomeBannerVideo } from "@/components/home-banner-video";
+import { HomeScrollSplitVisual } from "@/components/home-scroll-split-visual";
 import { HomeSocialProof } from "@/components/home-social-proof";
 import { HostWorkflowHighlight } from "@/components/host-workflow-highlight";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
@@ -165,41 +166,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-white/[0.08] bg-zinc-950 py-20 sm:py-28">
-        <div className="container-page">
+      <section className="border-t border-white/[0.08] bg-zinc-950">
+        <div className="container-page pt-16 sm:pt-20 lg:pt-24">
           <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">How RAGE works</p>
           <h2 className="mt-3 display-section-fluid text-white">
             Built to sell.
             <br />
             Built to operate.
           </h2>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
-            {[
-              {
-                n: "01",
-                title: "Publish a trusted page",
-                body: "Premium typography, clear structure, and high-signal details so guests immediately understand value and legitimacy.",
-              },
-              {
-                n: "02",
-                title: "Convert with low-friction checkout",
-                body: "Strong trust cues, simple quantity decisions, and familiar payment flow remove hesitation and improve completed orders.",
-              },
-              {
-                n: "03",
-                title: "Run doors smoothly",
-                body: "Attendee search, duplicate prevention, and check-in clarity let your team move confidently when lines get long.",
-              },
-            ].map((step) => (
-              <div key={step.n} className="border-t border-white/15 pt-5">
-                <p className="text-sm font-bold text-zinc-500">{step.n}</p>
-                <h3 className="mt-3 text-2xl font-black leading-tight tracking-tighter text-white">{step.title}</h3>
-                <p className="mt-3 text-base leading-relaxed text-zinc-400">{step.body}</p>
-              </div>
-            ))}
-          </div>
         </div>
+        <HomeScrollSplitVisual />
       </section>
 
       <section className="border-t border-white/[0.08] bg-black py-20 text-white sm:py-28">

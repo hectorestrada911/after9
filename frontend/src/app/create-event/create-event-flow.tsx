@@ -113,29 +113,44 @@ const STEPS = [
 ] as const;
 
 const field =
-  "h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-3.5 text-[13px] font-normal text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] placeholder:text-zinc-600 transition " +
-  "focus:border-brand-green/40 focus:bg-white/[0.06] focus:outline-none focus:ring-1 focus:ring-brand-green/25";
+  "h-11 w-full rounded-xl border border-white/[0.14] bg-white/[0.07] px-3.5 text-[13px] font-normal text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] placeholder:text-zinc-500 transition " +
+  "focus:border-brand-green/55 focus:bg-white/[0.1] focus:outline-none focus:ring-2 focus:ring-brand-green/25";
 
-const labelClass = "mb-1.5 block text-[11px] font-medium tracking-wide text-zinc-500";
+const labelClass = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-400";
 
 function StepDots({ step }: { step: number }) {
   return (
-    <div className="flex items-start justify-between gap-2 px-1">
-      {STEPS.map((s, i) => (
-        <div key={s.id} className="flex flex-1 flex-col items-center gap-2">
-          <div
-            className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-300",
-              i < step ? "bg-brand-green text-black" : i === step ? "bg-white text-black ring-2 ring-brand-green/45" : "bg-white/10 text-zinc-600",
-            )}
-          >
-            {i < step ? <Check className="h-4 w-4" strokeWidth={2.5} /> : i + 1}
-          </div>
-          <span className={cn("text-center text-[10px] font-medium uppercase tracking-wider", i === step ? "text-zinc-200" : "text-zinc-600")}>
-            {s.label}
-          </span>
-        </div>
-      ))}
+    <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-5">
+      <div className="flex items-start justify-between gap-1.5 sm:gap-3">
+        {STEPS.map((s, i) => {
+          const done = i < step;
+          const current = i === step;
+          return (
+            <div key={s.id} className="flex min-w-0 flex-1 flex-col items-center gap-2.5">
+              <div
+                className={cn(
+                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[12px] font-bold transition-all duration-300 sm:h-11 sm:w-11",
+                  done && "bg-brand-green text-black shadow-[0_0_22px_-3px_rgba(75,250,148,0.75)]",
+                  current && "bg-white text-black shadow-[0_0_0_2px_rgba(75,250,148,0.55),0_0_28px_-5px_rgba(75,250,148,0.5)]",
+                  !done && !current && "border border-white/18 bg-zinc-900/90 text-zinc-500",
+                )}
+              >
+                {done ? <Check className="h-4 w-4" strokeWidth={2.5} /> : i + 1}
+              </div>
+              <span
+                className={cn(
+                  "max-w-[5.5rem] text-center text-[10px] font-semibold uppercase leading-tight tracking-wider sm:max-w-none sm:text-[11px]",
+                  current && "text-white",
+                  done && !current && "text-brand-green/90",
+                  !done && !current && "text-zinc-500",
+                )}
+              >
+                {s.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -284,8 +299,8 @@ export function CreateEventFlow() {
 
   function FlyerAnchor() {
     return (
-      <div className="mb-5 flex gap-3 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-        <div className="relative h-[92px] w-[72px] shrink-0 overflow-hidden rounded-xl ring-1 ring-white/12">
+      <div className="mb-5 flex gap-3 rounded-2xl border border-white/[0.12] bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="relative h-[92px] w-[72px] shrink-0 overflow-hidden rounded-xl bg-zinc-800 ring-1 ring-white/15">
           {/* eslint-disable-next-line @next/next/no-img-element -- data URLs + Unsplash; avoids optimizer issues on deploy */}
           <img src={coverThumbSrc} alt="" className="h-full w-full object-cover" />
         </div>
@@ -416,10 +431,10 @@ export function CreateEventFlow() {
         <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-2 sm:max-w-lg sm:px-6 sm:pb-28 sm:pt-4">
           <div className="mb-8">
             <StepDots step={step} />
-            <p className="mt-3 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+            <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">
               Step {step + 1} of {STEPS.length} · {STEPS[step]?.label}
             </p>
-            <h1 className="mt-2 text-center text-xl font-semibold tracking-tight text-white sm:text-2xl">{STEPS[step]?.hint}</h1>
+            <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">{STEPS[step]?.hint}</h1>
           </div>
 
           {microWin && (
@@ -444,7 +459,7 @@ export function CreateEventFlow() {
                   type="button"
                   disabled={uploadBusy}
                   onClick={() => fileRef.current?.click()}
-                  className="group flex w-full items-center gap-3.5 rounded-xl border border-dashed border-white/15 bg-white/[0.03] px-4 py-4 text-left transition hover:border-brand-green/35 hover:bg-white/[0.05] disabled:pointer-events-none disabled:opacity-60"
+                  className="group flex w-full items-center gap-3.5 rounded-xl border border-dashed border-white/22 bg-white/[0.05] px-4 py-4 text-left transition hover:border-brand-green/45 hover:bg-white/[0.08] disabled:pointer-events-none disabled:opacity-60"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition group-hover:border-brand-green/30 group-hover:text-brand-green">
                     {uploadBusy ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} /> : <Upload className="h-4 w-4" strokeWidth={1.75} />}
@@ -471,7 +486,7 @@ export function CreateEventFlow() {
                 />
 
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-600" strokeWidth={1.75} />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" strokeWidth={1.75} />
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -492,8 +507,8 @@ export function CreateEventFlow() {
                       className={cn(
                         "snap-start shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition",
                         flyCategory === cat.id
-                          ? "border-brand-green/50 bg-brand-green/20 text-brand-green"
-                          : "border-white/10 bg-white/[0.04] text-zinc-500 hover:border-white/20 hover:text-zinc-300",
+                          ? "border-brand-green/55 bg-brand-green/22 text-brand-green shadow-[0_0_20px_-8px_rgba(75,250,148,0.5)]"
+                          : "border-white/14 bg-white/[0.05] text-zinc-400 hover:border-white/25 hover:text-zinc-200",
                       )}
                     >
                       {cat.label}
@@ -513,10 +528,10 @@ export function CreateEventFlow() {
                           flash("Great eye");
                         }}
                         className={cn(
-                          "relative aspect-[4/5] w-full min-h-0 overflow-hidden rounded-xl transition duration-300",
+                          "relative aspect-[4/5] w-full min-h-0 overflow-hidden rounded-xl bg-zinc-800/90 transition duration-300",
                           active
                             ? "z-[1] scale-[1.02] ring-2 ring-brand-green ring-offset-2 ring-offset-[#030303] shadow-[0_0_24px_-4px_rgba(75,250,148,0.45)]"
-                            : "opacity-90 hover:opacity-100 hover:ring-1 hover:ring-white/20",
+                            : "opacity-95 hover:opacity-100 hover:ring-1 hover:ring-white/25",
                         )}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element -- external Unsplash; reliable on Vercel */}
@@ -526,7 +541,6 @@ export function CreateEventFlow() {
                           className="absolute inset-0 h-full w-full object-cover"
                           loading="lazy"
                           decoding="async"
-                          referrerPolicy="no-referrer"
                         />
                         {active && (
                           <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-black shadow-lg">
@@ -543,7 +557,7 @@ export function CreateEventFlow() {
 
             {/* Step 1 — Story */}
             {step === 1 && (
-              <div key="s1" className="animate-fadeUp space-y-4">
+              <div key="s1" className="animate-fadeUp space-y-5">
                 <FlyerAnchor />
                 <div>
                   <span className={labelClass}>Event title</span>
@@ -560,19 +574,19 @@ export function CreateEventFlow() {
                 </div>
                 <div>
                   <span className={labelClass}>When</span>
-                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-600">We prefilled tonight — tweak anything.</p>
+                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-500">We prefilled tonight — tweak anything.</p>
                   <div className="grid grid-cols-1 gap-2">
                     <div>
-                      <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-zinc-600">Date</span>
+                      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Date</span>
                       <input className={field} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-zinc-600">Starts</span>
+                        <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Starts</span>
                         <input className={field} type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
                       </div>
                       <div>
-                        <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-zinc-600">Ends</span>
+                        <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Ends</span>
                         <input className={field} type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
                       </div>
                     </div>
@@ -591,7 +605,7 @@ export function CreateEventFlow() {
 
             {/* Step 2 — Tickets */}
             {step === 2 && (
-              <div key="s2" className="animate-fadeUp space-y-4">
+              <div key="s2" className="animate-fadeUp space-y-5">
                 <FlyerAnchor />
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>

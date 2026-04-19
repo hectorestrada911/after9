@@ -22,11 +22,11 @@ function localDateISO(d = new Date()) {
 async function fileToDraftDataUrl(file: File, maxStrLen: number): Promise<string> {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "heic" || ext === "heif" || file.type === "image/heic" || file.type === "image/heif") {
-    throw new Error("HEIC isn’t supported in the browser yet — export as JPG in Photos, or pick a stock flyer.");
+    throw new Error("HEIC isn’t supported in the browser yet. Export as JPG in Photos, or pick a stock flyer.");
   }
   if (file.type === "image/gif") {
     const s = await readFileAsDataUrl(file);
-    if (s.length > maxStrLen) throw new Error("GIF is too large — try JPG/PNG or a stock image.");
+    if (s.length > maxStrLen) throw new Error("GIF is too large. Try JPG/PNG or a stock image.");
     return s;
   }
   if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
@@ -93,7 +93,7 @@ function compressToJpegDataUrl(file: File, maxStrLen: number): Promise<string> {
         guard += 1;
       }
       if (out.length > maxStrLen) {
-        reject(new Error("Still too large after compressing — try a smaller photo or a stock flyer."));
+        reject(new Error("Still too large after compressing. Try a smaller photo or a stock flyer."));
         return;
       }
       resolve(out);
@@ -232,7 +232,7 @@ export function CreateEventFlow() {
     setError(null);
     const maxRawBytes = 18 * 1024 * 1024;
     if (f.size > maxRawBytes) {
-      setError("That file is too large to open in the browser — try under ~18MB or a stock flyer.");
+      setError("That file is too large to open in the browser. Try under ~18MB or a stock flyer.");
       return;
     }
     setUploadBusy(true);
@@ -307,7 +307,7 @@ export function CreateEventFlow() {
         <div className="flex min-w-0 flex-1 flex-col justify-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Your flyer</p>
           <p className="mt-1 line-clamp-2 text-[13px] font-medium leading-snug text-zinc-100">
-            {title.trim() ? title.trim() : "Guests see this first — add a title below when you’re ready."}
+            {title.trim() ? title.trim() : "Guests see this first. Add a title below when you’re ready."}
           </p>
           <button
             type="button"
@@ -383,7 +383,7 @@ export function CreateEventFlow() {
     try {
       writeEventDraft(draft);
     } catch {
-      setError("Couldn't save the draft — try a smaller image.");
+      setError("Couldn't save the draft. Try a smaller image.");
       return;
     }
 
@@ -452,7 +452,7 @@ export function CreateEventFlow() {
               <p className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-center text-[12px] text-red-200">{error}</p>
             )}
 
-            {/* Step 0 — Flyer */}
+            {/* Step 0: Flyer */}
             {step === 0 && (
               <div key="s0" className="animate-fadeUp space-y-5">
                 <button
@@ -467,7 +467,7 @@ export function CreateEventFlow() {
                   <div className="min-w-0">
                     <p className="text-[14px] font-medium text-white">{uploadBusy ? "Optimizing for draft…" : "Upload your flyer"}</p>
                     <p className="mt-0.5 truncate text-[12px] text-zinc-500">
-                      {uploadBusy ? "Large phone photos get shrunk automatically." : uploadName ?? "JPG, PNG, WebP — or choose a look below"}
+                      {uploadBusy ? "Large phone photos get shrunk automatically." : uploadName ?? "JPG, PNG, WebP, or choose a look below"}
                     </p>
                   </div>
                 </button>
@@ -551,11 +551,11 @@ export function CreateEventFlow() {
                     );
                   })}
                 </div>
-                {filteredStock.length === 0 && <p className="text-center text-[12px] text-zinc-600">Nothing matched — try another word.</p>}
+                {filteredStock.length === 0 && <p className="text-center text-[12px] text-zinc-600">Nothing matched. Try another word.</p>}
               </div>
             )}
 
-            {/* Step 1 — Story */}
+            {/* Step 1: Story */}
             {step === 1 && (
               <div key="s1" className="animate-fadeUp space-y-5">
                 <FlyerAnchor />
@@ -574,7 +574,7 @@ export function CreateEventFlow() {
                 </div>
                 <div>
                   <span className={labelClass}>When</span>
-                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-500">We prefilled tonight — tweak anything.</p>
+                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-500">We prefilled tonight. Tweak anything.</p>
                   <div className="grid grid-cols-1 gap-2">
                     <div>
                       <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Date</span>
@@ -603,7 +603,7 @@ export function CreateEventFlow() {
               </div>
             )}
 
-            {/* Step 2 — Tickets */}
+            {/* Step 2: Tickets */}
             {step === 2 && (
               <div key="s2" className="animate-fadeUp space-y-5">
                 <FlyerAnchor />
@@ -691,7 +691,7 @@ export function CreateEventFlow() {
                 )}
               </div>
               <p className="mx-auto mt-2.5 max-w-sm text-center text-[11px] leading-relaxed text-zinc-600">
-                {step < 2 ? "Small wins add up — you're almost publish-ready." : "Account next. Your draft stays in this browser until you publish."}
+                {step < 2 ? "Small wins add up. You're almost publish-ready." : "Account next. Your draft stays in this browser until you publish."}
               </p>
             </div>
           </form>

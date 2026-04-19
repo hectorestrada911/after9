@@ -23,7 +23,7 @@ function getNetworkHints() {
 }
 
 /**
- * Banner video: `public/a9-banner.mp4` is large (~10MB) — main cost after first paint.
+ * Banner video: `public/a9-banner.mp4` is large (~10MB); main cost after first paint.
  * - Waits until near viewport, then defers `src` until the browser is idle (or timeout) so JS/CSS/fonts win the race.
  * - On save-data, reduced motion, or slow network: poster only until the user taps Play.
  *
@@ -109,7 +109,7 @@ export function HomeBannerVideo({ className }: Props) {
         preload="none"
         controls={false}
         {...(showVideo ? { src: "/a9-banner.mp4" } : {})}
-        {...({ fetchPriority: "low" } as React.ComponentProps<"video">)}
+        {...({ fetchPriority: "low" } as Record<string, string>)}
       />
 
       {inView && !showVideo && needsTap && (

@@ -1,4 +1,4 @@
-/** Curated 4:5 flyer images (Unsplash). IDs verified HTTP 200 — Unsplash periodically retires assets. */
+/** Curated 4:5 flyer images (Unsplash). IDs verified HTTP 200; Unsplash periodically retires assets. */
 export type FlyerCategory = "all" | "party" | "drinks" | "club" | "concert" | "chill";
 
 export type FlyerStockImage = {

@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Heart, Play } from "lucide-react";
 import { HomeBannerVideo } from "@/components/home-banner-video";
-import { HostDashboardPreview } from "@/components/host-dashboard-preview";
+import { HomeSocialProof } from "@/components/home-social-proof";
+import { HostWorkflowHighlight } from "@/components/host-workflow-highlight";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 
@@ -93,7 +94,7 @@ export default async function HomePage() {
           <div className="relative mx-auto aspect-square w-full max-w-md min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-900 sm:max-w-lg lg:mx-0 lg:max-w-none lg:col-start-2 lg:row-start-1">
             <Image
               src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
-              alt="RAGE — live energy"
+              alt="RAGE, live energy"
               fill
               loading="lazy"
               sizes="(max-width: 1023px) min(100vw, 32rem), min(50vw, 560px)"
@@ -112,13 +113,15 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <HomeSocialProof />
+
       <section className="border-t border-white/[0.08] py-16 sm:py-24">
         <div className="container-page">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h2 className="text-2xl font-black tracking-tighter text-white sm:text-3xl">Trending now</h2>
               <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400">
-                Fresh drops from rooms we love — club nights, live sets, comedy, and the kind of nights people actually talk about.
+                Fresh drops from rooms we love: club nights, live sets, comedy, and the kind of nights people actually talk about.
               </p>
             </div>
             <Link href="/demo-flow" className="pill-dark h-11 self-start px-6 text-xs sm:self-end">
@@ -227,10 +230,10 @@ export default async function HomePage() {
             </div>
             <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3">
               {[
-                ["4.8/5", "Host satisfaction"],
-                ["Apple Pay", "Stripe checkout"],
-                ["<2 min", "Launch time"],
-                ["99.9%", "Checkout uptime"],
+                ["Minutes", "From blank form to live page"],
+                ["One link", "Sell tickets & share anywhere"],
+                ["QR + email", "What guests get after buying"],
+                ["Search + scan", "How you run the door"],
               ].map(([v, l]) => (
                 <div key={l} className="rounded-2xl border border-white/15 p-4 sm:p-5">
                   <p className="text-2xl font-black tracking-tighter sm:text-3xl">{v}</p>
@@ -242,13 +245,13 @@ export default async function HomePage() {
 
           <div className="mt-14 border-t border-white/[0.08] pt-14 sm:mt-20 sm:pt-20">
             <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/45 sm:text-left">
-              Host workspace
+              How it feels to host
             </p>
             <p className="mt-2 text-center text-sm text-zinc-500 sm:text-left">
-              A live-style preview of what organizers see after sign-in — numbers are illustrative.
+              Fast publish, one checkout link, and door tools that stay human, without a fake finance dashboard.
             </p>
             <div className="mt-6">
-              <HostDashboardPreview />
+              <HostWorkflowHighlight />
             </div>
           </div>
         </div>

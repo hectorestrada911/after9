@@ -204,7 +204,7 @@ export default function NewEventPage() {
               onChange={(e) => {
                 const f = e.target.files?.[0] ?? null;
                 setCoverFile(f && f.size > 0 ? f : null);
-                setCoverHint(f && f.size > 0 ? "New image selected — will upload when you publish." : null);
+                setCoverHint(f && f.size > 0 ? "New image selected; will upload when you publish." : null);
               }}
             />
           </div>

@@ -14,7 +14,7 @@ const display = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RAGE — Nights out, sorted",
+  title: "RAGE · Nights out, sorted",
   description: "Host with clear pricing and mobile tickets. Guests skip the guesswork; your crew keeps the line moving.",
 };
 

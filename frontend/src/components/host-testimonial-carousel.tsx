@@ -103,7 +103,7 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
           ))}
         </div>
 
-        <div className="mt-8 flex justify-center gap-2 sm:mt-10" role="tablist" aria-label="Choose testimonial">
+        <div className="mt-8 flex justify-center gap-1 sm:mt-10 sm:gap-2" role="tablist" aria-label="Choose testimonial">
           {reviews.map((r, i) => (
             <button
               key={r.id}
@@ -112,29 +112,33 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
               aria-selected={i === index}
               aria-label={`Testimonial ${i + 1} of ${n}`}
               onClick={() => setIndex(i)}
-              className={
-                i === index
-                  ? "h-2 w-7 rounded-full bg-white transition-[width,background-color]"
-                  : "h-2 w-2 rounded-full bg-zinc-600 transition-[width,background-color] hover:bg-zinc-500"
-              }
-            />
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 touch-manipulation sm:min-h-0 sm:min-w-0 sm:p-0"
+            >
+              <span
+                className={
+                  i === index
+                    ? "block h-2 w-7 rounded-full bg-white transition-[width,background-color]"
+                    : "block h-2 w-2 rounded-full bg-zinc-600 transition-[width,background-color] hover:bg-zinc-500"
+                }
+              />
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="relative mt-12 aspect-[5/4] w-full overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-900 sm:mt-14">
+      <div className="relative mt-10 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-900 sm:mt-14 sm:aspect-[5/4]">
         <Image
           src="/host-review-scene.jpg"
           alt="Night out, crowd and lights"
           fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 48rem"
+          className="object-cover object-[50%_32%] sm:object-[50%_42%]"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 48rem"
           priority={false}
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-5 text-left sm:p-7">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 p-5 pb-6 text-left sm:p-7 sm:pb-7">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">The listing</p>
-          <p className="mt-2 max-w-[22rem] text-lg font-semibold leading-snug text-white sm:text-xl">
+          <p className="mt-2 max-w-[22rem] text-pretty text-base font-semibold leading-snug text-white sm:text-lg md:text-xl">
             When time, place, and price read clearly, guests pay without guesswork or back-and-forth DMs.
           </p>
         </div>

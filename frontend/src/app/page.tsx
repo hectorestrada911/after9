@@ -49,34 +49,31 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-w-0 bg-white text-black">
+    <main className="min-w-0 text-zinc-100">
       <section className="container-page pb-16 pt-12 sm:pb-24 sm:pt-16">
-        <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[1.05fr,0.95fr]">
-          <div className="min-w-0">
-            <h1 className="display-hero-fluid min-w-0">
+        <div className="flex min-w-0 flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-14 lg:gap-y-0">
+          <div className="min-w-0 max-w-full lg:min-w-0 lg:overflow-hidden lg:pr-2">
+            <h1 className="display-hero-fluid display-hero-contained min-w-0 text-balance text-white">
               <span className="block">Welcome to the</span>
               <span className="block">alternative</span>
             </h1>
-            <p className="mt-7 max-w-sm text-[15px] leading-relaxed text-neutral-500 sm:max-w-md sm:text-base">
-              Incredible live shows. Upfront pricing. Mobile tickets. After9 makes going out easy.
+            <p className="mt-7 max-w-sm text-[15px] leading-relaxed text-zinc-400 sm:max-w-md sm:text-base">
+              Incredible live shows. Upfront pricing. Mobile tickets. RAGE makes going out easy.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
                 href="/create-event"
-                className="inline-flex h-11 items-center rounded-full bg-neutral-950 px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-neutral-800 sm:h-12 sm:px-8"
+                className="inline-flex h-11 items-center rounded-full bg-white px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200 sm:h-12 sm:px-8"
               >
                 Create event
               </Link>
-              <Link
-                href="/demo-flow"
-                className="inline-flex h-11 items-center rounded-full border border-neutral-300/90 bg-white px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-900 transition hover:bg-neutral-50 sm:h-12 sm:px-8"
-              >
+              <Link href="/demo-flow" className="pill-light h-11 px-7 text-[11px] sm:h-12 sm:px-8">
                 Browse events
               </Link>
             </div>
           </div>
 
-          <div className="relative mx-auto aspect-square w-full min-w-0 max-w-[560px] overflow-hidden rounded-2xl bg-black">
+          <div className="relative mx-auto aspect-square w-full min-w-0 max-w-[560px] shrink-0 overflow-hidden rounded-2xl bg-zinc-900 lg:mx-0 lg:max-w-none">
             <Image
               src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
               alt="RAGE events"
@@ -120,12 +117,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-line py-14 sm:py-20">
+      <section className="border-t border-white/[0.08] py-14 sm:py-20">
         <div className="container-page">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h2 className="text-2xl font-black tracking-tighter sm:text-3xl">Trending now</h2>
-              <p className="mt-2 max-w-xl text-base text-muted">
+              <h2 className="text-2xl font-black tracking-tighter text-white sm:text-3xl">Trending now</h2>
+              <p className="mt-2 max-w-xl text-base text-zinc-400">
                 Check out some of the most popular events coming up, from club nights and gigs to artist signings and comedy shows.
               </p>
             </div>
@@ -139,7 +136,7 @@ export default async function HomePage() {
           <div className="mx-auto flex max-w-[1400px] gap-4 px-4 sm:gap-5 sm:px-6">
             {events.map((event, i) => (
               <Link key={`${event.slug}-${i}`} href={`/events/${event.slug}`} className="group w-[260px] shrink-0 sm:w-[280px]">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-offwhite">
+                <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900">
                   {event.image_url && (
                     <Image
                       src={event.image_url}
@@ -159,10 +156,10 @@ export default async function HomePage() {
                   </div>
                 </div>
                 <div className="mt-3">
-                  <p className="line-clamp-2 text-base font-bold leading-tight">{event.title}</p>
-                  <p className="mt-1 text-sm text-muted">{formatDate(event.date)}</p>
-                  <p className="text-sm text-muted">{event.location}</p>
-                  <p className="mt-1 text-sm font-semibold">${centsToDollars(event.ticket_price)}</p>
+                  <p className="line-clamp-2 text-base font-bold leading-tight text-white">{event.title}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{formatDate(event.date)}</p>
+                  <p className="text-sm text-zinc-500">{event.location}</p>
+                  <p className="mt-1 text-sm font-semibold text-zinc-200">${centsToDollars(event.ticket_price)}</p>
                 </div>
               </Link>
             ))}
@@ -170,10 +167,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="border-t border-line bg-offwhite py-20 sm:py-28">
+      <section className="border-t border-white/[0.08] bg-zinc-950 py-20 sm:py-28">
         <div className="container-page">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted">How After9 works</p>
-          <h2 className="mt-3 display-section-fluid">
+          <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">How RAGE works</p>
+          <h2 className="mt-3 display-section-fluid text-white">
             Built to sell.
             <br />
             Built to operate.
@@ -197,17 +194,17 @@ export default async function HomePage() {
                 body: "Attendee search, duplicate prevention, and check-in clarity let your team move confidently when lines get long.",
               },
             ].map((step) => (
-              <div key={step.n} className="border-t border-black pt-5">
-                <p className="text-sm font-bold">{step.n}</p>
-                <h3 className="mt-3 text-2xl font-black leading-tight tracking-tighter">{step.title}</h3>
-                <p className="mt-3 text-base leading-relaxed text-muted">{step.body}</p>
+              <div key={step.n} className="border-t border-white/15 pt-5">
+                <p className="text-sm font-bold text-zinc-500">{step.n}</p>
+                <h3 className="mt-3 text-2xl font-black leading-tight tracking-tighter text-white">{step.title}</h3>
+                <p className="mt-3 text-base leading-relaxed text-zinc-400">{step.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line bg-black py-20 text-white sm:py-28">
+      <section className="border-t border-white/[0.08] bg-black py-20 text-white sm:py-28">
         <div className="container-page">
           <div className="grid min-w-0 gap-10 lg:grid-cols-[1.2fr,0.8fr] lg:items-center">
             <div className="min-w-0">

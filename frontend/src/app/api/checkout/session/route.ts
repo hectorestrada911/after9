@@ -9,6 +9,15 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
   try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!stripeKey || !supabaseUrl || !serviceRole) {
+      return NextResponse.json({ error: "Checkout is not configured." }, { status: 503 });
+    }
+    const stripe = new Stripe(stripeKey);
+    const supabase = createClient(supabaseUrl, serviceRole);
+
     const { eventId, title, slug, buyerName, buyerEmail, quantity } = await req.json();
 
     if (!eventId || !title || !slug || !buyerName || !buyerEmail || !quantity) {

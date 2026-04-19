@@ -14,79 +14,114 @@ const display = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "After9 — Welcome to the alternative",
-  description: "Live student events. Upfront pricing. Mobile tickets. After9 makes going out easy.",
+  title: "RAGE — Welcome to the alternative",
+  description: "Live events, upfront pricing, mobile tickets. RAGE makes going out easy.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={display.variable}>
-      <body>
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-line">
-          <div className="container-page flex h-16 items-center gap-4 sm:gap-6">
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-black text-white text-sm font-black">A9</span>
-              <span className="text-xl font-black tracking-tightest hidden sm:inline">AFTER9</span>
+      <body className="min-h-dvh bg-[#030303] text-zinc-100 antialiased">
+        <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
+          <div className="container-page flex h-14 min-w-0 items-center gap-3 sm:h-16 sm:gap-5">
+            <Link href="/" className="flex shrink-0 items-center gap-2">
+              <Image
+                src="/rage-logo.png"
+                alt="RAGE"
+                width={160}
+                height={48}
+                className="h-8 w-auto object-contain sm:h-10"
+                priority
+              />
             </Link>
 
-            <div className="flex-1 hidden md:flex items-center bg-offwhite rounded-full h-11 px-4">
-              <Search size={16} className="text-muted shrink-0" />
+            <div className="hidden min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-4 py-2.5 md:flex">
+              <Search size={16} className="shrink-0 text-zinc-500" strokeWidth={1.75} />
               <input
                 type="text"
                 placeholder="Search by event, venue or city"
-                className="bg-transparent border-0 outline-none w-full ml-3 text-sm placeholder:text-muted"
+                className="ml-3 w-full min-w-0 border-0 bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
               />
             </div>
 
-            <nav className="hidden lg:flex items-center gap-7 text-sm font-medium">
-              <Link href="/dashboard" className="hover:opacity-60 transition">My tickets</Link>
-              <Link href="/" className="hover:opacity-60 transition">Browse events</Link>
-              <Link href="/demo-flow" className="hover:opacity-60 transition">Demo flow</Link>
-              <Link href="/login" className="hover:opacity-60 transition">Host login</Link>
+            <nav className="ml-auto hidden items-center gap-6 text-sm font-medium text-zinc-400 lg:flex">
+              <Link href="/dashboard" className="transition hover:text-white">
+                My tickets
+              </Link>
+              <Link href="/" className="transition hover:text-white">
+                Browse events
+              </Link>
+              <Link href="/demo-flow" className="transition hover:text-white">
+                Demo flow
+              </Link>
+              <Link href="/login" className="transition hover:text-white">
+                Host login
+              </Link>
             </nav>
 
-            <Link href="/signup" className="pill-dark h-11 px-5 text-sm shrink-0">
-              CREATE EVENT
+            <Link
+              href="/create-event"
+              className="inline-flex h-9 shrink-0 items-center rounded-full bg-white px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-zinc-200 sm:h-10 sm:px-5 sm:text-[11px]"
+            >
+              Create event
             </Link>
           </div>
         </header>
 
         {children}
 
-        <footer className="mt-24 border-t border-line bg-white">
+        <footer className="mt-24 border-t border-white/[0.08] bg-[#030303]">
           <div className="container-page py-12">
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <span className="text-xl font-black tracking-tightest">AFTER9</span>
-                <p className="mt-3 text-sm text-muted leading-relaxed">
-                  Student events, upfront pricing, mobile tickets.
-                </p>
+                <Image src="/rage-logo.png" alt="RAGE" width={140} height={42} className="h-7 w-auto object-contain opacity-90" />
+                <p className="mt-3 text-sm leading-relaxed text-zinc-500">Live events, upfront pricing, mobile tickets.</p>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider mb-3">Discover</p>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/" className="hover:opacity-60">Browse events</Link></li>
-                  <li><Link href="/demo-flow" className="hover:opacity-60">Demo event</Link></li>
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Discover</p>
+                <ul className="space-y-2 text-sm text-zinc-300">
+                  <li>
+                    <Link href="/" className="transition hover:text-white">
+                      Browse events
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/demo-flow" className="transition hover:text-white">
+                      Demo event
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider mb-3">Hosts</p>
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/signup" className="hover:opacity-60">Create event</Link></li>
-                  <li><Link href="/login" className="hover:opacity-60">Host login</Link></li>
-                  <li><Link href="/dashboard" className="hover:opacity-60">Dashboard</Link></li>
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Hosts</p>
+                <ul className="space-y-2 text-sm text-zinc-300">
+                  <li>
+                    <Link href="/create-event" className="transition hover:text-white">
+                      Create event
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/login" className="transition hover:text-white">
+                      Host login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/dashboard" className="transition hover:text-white">
+                      Dashboard
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider mb-3">Company</p>
-                <ul className="space-y-2 text-sm">
-                  <li><span className="text-muted">Get help</span></li>
-                  <li><span className="text-muted">Work with us</span></li>
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Company</p>
+                <ul className="space-y-2 text-sm text-zinc-500">
+                  <li>Get help</li>
+                  <li>Work with us</li>
                 </ul>
               </div>
             </div>
-            <div className="mt-10 pt-6 border-t border-line flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted">
-              <p>© {new Date().getFullYear()} After9. All rights reserved.</p>
+            <div className="mt-10 flex flex-col justify-between gap-2 border-t border-white/[0.08] pt-6 text-xs text-zinc-500 sm:flex-row">
+              <p>© {new Date().getFullYear()} RAGE. All rights reserved.</p>
               <p>Secure checkout · Mobile tickets · Fast door entry</p>
             </div>
           </div>

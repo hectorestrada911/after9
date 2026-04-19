@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Loader2, Search, Sparkles, Upload } from "lucide-react";
@@ -287,7 +286,8 @@ export function CreateEventFlow() {
     return (
       <div className="mb-5 flex gap-3 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="relative h-[92px] w-[72px] shrink-0 overflow-hidden rounded-xl ring-1 ring-white/12">
-          <Image src={coverThumbSrc} alt="Selected flyer" fill unoptimized className="object-cover" sizes="80px" />
+          {/* eslint-disable-next-line @next/next/no-img-element -- data URLs + Unsplash; avoids optimizer issues on deploy */}
+          <img src={coverThumbSrc} alt="" className="h-full w-full object-cover" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-center">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Your flyer</p>
@@ -501,7 +501,7 @@ export function CreateEventFlow() {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-2">
                   {filteredStock.map((img) => {
                     const active = coverMode === "stock" && selectedStockId === img.id;
                     return (
@@ -513,13 +513,21 @@ export function CreateEventFlow() {
                           flash("Great eye");
                         }}
                         className={cn(
-                          "relative aspect-[4/5] overflow-hidden rounded-xl transition duration-300",
+                          "relative aspect-[4/5] w-full min-h-0 overflow-hidden rounded-xl transition duration-300",
                           active
                             ? "z-[1] scale-[1.02] ring-2 ring-brand-green ring-offset-2 ring-offset-[#030303] shadow-[0_0_24px_-4px_rgba(75,250,148,0.45)]"
                             : "opacity-90 hover:opacity-100 hover:ring-1 hover:ring-white/20",
                         )}
                       >
-                        <Image src={img.thumb} alt={img.alt} fill unoptimized className="object-cover" sizes="180px" />
+                        {/* eslint-disable-next-line @next/next/no-img-element -- external Unsplash; reliable on Vercel */}
+                        <img
+                          src={img.thumb}
+                          alt={img.alt}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
+                        />
                         {active && (
                           <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-black shadow-lg">
                             <Check className="h-3.5 w-3.5" strokeWidth={3} />

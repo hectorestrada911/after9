@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html {
@@ -11,8 +11,8 @@ html {
 }
 
 html, body {
-  background: #ffffff;
-  color: #000000;
+  background: #030303;
+  color: #fafafa;
 }
 
 body {
@@ -21,8 +21,8 @@ body {
 }
 
 ::selection {
-  background: #f2ef1d;
-  color: #000000;
+  background: #4bfa94;
+  color: #030303;
 }
 
 .container-page {
@@ -72,6 +72,26 @@ body {
 @media (min-width: 1280px) {
   .display-hero-fluid {
     font-size: clamp(5rem, 12vw + 1.25rem, 8.125rem);
+  }
+}
+
+/* Homepage: keep the two-column hero from painting over the image */
+.display-hero-fluid.display-hero-contained {
+  font-size: clamp(2.75rem, 12vw + 0.2rem, 3.75rem);
+}
+@media (min-width: 640px) {
+  .display-hero-fluid.display-hero-contained {
+    font-size: clamp(3rem, 8vw + 0.75rem, 5rem);
+  }
+}
+@media (min-width: 1024px) {
+  .display-hero-fluid.display-hero-contained {
+    font-size: clamp(3.25rem, 4.8vw + 0.75rem, 5.5rem);
+  }
+}
+@media (min-width: 1280px) {
+  .display-hero-fluid.display-hero-contained {
+    font-size: clamp(3.5rem, 4.25vw + 0.5rem, 6rem);
   }
 }
 
@@ -146,11 +166,11 @@ body {
 }
 
 .pill-dark {
-  @apply pill bg-black text-white hover:bg-neutral-800;
+  @apply pill bg-white text-black hover:bg-zinc-200;
 }
 
 .pill-light {
-  @apply pill bg-white text-black border border-line hover:border-black;
+  @apply pill border border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/5;
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

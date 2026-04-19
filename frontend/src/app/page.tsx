@@ -4,6 +4,7 @@ import { ArrowRight, Heart, Play } from "lucide-react";
 import { HomeBannerVideo } from "@/components/home-banner-video";
 import { HomeScrollSplitVisual } from "@/components/home-scroll-split-visual";
 import { HomeSocialProof } from "@/components/home-social-proof";
+import { HostProductSnapshot } from "@/components/host-product-snapshot";
 import { HostWorkflowHighlight } from "@/components/host-workflow-highlight";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
@@ -216,6 +217,22 @@ export default async function HomePage() {
                   <p className="mt-1 text-[10px] uppercase leading-snug tracking-wider text-white/60 sm:text-xs">{l}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="mt-14 flex flex-col gap-8 border-t border-white/[0.08] pt-14 lg:mt-16 lg:flex-row lg:items-start lg:gap-14 lg:pt-16">
+            <div className="min-w-0 shrink-0 lg:max-w-[14rem] lg:pt-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">What guests open</p>
+              <p className="mt-3 text-lg font-bold leading-snug text-white sm:text-xl">
+                A page that looks worth the ticket.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-zinc-500">
+                Cover, details, price, checkout: the same bones every public event uses. Below is a static mock, not a
+                live event.
+              </p>
+            </div>
+            <div className="mx-auto w-full max-w-md flex-1 lg:mx-0 lg:max-w-lg">
+              <HostProductSnapshot />
             </div>
           </div>
 

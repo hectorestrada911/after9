@@ -133,9 +133,9 @@ export function HostTestimonialCarousel({ reviews = DEFAULT_REVIEWS, autoAdvance
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5 text-left sm:p-7">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">The room</p>
-          <p className="mt-2 max-w-[20rem] text-lg font-semibold leading-snug text-white sm:text-xl">
-            This is what you are selling: bodies, lights, and a night that feels legit.
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">The listing</p>
+          <p className="mt-2 max-w-[22rem] text-lg font-semibold leading-snug text-white sm:text-xl">
+            When time, place, and price read clearly, guests pay without guesswork or back-and-forth DMs.
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, LayoutGrid, Search, Sparkles, Ticket, TrendingUp, Users } from "lucide-react";
+import { ArrowUpRight, LayoutGrid, Search, Sparkles, Ticket, Users, Wallet } from "lucide-react";
 
 /** Marketing-only dashboard mock — static, no data wiring. */
 export function HostDashboardPreview() {
@@ -24,10 +24,10 @@ export function HostDashboardPreview() {
         <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
             {[
-              { k: "$4,280", l: "Gross tonight", d: "+12% vs last Fri", up: true },
-              { k: "186", l: "Tickets sold", d: "72% of cap", up: null },
-              { k: "142", l: "Checked in", d: "Live door", up: null },
-              { k: "3.2%", l: "Abandon rate", d: "Checkout", up: false },
+              { k: "$4,280", l: "Gross tonight", d: "Fees visible in checkout", tone: "neutral" as const },
+              { k: "186", l: "Tickets sold", d: "72% of cap", tone: "neutral" as const },
+              { k: "142", l: "Checked in", d: "Live door", tone: "neutral" as const },
+              { k: "3.2%", l: "Abandon rate", d: "Checkout funnel", tone: "warn" as const },
             ].map((row) => (
               <div
                 key={row.l}
@@ -35,13 +35,25 @@ export function HostDashboardPreview() {
               >
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">{row.l}</p>
                 <p className="mt-1.5 text-xl font-black tracking-tight text-white sm:text-2xl">{row.k}</p>
-                <p className="mt-1 flex items-center gap-1 text-[10px] font-medium text-zinc-600">
-                  {row.up === true && <TrendingUp className="h-3 w-3 text-brand-green" strokeWidth={2} />}
-                  {row.up === false && <span className="text-amber-400/90">·</span>}
-                  <span className={row.up === true ? "text-brand-green/90" : row.up === false ? "text-amber-400/80" : "text-zinc-500"}>{row.d}</span>
+                <p className="mt-1 text-[10px] font-medium text-zinc-500">
+                  <span className={row.tone === "warn" ? "text-amber-400/85" : "text-zinc-500"}>{row.d}</span>
                 </p>
               </div>
             ))}
+          </div>
+
+          <div className="flex flex-col gap-2 rounded-xl border border-brand-green/20 bg-brand-green/[0.07] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2.5 text-[11px] text-zinc-300">
+              <Wallet className="h-4 w-4 shrink-0 text-brand-green" strokeWidth={1.75} />
+              <span>
+                <span className="text-zinc-500">Next payout ·</span>{" "}
+                <span className="font-medium text-white">Wed</span>{" "}
+                <span className="text-zinc-600">·</span>{" "}
+                <span className="font-mono text-brand-green">$3,840</span>{" "}
+                <span className="text-zinc-500">est.</span>
+              </span>
+            </div>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Illustrative</span>
           </div>
 
           <div className="grid min-h-0 flex-1 gap-3 sm:grid-cols-[1.1fr_0.9fr] sm:gap-4">
@@ -51,7 +63,7 @@ export function HostDashboardPreview() {
                   <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Sales · 7 days</p>
                   <p className="mt-1 text-2xl font-black tracking-tight text-white">$18.4k</p>
                 </div>
-                <span className="rounded-full border border-brand-green/25 bg-brand-green/10 px-2.5 py-1 text-[10px] font-semibold text-brand-green">+24%</span>
+                <span className="rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[10px] font-semibold text-zinc-400">7 days</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
                 <svg viewBox="0 0 400 120" className="h-28 w-full text-brand-green/80 sm:h-32" preserveAspectRatio="none" aria-hidden>

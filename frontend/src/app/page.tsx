@@ -228,7 +228,7 @@ export default async function HomePage() {
             <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3">
               {[
                 ["4.8/5", "Host satisfaction"],
-                ["+31%", "Conversion lift"],
+                ["Next-day", "Standard payouts"],
                 ["<2 min", "Launch time"],
                 ["99.9%", "Checkout uptime"],
               ].map(([v, l]) => (

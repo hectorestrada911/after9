@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/demo-flow",
+        destination: "/events/campus-lights-fest",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -72,7 +72,7 @@ export default async function HomePage() {
               >
                 Create event
               </Link>
-              <Link href="/demo-flow" className="pill-light h-11 px-7 text-[11px] sm:h-12 sm:px-8">
+              <Link href="/#browse-events" className="pill-light h-11 px-7 text-[11px] sm:h-12 sm:px-8">
                 Browse events
               </Link>
             </div>
@@ -117,7 +117,7 @@ export default async function HomePage() {
 
       <HomeSocialProof />
 
-      <section className="border-t border-white/[0.08] py-16 sm:py-24">
+      <section id="browse-events" className="border-t border-white/[0.08] py-16 sm:py-24">
         <div className="container-page">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
@@ -126,7 +126,7 @@ export default async function HomePage() {
                 Fresh drops from rooms we love: club nights, live sets, comedy, and the kind of nights people actually talk about.
               </p>
             </div>
-            <Link href="/demo-flow" className="pill-dark h-11 self-start px-6 text-xs sm:self-end">
+            <Link href="/#browse-events" className="pill-dark h-11 self-start px-6 text-xs sm:self-end">
               BROWSE EVENTS
             </Link>
           </div>

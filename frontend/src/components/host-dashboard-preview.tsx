@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, LayoutGrid, Search, Sparkles, Ticket, Users, Wallet } from "lucide-react";
+import { ArrowUpRight, LayoutGrid, Search, Sparkles, Ticket, Users, Wallet, Zap } from "lucide-react";
 
 /** Marketing-only dashboard mock — static, no data wiring. */
 export function HostDashboardPreview() {
@@ -54,6 +54,14 @@ export function HostDashboardPreview() {
               </span>
             </div>
             <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Illustrative</span>
+          </div>
+
+          <div className="flex items-start gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3 text-[11px] leading-relaxed text-zinc-500">
+            <Zap className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={2} />
+            <p>
+              <span className="font-medium text-zinc-300">Guests check out fast</span> — Apple Pay, cards & digital wallets on the same link you share.{" "}
+              <span className="text-zinc-600">Tickets hit their inbox + QR instantly.</span>
+            </p>
           </div>
 
           <div className="grid min-h-0 flex-1 gap-3 sm:grid-cols-[1.1fr_0.9fr] sm:gap-4">

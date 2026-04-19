@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Heart, Play } from "lucide-react";
 import { HomeBannerVideo } from "@/components/home-banner-video";
+import { HostDashboardPreview } from "@/components/host-dashboard-preview";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 
@@ -236,6 +237,18 @@ export default async function HomePage() {
                   <p className="mt-1 text-[10px] uppercase leading-snug tracking-wider text-white/60 sm:text-xs">{l}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="mt-14 border-t border-white/[0.08] pt-14 sm:mt-20 sm:pt-20">
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/45 sm:text-left">
+              Host workspace
+            </p>
+            <p className="mt-2 text-center text-sm text-zinc-500 sm:text-left">
+              A live-style preview of what organizers see after sign-in — numbers are illustrative.
+            </p>
+            <div className="mt-6">
+              <HostDashboardPreview />
             </div>
           </div>
         </div>

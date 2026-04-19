@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Heart, Play } from "lucide-react";
+import { HomeBannerVideo } from "@/components/home-banner-video";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 
@@ -50,15 +51,15 @@ export default async function HomePage() {
 
   return (
     <main className="min-w-0 text-zinc-100">
-      <section className="container-page pb-16 pt-12 sm:pb-24 sm:pt-16">
-        <div className="flex min-w-0 flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-14 lg:gap-y-0">
-          <div className="min-w-0 max-w-full lg:min-w-0 lg:overflow-hidden lg:pr-2">
+      <section className="container-page pb-12 pt-12 sm:pb-16 sm:pt-16">
+        <div className="flex min-w-0 flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-14 lg:gap-y-12">
+          <div className="min-w-0 max-w-full lg:col-start-1 lg:row-start-1 lg:min-w-0 lg:overflow-hidden lg:pr-2">
             <h1 className="display-hero-fluid display-hero-contained min-w-0 text-balance text-white">
-              <span className="block">Welcome to the</span>
-              <span className="block">alternative</span>
+              <span className="block">The alternative</span>
+              <span className="block">you can trust.</span>
             </h1>
             <p className="mt-7 max-w-sm text-[15px] leading-relaxed text-zinc-400 sm:max-w-md sm:text-base">
-              Incredible live shows. Upfront pricing. Mobile tickets. RAGE makes going out easy.
+              Honest pricing on every page, tickets on the phone, and a door flow that stays human when the room peaks.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
@@ -73,13 +74,28 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="relative mx-auto aspect-square w-full min-w-0 max-w-[560px] shrink-0 overflow-hidden rounded-2xl bg-zinc-900 lg:mx-0 lg:max-w-none">
+          {/* Mobile: video directly under headline. Desktop: full-width row under title + image. */}
+          <div className="relative -mx-4 w-[calc(100%+2rem)] overflow-hidden rounded-2xl border border-white/[0.06] bg-black sm:mx-0 sm:w-full lg:col-span-2 lg:col-start-1 lg:row-start-2">
+            <HomeBannerVideo className="relative aspect-[3/4] min-h-[min(88vw,440px)] w-full sm:aspect-[16/9] sm:min-h-[280px] lg:aspect-[21/9] lg:min-h-[min(40vw,460px)]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            <div className="absolute bottom-5 left-5 right-5 max-w-lg sm:bottom-8 sm:left-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>
+              <p className="mt-2 text-balance text-2xl font-black leading-[0.95] tracking-tighter text-white sm:text-3xl lg:text-4xl">
+                Crowd in.
+                <br />
+                Friction out.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative hidden aspect-square w-full min-w-0 overflow-hidden rounded-2xl bg-zinc-900 lg:col-start-2 lg:row-start-1 lg:block">
             <Image
               src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
-              alt="RAGE events"
+              alt="RAGE — live energy"
               fill
-              priority
-              className="object-cover opacity-80"
+              loading="lazy"
+              sizes="(max-width: 1023px) 0px, min(50vw, 560px)"
+              className="object-cover opacity-85"
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/30 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6">
@@ -87,43 +103,20 @@ export default async function HomePage() {
               <p className="mt-1 text-3xl font-black leading-none tracking-tighter text-white sm:text-4xl">
                 Where the
                 <br />
-                night begins.
+                build hits.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="container-page pb-16 sm:pb-20">
-        <div className="relative aspect-video min-h-[200px] w-full overflow-hidden rounded-2xl bg-black sm:aspect-[21/9] sm:min-h-0">
-          <video
-            src="/a9-banner.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6 max-w-md sm:bottom-10 sm:left-10 sm:right-auto">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>
-            <p className="mt-2 text-balance text-2xl font-black leading-[0.95] tracking-tighter text-white sm:text-4xl lg:text-5xl">
-              Real nights.
-              <br />
-              Real rooms.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-white/[0.08] py-14 sm:py-20">
+      <section className="border-t border-white/[0.08] py-16 sm:py-24">
         <div className="container-page">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h2 className="text-2xl font-black tracking-tighter text-white sm:text-3xl">Trending now</h2>
-              <p className="mt-2 max-w-xl text-base text-zinc-400">
-                Check out some of the most popular events coming up, from club nights and gigs to artist signings and comedy shows.
+              <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400">
+                Fresh drops from rooms we love — club nights, live sets, comedy, and the kind of nights people actually talk about.
               </p>
             </div>
             <Link href="/demo-flow" className="pill-dark h-11 self-start px-6 text-xs sm:self-end">

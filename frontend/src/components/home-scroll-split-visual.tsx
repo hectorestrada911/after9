@@ -90,8 +90,8 @@ export function HomeScrollSplitVisual() {
   const pillsOpacity = 0.2 + 0.8 * smoothstep((progress - 0.45) / 0.45);
 
   return (
-    <div ref={driverRef} className="relative min-h-[280vh] w-full">
-      <div className="sticky top-0 flex min-h-[100dvh] flex-col items-center justify-center py-8 sm:py-12">
+    <div ref={driverRef} className="relative min-h-[190vh] w-full sm:min-h-[240vh] lg:min-h-[280vh]">
+      <div className="sticky top-0 flex min-h-[92dvh] flex-col items-center justify-center py-8 sm:min-h-[100dvh] sm:py-12">
         <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-3 sm:px-5 lg:grid-cols-12 lg:gap-6">
           <div
             className="order-2 flex flex-col justify-center px-1 lg:order-1 lg:col-span-4 lg:pr-4"
@@ -115,7 +115,7 @@ export function HomeScrollSplitVisual() {
               }}
             >
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/[0.12] bg-zinc-900 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
-                <Image src={LEFT} alt="Crowd in the room" fill className="object-cover" sizes="400px" priority={false} />
+                <Image src={LEFT} alt="Crowd in the room" fill className="object-cover" sizes="400px" priority={false} unoptimized />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/55 via-transparent to-transparent" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 sm:p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/65">Sell this</p>
@@ -131,7 +131,7 @@ export function HomeScrollSplitVisual() {
               }}
             >
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/[0.12] bg-zinc-900 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
-                <Image src={RIGHT} alt="Energy at the decks" fill className="object-cover" sizes="400px" priority={false} />
+                <Image src={RIGHT} alt="Energy at the decks" fill className="object-cover" sizes="400px" priority={false} unoptimized />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-tl from-black/55 via-transparent to-transparent" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 text-right sm:p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/65">Run this</p>

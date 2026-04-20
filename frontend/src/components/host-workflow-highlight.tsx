@@ -19,16 +19,16 @@ const steps = [
     title: "One link sells tickets",
     body: "Checkout on the phone. QR and receipt land in email, not screenshots.",
     image:
-      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=82",
-    imageAlt: "Hands up at a live show",
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&q=82",
+    imageAlt: "People partying under blue lights",
   },
   {
     n: "03",
     title: "Door tools that stay simple",
     body: "Search, scan, catch duplicates. Built for loud lines, not spreadsheets.",
     image:
-      "https://images.unsplash.com/photo-1571266028363-e250f854c3e1?auto=format&fit=crop&w=900&q=82",
-    imageAlt: "Neon club entrance",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&q=82",
+    imageAlt: "Guests near venue lights",
   },
 ] as const;
 

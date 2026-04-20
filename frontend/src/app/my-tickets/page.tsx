@@ -59,8 +59,8 @@ function normalizeEventRelation(value: unknown) {
 
 export default async function MyTicketsPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData.user;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
   if (!user) {
     return (
       <main className="container-page py-16 sm:py-24">

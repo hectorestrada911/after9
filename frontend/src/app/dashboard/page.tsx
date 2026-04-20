@@ -5,21 +5,14 @@ import { centsToDollars } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import CopyEventLink from "@/components/copy-event-link";
 import SalesChart from "@/components/sales-chart";
+import DashboardAuthFallback from "@/components/dashboard-auth-fallback";
 
 export default async function DashboardPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData.user?.id;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const userId = sessionData.session?.user?.id;
   if (!userId) {
-    return (
-      <main className="container-page min-w-0 py-16 sm:py-24">
-        <div className="mx-auto max-w-md text-center">
-          <h1 className="display-section-fluid">Login required</h1>
-          <p className="mt-4 text-base text-muted">Sign in to access your host dashboard.</p>
-          <Link href="/login?next=/dashboard" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">GO TO LOGIN</Link>
-        </div>
-      </main>
-    );
+    return <DashboardAuthFallback />;
   }
 
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();

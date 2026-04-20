@@ -5,8 +5,8 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export default async function AccountPage() {
   const supabase = await getSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData.user;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
 
   if (!user) {
     return (

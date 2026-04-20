@@ -4,8 +4,8 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function GET() {
   const supabase = await getSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData.user;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
   if (!user) return NextResponse.json({ path: "/login" }, { status: 401 });
 
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).maybeSingle();

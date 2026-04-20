@@ -8,7 +8,7 @@ create type ticket_status as enum ('active', 'checked_in', 'cancelled');
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null,
-  school text not null,
+  school text,
   organizer_name text not null,
   created_at timestamptz default now()
 );

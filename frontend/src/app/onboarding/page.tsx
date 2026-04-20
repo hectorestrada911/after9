@@ -40,11 +40,16 @@ function OnboardingForm() {
     const formData = new FormData(e.currentTarget);
     const { data: authData } = await supabase.auth.getUser();
     if (!authData.user) return setError("Please login first.");
+    const organizerName = String(formData.get("organizerName")).trim();
+    const legalNameRaw = String(formData.get("legalName") ?? "").trim();
+    const fullName = legalNameRaw || organizerName;
+    if (!organizerName) return setError("Add the name guests should see on your event pages.");
+
     const payload = {
       id: authData.user.id,
-      full_name: String(formData.get("fullName")),
-      school: String(formData.get("school")),
-      organizer_name: String(formData.get("organizerName")),
+      full_name: fullName,
+      school: null,
+      organizer_name: organizerName,
     };
     const { error } = await supabase.from("profiles").upsert(payload);
     if (error) return setError(error.message);
@@ -92,9 +97,13 @@ function OnboardingForm() {
           Set your profile so guests trust your event pages.
         </p>
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
-          <Input name="fullName" placeholder="Full name" required />
-          <Input name="school" placeholder="School" required />
-          <Input name="organizerName" placeholder="Organizer name" required />
+          <Input name="organizerName" placeholder="Shown on events (e.g. RAGE / your collective)" required />
+          <Input name="legalName" placeholder="Legal / account name (optional)" />
+          <p className="text-xs leading-relaxed text-muted">
+            <span className="font-semibold text-black">Shown on events</span> is what buyers see as “Hosted by …”.{" "}
+            <span className="font-semibold text-black">Legal / account name</span> is only for your records; leave it blank
+            to reuse the public name.
+          </p>
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}
           <Button className="w-full">Continue</Button>
         </form>

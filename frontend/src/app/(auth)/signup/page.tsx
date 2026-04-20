@@ -22,9 +22,13 @@ function SignupForm() {
     const formData = new FormData(e.currentTarget);
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) return setError(error.message);
+    if (!data.session) {
+      router.push(`/login?next=${encodeURIComponent(next)}&justSignedUp=1`);
+      return;
+    }
     router.push(`/onboarding?next=${encodeURIComponent(next)}`);
   }
 

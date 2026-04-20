@@ -12,6 +12,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
+  const justSignedUp = searchParams.get("justSignedUp") === "1";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +42,11 @@ function LoginForm() {
           Access event analytics, ticket sales, and check-in tools.
         </p>
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
+          {justSignedUp ? (
+            <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-black">
+              Account created. If confirmation email is required, verify it first, then log in.
+            </p>
+          ) : null}
           <Input name="email" type="email" placeholder="you@school.edu" required />
           <Input name="password" type="password" placeholder="Password" required />
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}

@@ -2,7 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowUpRight, Calendar, CheckCircle2, Link2, MapPin, QrCode, ScanLine, Share2 } from "lucide-react";
 import { Button, Input, Select } from "@/components/ui";
+import { LocationAutocompleteInput } from "@/components/location-autocomplete-input";
 import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { clearEventDraft, dataUrlToFile, readEventDraft } from "@/lib/event-draft";
@@ -44,11 +46,15 @@ const emptyForm: FormState = {
 export default function NewEventPage() {
   const supabase = getSupabaseBrowserClient();
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [isFreeEvent, setIsFreeEvent] = useState(false);
+  const [pickedLocationHint, setPickedLocationHint] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverHint, setCoverHint] = useState<string | null>(null);
   const [fromDraft, setFromDraft] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdLink, setCreatedLink] = useState<string | null>(null);
+  const [createdSlug, setCreatedSlug] = useState<string | null>(null);
+  const [createdEventId, setCreatedEventId] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -72,6 +78,7 @@ export default function NewEventPage() {
       instructions: draft.instructions ?? "",
       locationNote: draft.locationNote ?? "",
     });
+    setIsFreeEvent(Number(draft.ticketPrice) === 0);
     if (draft.coverMode === "upload" && draft.imageDataUrl) {
       setCoverHint("Flyer from your draft will upload when you publish.");
       void dataUrlToFile(draft.imageDataUrl, "flyer.jpg")
@@ -110,6 +117,8 @@ export default function NewEventPage() {
     e.preventDefault();
     setError(null);
     setCreatedLink(null);
+    setCreatedSlug(null);
+    setCreatedEventId(null);
     setQrCodeUrl(null);
     setCopied(false);
 
@@ -125,6 +134,9 @@ export default function NewEventPage() {
       imageUrl: fallbackImageUrl,
     });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "Invalid event data.");
+    if (parsed.data.ticketsAvailable > parsed.data.capacity) {
+      return setError("Tickets to sell cannot be greater than capacity.");
+    }
 
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return setError("Please login first.");
@@ -161,13 +173,15 @@ export default function NewEventPage() {
       slug,
     };
 
-    const { error } = await supabase.from("events").insert(payload);
+    const { data: created, error } = await supabase.from("events").insert(payload).select("id,slug").single();
     if (error) return setError(error.message);
     clearEventDraft();
     setFromDraft(false);
     setCoverHint(null);
-    const link = `${window.location.origin}/events/${slug}`;
+    const link = `${window.location.origin}/events/${created.slug}`;
     setCreatedLink(link);
+    setCreatedSlug(created.slug);
+    setCreatedEventId(created.id);
   }
 
   return (
@@ -213,7 +227,70 @@ export default function NewEventPage() {
             <Input name="startTime" type="time" required value={form.startTime} onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))} />
             <Input name="endTime" type="time" required value={form.endTime} onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))} />
           </div>
-          <Input name="location" placeholder="Location" required value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} />
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">Location</label>
+            <LocationAutocompleteInput
+              name="location"
+              required
+              value={form.location}
+              onChange={(value) => {
+                setForm((f) => ({ ...f, location: value }));
+                setPickedLocationHint(null);
+              }}
+              onSelectSuggestion={(suggestion) => {
+                const coordinates =
+                  typeof suggestion.lat === "number" && typeof suggestion.lng === "number"
+                    ? ` (${suggestion.lat.toFixed(5)}, ${suggestion.lng.toFixed(5)})`
+                    : "";
+                setPickedLocationHint(`Verified location selected${coordinates}`);
+              }}
+            />
+            <p className="mt-1 text-xs text-muted">Start typing a venue or full address to pick an exact real place.</p>
+            {pickedLocationHint ? <p className="mt-1 text-xs font-medium text-emerald-700">{pickedLocationHint}</p> : null}
+          </div>
+          <div className="rounded-xl border border-line bg-offwhite p-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted">Ticket setup</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFreeEvent(false);
+                  setForm((f) => ({ ...f, ticketPrice: f.ticketPrice === "0" ? "15" : f.ticketPrice }));
+                }}
+                className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                  !isFreeEvent ? "border-black bg-white text-black" : "border-line bg-white/60 text-muted hover:border-black/40"
+                }`}
+              >
+                Paid event
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsFreeEvent(true);
+                  setForm((f) => ({ ...f, ticketPrice: "0" }));
+                }}
+                className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                  isFreeEvent ? "border-black bg-white text-black" : "border-line bg-white/60 text-muted hover:border-black/40"
+                }`}
+              >
+                Free event
+              </button>
+            </div>
+            {!isFreeEvent ? (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {["10", "20", "30", "50"].map((price) => (
+                  <button
+                    key={price}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, ticketPrice: price }))}
+                    className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold text-black transition hover:border-black"
+                  >
+                    ${price}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <Input
               name="capacity"
@@ -230,6 +307,7 @@ export default function NewEventPage() {
               placeholder="Ticket price"
               required
               value={form.ticketPrice}
+              disabled={isFreeEvent}
               onChange={(e) => setForm((f) => ({ ...f, ticketPrice: e.target.value }))}
             />
             <Input
@@ -272,38 +350,109 @@ export default function NewEventPage() {
           {error && <p className="text-sm font-medium text-red-600">{error}</p>}
 
           {createdLink && (
-            <div className="space-y-4 rounded-2xl border border-black bg-offwhite p-5">
-              <p className="text-sm font-bold">Event created. Share this link with guests:</p>
-              <p className="break-all rounded-xl border border-line bg-white px-3 py-2 font-mono text-xs">{createdLink}</p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={copyCreatedLink}
-                  className="inline-flex h-10 items-center rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
-                >
-                  {copied ? "Copied" : "Copy link"}
-                </button>
-                <Link
-                  href={createdLink}
-                  target="_blank"
-                  className="inline-flex h-10 items-center rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
-                >
-                  Open page
-                </Link>
+            <div className="space-y-5 rounded-2xl border border-black bg-gradient-to-br from-offwhite to-zinc-100 p-5 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.35)]">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-black">
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> Published
+                  </p>
+                  <h2 className="mt-2 text-xl font-black tracking-tight text-black sm:text-2xl">Your event is live</h2>
+                  <p className="mt-1 max-w-md text-sm text-muted">
+                    Share the guest page, then watch sales and check-ins from your dashboard. You can always edit details later.
+                  </p>
+                </div>
+                {qrCodeUrl && (
+                  <div className="rounded-xl border border-line bg-white p-2.5 shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={qrCodeUrl} alt="QR code for event link" className="h-24 w-24 rounded-md sm:h-28 sm:w-28" />
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-line bg-white/80 p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted">Guest link</p>
+                <p className="mt-2 break-all rounded-lg border border-line bg-white px-3 py-2 font-mono text-[11px] text-black">{createdLink}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={copyCreatedLink}
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                  >
+                    <Link2 className="h-3.5 w-3.5" aria-hidden />
+                    {copied ? "Copied" : "Copy link"}
+                  </button>
+                  <Link
+                    href={createdLink}
+                    target="_blank"
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                  >
+                    <Share2 className="h-3.5 w-3.5" aria-hidden />
+                    Preview guest page
+                  </Link>
+                  {createdSlug ? (
+                    <Link
+                      href={`/events/${createdSlug}`}
+                      target="_blank"
+                      className="inline-flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
+                    >
+                      Open event <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-line bg-white/80 p-4">
+                  <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
+                    <Calendar className="h-3.5 w-3.5" aria-hidden /> Event snapshot
+                  </p>
+                  <p className="mt-2 text-base font-bold text-black">{form.title}</p>
+                  <p className="mt-1 text-sm text-muted">
+                    {form.date} · {form.startTime}–{form.endTime}
+                  </p>
+                  <p className="mt-2 inline-flex items-start gap-1.5 text-sm text-muted">
+                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                    <span>{form.location}</span>
+                  </p>
+                </div>
+                <div className="rounded-xl border border-line bg-white/80 p-4">
+                  <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
+                    <QrCode className="h-3.5 w-3.5" aria-hidden /> Next for door
+                  </p>
+                  <p className="mt-2 text-sm text-muted">Open check-in on your phone and scan tickets as guests arrive.</p>
+                  {createdEventId ? (
+                    <Link
+                      href={`/dashboard/events/${createdEventId}/check-in`}
+                      className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border border-line bg-white text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                    >
+                      <ScanLine className="h-3.5 w-3.5" aria-hidden />
+                      Open check-in
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/dashboard"
+                      className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border border-line bg-white text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                    >
+                      Open dashboard
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 border-t border-black/5 pt-4">
                 <Link
                   href="/dashboard"
-                  className="inline-flex h-10 items-center rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
+                  className="inline-flex h-10 flex-1 min-w-[10rem] items-center justify-center rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
                 >
-                  Dashboard
+                  Go to dashboard
+                </Link>
+                <Link
+                  href="/create-event"
+                  className="inline-flex h-10 flex-1 min-w-[10rem] items-center justify-center rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                >
+                  Create another
                 </Link>
               </div>
-              {qrCodeUrl && (
-                <div className="w-fit rounded-xl border border-line bg-white p-3">
-                  <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">Guest entry QR</p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCodeUrl} alt="Event QR code" className="h-40 w-40 rounded-md" />
-                </div>
-              )}
             </div>
           )}
 

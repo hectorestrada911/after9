@@ -79,7 +79,7 @@ export default async function HomePage() {
           </div>
 
           {/* Mobile: video directly under headline. Desktop: full-width row under title + image. */}
-          <div className="relative -mx-4 w-[calc(100%+2rem)] overflow-hidden rounded-2xl border border-white/[0.06] bg-black sm:mx-0 sm:w-full lg:col-span-2 lg:col-start-1 lg:row-start-2">
+          <div className="relative w-full overflow-hidden rounded-2xl border border-white/[0.06] bg-black lg:col-span-2 lg:col-start-1 lg:row-start-2">
             <HomeBannerVideo className="relative aspect-[3/4] min-h-[min(88vw,440px)] w-full sm:aspect-[16/9] sm:min-h-[280px] lg:aspect-[21/9] lg:min-h-[min(40vw,460px)]" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 max-w-lg sm:bottom-8 sm:left-8">
@@ -201,7 +201,7 @@ export default async function HomePage() {
                   href="/login"
                   className="inline-flex h-11 items-center rounded-full border border-white/25 px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/50 sm:h-12"
                 >
-                  Host login
+                  Login
                 </Link>
               </div>
             </div>

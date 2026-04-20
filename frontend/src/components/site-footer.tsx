@@ -28,11 +28,21 @@ export function SiteFooter() {
                   Sample event
                 </Link>
               </li>
+              <li>
+                <Link href="/test" className="transition hover:text-neutral-950">
+                  Test flow
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Hosts</p>
             <ul className="space-y-2 text-sm text-neutral-600">
+              <li>
+                <Link href="/my-tickets" className="transition hover:text-neutral-950">
+                  My tickets
+                </Link>
+              </li>
               <li>
                 <Link href="/create-event" className="transition hover:text-neutral-950">
                   Create event
@@ -40,7 +50,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link href="/login" className="transition hover:text-neutral-950">
-                  Host login
+                  Login
                 </Link>
               </li>
               <li>

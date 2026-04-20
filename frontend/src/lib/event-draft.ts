@@ -30,11 +30,14 @@ export function placeholderCoverUrl() {
 }
 
 export function safeNextPath(raw: string | null | undefined): string {
-  if (!raw || typeof raw !== "string") return "/dashboard";
+  if (!raw || typeof raw !== "string") return "/account";
   const path = raw.split("?")[0] ?? "";
-  if (!path.startsWith("/") || path.startsWith("//")) return "/dashboard";
-  if (!path.startsWith("/dashboard")) return "/dashboard";
-  return path;
+  if (!path.startsWith("/") || path.startsWith("//")) return "/account";
+  if (path.startsWith("/dashboard")) return path;
+  if (path.startsWith("/my-tickets")) return path;
+  if (path.startsWith("/account")) return path;
+  if (path.startsWith("/onboarding")) return path;
+  return "/account";
 }
 
 export function readEventDraft(): EventDraftV1 | null {

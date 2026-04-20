@@ -24,9 +24,25 @@ function LoginForm() {
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) return setError(error.message);
-    router.push(next);
+    if (error) {
+      setLoading(false);
+      return setError(error.message);
+    }
+    try {
+      const shouldAutoRoute = !searchParams.get("next");
+      if (!shouldAutoRoute) {
+        setLoading(false);
+        router.push(next);
+        return;
+      }
+      const res = await fetch("/api/auth/post-login", { method: "GET" });
+      const payload = (await res.json()) as { path?: string };
+      setLoading(false);
+      router.push(payload.path || "/account");
+    } catch {
+      setLoading(false);
+      router.push(next);
+    }
   }
 
   const signupHref = `/signup?next=${encodeURIComponent(next)}`;
@@ -36,10 +52,10 @@ function LoginForm() {
       <div className="mx-auto max-w-md min-w-0">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">Welcome back</p>
         <h1 className="mt-3 heading-display-fluid">
-          Host<br />login
+          Account<br />login
         </h1>
         <p className="mt-4 text-base text-muted">
-          Access event analytics, ticket sales, and check-in tools.
+          Access tickets, orders, and host tools in one place.
         </p>
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
           {justSignedUp ? (
@@ -55,8 +71,8 @@ function LoginForm() {
           </Button>
         </form>
         <p className="mt-6 text-sm text-muted">
-          New host?{" "}
-          <Link className="font-bold text-black underline underline-offset-4" href={signupHref}>
+          New here?{" "}
+          <Link className="font-bold text-zinc-100 underline underline-offset-4 hover:text-white" href={signupHref}>
             Create account
           </Link>
         </p>

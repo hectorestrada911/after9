@@ -6,8 +6,8 @@ import { searchLocationSuggestions, type LocationSuggestion } from "@/lib/locati
 
 type LocationAutocompleteInputProps = {
   value: string;
-  onChange: (value: string) => void;
-  onSelectSuggestion?: (suggestion: LocationSuggestion) => void;
+  onChange: (_value: string) => void;
+  onSelectSuggestion?: (_suggestion: LocationSuggestion) => void;
   required?: boolean;
   placeholder?: string;
   name?: string;

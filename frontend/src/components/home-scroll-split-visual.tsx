@@ -21,6 +21,7 @@ export function HomeScrollSplitVisual() {
   const driverRef = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -29,6 +30,15 @@ export function HomeScrollSplitVisual() {
     const onChange = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsCompact(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
   useEffect(() => {
@@ -68,8 +78,10 @@ export function HomeScrollSplitVisual() {
   }, [reducedMotion]);
 
   const progress = reducedMotion ? 1 : t;
-  const leftX = -5 - 21 * (1 - progress);
-  const rightX = 5 + 21 * (1 - progress);
+  const nearSpread = isCompact ? 2.5 : 5;
+  const farSpread = isCompact ? 13 : 21;
+  const leftX = -nearSpread - farSpread * (1 - progress);
+  const rightX = nearSpread + farSpread * (1 - progress);
   const lift = 10 * (1 - progress);
   const leftRot = -3 * (1 - progress);
   const rightRot = 3 * (1 - progress);
@@ -97,7 +109,7 @@ export function HomeScrollSplitVisual() {
 
           <div className="relative order-1 flex h-[min(68dvh,520px)] w-full items-center justify-center lg:col-span-8">
             <div
-              className="absolute left-1/2 top-1/2 z-10 w-[min(88vw,400px)] will-change-transform sm:w-[min(40vw,400px)]"
+              className="absolute left-1/2 top-1/2 z-10 w-[min(80vw,360px)] will-change-transform sm:w-[min(40vw,400px)]"
               style={{
                 transform: `translate(calc(-50% + ${leftX}vw), calc(-50% - ${lift}px)) rotate(${leftRot}deg) scale(${scale})`,
               }}
@@ -113,7 +125,7 @@ export function HomeScrollSplitVisual() {
             </div>
 
             <div
-              className="absolute left-1/2 top-1/2 z-20 w-[min(88vw,400px)] will-change-transform sm:w-[min(40vw,400px)]"
+              className="absolute left-1/2 top-1/2 z-20 w-[min(80vw,360px)] will-change-transform sm:w-[min(40vw,400px)]"
               style={{
                 transform: `translate(calc(-50% + ${rightX}vw), calc(-50% + ${lift}px)) rotate(${rightRot}deg) scale(${scale})`,
               }}

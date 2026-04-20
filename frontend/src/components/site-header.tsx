@@ -10,9 +10,9 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 export function SiteHeader() {
   const supabase = getSupabaseBrowserClient();
   const pathname = usePathname();
+  const hideHeader = pathname === "/create-event";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authedEmail, setAuthedEmail] = useState<string | null>(null);
-  if (pathname === "/create-event") return null;
 
   useEffect(() => {
     let ignore = false;
@@ -45,6 +45,8 @@ export function SiteHeader() {
     { href: "/test", label: "Test flow" },
   ];
 
+  if (hideHeader) return null;
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
       <div className="container-page flex h-[3.25rem] min-w-0 items-center gap-3 sm:h-16 sm:gap-6">
@@ -62,6 +64,9 @@ export function SiteHeader() {
         </div>
 
         <nav className="ml-auto hidden items-center gap-7 text-sm font-medium text-zinc-400 lg:ml-0 lg:flex">
+          <Link href="/my-tickets" className="transition hover:text-white">
+            My tickets
+          </Link>
           <Link href="/dashboard" className="transition hover:text-white">
             Dashboard
           </Link>
@@ -76,9 +81,14 @@ export function SiteHeader() {
               Logout
             </button>
           ) : (
-            <Link href="/login" className="transition hover:text-white">
-              Host login
-            </Link>
+            <div className="inline-flex items-center gap-4">
+              <Link href="/signup" className="transition hover:text-white">
+                Register
+              </Link>
+              <Link href="/login" className="transition hover:text-white">
+                Login
+              </Link>
+            </div>
           )}
         </nav>
 
@@ -112,6 +122,13 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
+              href="/my-tickets"
+              onClick={() => setMobileOpen(false)}
+              className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+            >
+              My tickets
+            </Link>
+            <Link
               href="/dashboard"
               onClick={() => setMobileOpen(false)}
               className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
@@ -140,13 +157,22 @@ export function SiteHeader() {
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-              >
-                Host login
-              </Link>
+              <>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Login
+                </Link>
+              </>
             )}
           </div>
         </div>

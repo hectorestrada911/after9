@@ -11,7 +11,9 @@ function SignupForm() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = safeNextPath(searchParams.get("next"));
+  const nextParam = searchParams.get("next");
+  const next = safeNextPath(nextParam);
+  const hostIntent = next.startsWith("/dashboard");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,10 +28,15 @@ function SignupForm() {
     setLoading(false);
     if (error) return setError(error.message);
     if (!data.session) {
-      router.push(`/login?next=${encodeURIComponent(next)}&justSignedUp=1`);
+      const loginTarget = hostIntent ? next : "/account";
+      router.push(`/login?next=${encodeURIComponent(loginTarget)}&justSignedUp=1`);
       return;
     }
-    router.push(`/onboarding?next=${encodeURIComponent(next)}`);
+    if (hostIntent) {
+      router.push(`/onboarding?next=${encodeURIComponent(next)}`);
+      return;
+    }
+    router.push("/account");
   }
 
   const loginHref = `/login?next=${encodeURIComponent(next)}`;
@@ -54,7 +61,7 @@ function SignupForm() {
         </form>
         <p className="mt-6 text-sm text-muted">
           Already have an account?{" "}
-          <Link className="font-bold text-black underline underline-offset-4" href={loginHref}>
+          <Link className="font-bold text-zinc-100 underline underline-offset-4 hover:text-white" href={loginHref}>
             Log in
           </Link>
         </p>

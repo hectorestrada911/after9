@@ -16,7 +16,7 @@ export default async function DashboardPage() {
         <div className="mx-auto max-w-md text-center">
           <h1 className="display-section-fluid">Login required</h1>
           <p className="mt-4 text-base text-muted">Sign in to access your host dashboard.</p>
-          <Link href="/login" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">GO TO LOGIN</Link>
+          <Link href="/login?next=/dashboard" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">GO TO LOGIN</Link>
         </div>
       </main>
     );
@@ -29,7 +29,12 @@ export default async function DashboardPage() {
         <div className="mx-auto max-w-md text-center">
           <h1 className="display-section-fluid">Finish onboarding</h1>
           <p className="mt-4 text-base text-muted">Set up your organizer profile before creating events.</p>
-          <Link href="/onboarding" className="mt-6 inline-flex pill-dark h-12 px-7 text-sm">CONTINUE</Link>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <Link href="/onboarding?next=/dashboard" className="inline-flex pill-dark h-12 px-7 text-sm">CONTINUE</Link>
+            <Link href="/account" className="inline-flex h-12 items-center rounded-full border border-white/20 px-6 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40">
+              ACCOUNT HOME
+            </Link>
+          </div>
         </div>
       </main>
     );

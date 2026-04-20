@@ -57,13 +57,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Hosts</p>
                 <ul className="space-y-2 text-sm text-zinc-300">
                   <li>
+                    <Link href="/my-tickets" className="transition hover:text-white">
+                      My tickets
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/create-event" className="transition hover:text-white">
                       Create event
                     </Link>
                   </li>
                   <li>
                     <Link href="/login" className="transition hover:text-white">
-                      Host login
+                      Login
                     </Link>
                   </li>
                   <li>

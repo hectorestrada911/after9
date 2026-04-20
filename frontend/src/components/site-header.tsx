@@ -32,7 +32,7 @@ export function SiteHeader() {
           <Link href="/" className="transition hover:text-white">
             Browse
           </Link>
-          <Link href="/events/campus-lights-fest" className="transition hover:text-white">
+          <Link href="/demo" className="transition hover:text-white">
             Sample event
           </Link>
           <Link href="/login" className="transition hover:text-white">

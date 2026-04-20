@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Link href="/" className="transition hover:text-white">
                 Browse events
               </Link>
-              <Link href="/events/campus-lights-fest" className="transition hover:text-white">
+              <Link href="/demo" className="transition hover:text-white">
                 Sample event
               </Link>
               <Link href="/login" className="transition hover:text-white">
@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/events/campus-lights-fest" className="transition hover:text-white">
+                    <Link href="/demo" className="transition hover:text-white">
                       Sample event
                     </Link>
                   </li>

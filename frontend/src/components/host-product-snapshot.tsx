@@ -34,7 +34,7 @@ export function HostProductSnapshot() {
             <p className="text-2xl font-black tabular-nums text-white sm:text-3xl">$25</p>
           </div>
           <Link
-            href="/events/campus-lights-fest"
+            href="/#browse-events"
             className="inline-flex h-11 shrink-0 items-center rounded-full bg-white px-6 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-zinc-200"
           >
             Get tickets

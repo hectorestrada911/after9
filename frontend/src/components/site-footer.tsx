@@ -24,7 +24,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/events/campus-lights-fest" className="transition hover:text-neutral-950">
+                <Link href="/demo" className="transition hover:text-neutral-950">
                   Sample event
                 </Link>
               </li>

@@ -34,6 +34,29 @@ function formatDate(dateLike: string) {
   }
 }
 
+function isEventSummary(
+  value: unknown,
+): value is { title: string; date: string; location: string; slug: string; image_url: string | null } {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row.title === "string" &&
+    typeof row.date === "string" &&
+    typeof row.location === "string" &&
+    typeof row.slug === "string" &&
+    (typeof row.image_url === "string" || row.image_url === null)
+  );
+}
+
+function normalizeEventRelation(value: unknown) {
+  if (!value) return null;
+  if (Array.isArray(value)) {
+    const firstValid = value.find((item) => isEventSummary(item));
+    return firstValid ?? null;
+  }
+  return isEventSummary(value) ? value : null;
+}
+
 export default async function MyTicketsPage() {
   const supabase = await getSupabaseServerClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -109,7 +132,11 @@ export default async function MyTicketsPage() {
         </div>
       ) : (
         <div className="space-y-5">
-          {(orders as OrderRow[]).map((order) => {
+          {(orders ?? []).map((rawOrder) => {
+            const order = {
+              ...(rawOrder as Omit<OrderRow, "events">),
+              events: normalizeEventRelation((rawOrder as { events?: unknown }).events),
+            } as OrderRow;
             const orderTickets = tickets.filter((t) => t.order_id === order.id);
             return (
               <div key={order.id} className="overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-950">

@@ -26,17 +26,27 @@ function SignupForm() {
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
     const { data, error } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
-    if (error) return setError(error.message);
+    if (error) {
+      setLoading(false);
+      return setError(error.message);
+    }
     if (!data.session) {
+      setLoading(false);
       const loginTarget = hostIntent ? next : "/account";
       router.push(`/login?next=${encodeURIComponent(loginTarget)}&justSignedUp=1`);
       return;
     }
     if (hostIntent) {
+      const { data: profile } = await supabase.from("profiles").select("id").eq("id", data.session.user.id).maybeSingle();
+      setLoading(false);
+      if (profile) {
+        router.push(next);
+        return;
+      }
       router.push(`/onboarding?next=${encodeURIComponent(next)}`);
       return;
     }
+    setLoading(false);
     router.push("/account");
   }
 

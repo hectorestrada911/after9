@@ -388,7 +388,7 @@ export function CreateEventFlow() {
     }
 
     const next = encodeURIComponent(NEXT_AFTER_AUTH);
-    router.push(`/signup?next=${next}`);
+    router.push(`/login?next=${next}`);
   }
 
   const chevron =
@@ -685,13 +685,13 @@ export function CreateEventFlow() {
                     type="submit"
                     className="group flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 text-[12px] font-bold uppercase tracking-[0.12em] text-black shadow-[0_0_36px_-6px_rgba(75,250,148,0.55)] transition hover:brightness-110"
                   >
-                    Continue to sign in
+                    Continue to login
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" strokeWidth={2} />
                   </button>
                 )}
               </div>
               <p className="mx-auto mt-2.5 max-w-sm text-center text-[11px] leading-relaxed text-zinc-600">
-                {step < 2 ? "Small wins add up. You're almost publish-ready." : "Account next. Your draft stays in this browser until you publish."}
+                {step < 2 ? "Small wins add up. You're almost publish-ready." : "Log in next. Your draft stays in this browser until you publish."}
               </p>
             </div>
           </form>

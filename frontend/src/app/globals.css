@@ -18,7 +18,6 @@ html, body {
 body {
   @apply antialiased;
   font-feature-settings: "ss01", "ss02";
-  overflow-x: hidden;
 }
 
 ::selection {

@@ -27,6 +27,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                 fill
                 priority
                 className="object-cover"
+                unoptimized
               />
             </div>
 

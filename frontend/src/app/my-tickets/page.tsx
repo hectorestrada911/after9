@@ -143,7 +143,7 @@ export default async function MyTicketsPage() {
                 <div className="grid gap-4 p-4 sm:grid-cols-[120px,1fr] sm:p-5">
                   <div className="relative h-24 overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900 sm:h-28">
                     {order.events?.image_url ? (
-                      <Image src={order.events.image_url} alt={order.events.title} fill className="object-cover" sizes="120px" />
+                      <Image src={order.events.image_url} alt={order.events.title} fill className="object-cover" sizes="120px" unoptimized />
                     ) : null}
                   </div>
                   <div>

@@ -3,10 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-const LEFT =
-  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1100&q=80";
-const RIGHT =
-  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1100&q=80";
+const LEFT = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80";
+const RIGHT = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=900&q=80";
 
 function smoothstep(x: number) {
   const t = Math.max(0, Math.min(1, x));
@@ -21,7 +19,6 @@ export function HomeScrollSplitVisual() {
   const driverRef = useRef<HTMLDivElement>(null);
   const [t, setT] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -30,15 +27,6 @@ export function HomeScrollSplitVisual() {
     const onChange = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") return;
-    const mq = window.matchMedia("(max-width: 768px)");
-    const sync = () => setIsCompact(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
   }, []);
 
   useEffect(() => {
@@ -78,10 +66,8 @@ export function HomeScrollSplitVisual() {
   }, [reducedMotion]);
 
   const progress = reducedMotion ? 1 : t;
-  const nearSpread = isCompact ? 2.5 : 5;
-  const farSpread = isCompact ? 13 : 21;
-  const leftX = -nearSpread - farSpread * (1 - progress);
-  const rightX = nearSpread + farSpread * (1 - progress);
+  const leftX = -5 - 21 * (1 - progress);
+  const rightX = 5 + 21 * (1 - progress);
   const lift = 10 * (1 - progress);
   const leftRot = -3 * (1 - progress);
   const rightRot = 3 * (1 - progress);
@@ -90,8 +76,8 @@ export function HomeScrollSplitVisual() {
   const pillsOpacity = 0.2 + 0.8 * smoothstep((progress - 0.45) / 0.45);
 
   return (
-    <div ref={driverRef} className="relative min-h-[190vh] w-full sm:min-h-[240vh] lg:min-h-[280vh]">
-      <div className="sticky top-0 flex min-h-[92dvh] flex-col items-center justify-center py-8 sm:min-h-[100dvh] sm:py-12">
+    <div ref={driverRef} className="relative min-h-[280vh] w-full">
+      <div className="sticky top-0 flex min-h-[100dvh] flex-col items-center justify-center py-8 sm:py-12">
         <div className="relative mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-3 sm:px-5 lg:grid-cols-12 lg:gap-6">
           <div
             className="order-2 flex flex-col justify-center px-1 lg:order-1 lg:col-span-4 lg:pr-4"
@@ -109,13 +95,21 @@ export function HomeScrollSplitVisual() {
 
           <div className="relative order-1 flex h-[min(68dvh,520px)] w-full items-center justify-center lg:col-span-8">
             <div
-              className="absolute left-1/2 top-1/2 z-10 w-[min(80vw,360px)] will-change-transform sm:w-[min(40vw,400px)]"
+              className="absolute left-1/2 top-1/2 z-10 w-[min(88vw,400px)] will-change-transform sm:w-[min(40vw,400px)]"
               style={{
                 transform: `translate(calc(-50% + ${leftX}vw), calc(-50% - ${lift}px)) rotate(${leftRot}deg) scale(${scale})`,
               }}
             >
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/[0.12] bg-zinc-900 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
-                <Image src={LEFT} alt="Crowd in the room" fill className="object-cover" sizes="400px" priority={false} unoptimized />
+                <Image
+                  src={LEFT}
+                  alt="Crowd in the room"
+                  fill
+                  className="object-cover [object-position:32%_50%]"
+                  sizes="400px"
+                  unoptimized
+                  priority={false}
+                />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/55 via-transparent to-transparent" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 sm:p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/65">Sell this</p>
@@ -125,13 +119,21 @@ export function HomeScrollSplitVisual() {
             </div>
 
             <div
-              className="absolute left-1/2 top-1/2 z-20 w-[min(80vw,360px)] will-change-transform sm:w-[min(40vw,400px)]"
+              className="absolute left-1/2 top-1/2 z-20 w-[min(88vw,400px)] will-change-transform sm:w-[min(40vw,400px)]"
               style={{
                 transform: `translate(calc(-50% + ${rightX}vw), calc(-50% + ${lift}px)) rotate(${rightRot}deg) scale(${scale})`,
               }}
             >
               <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/[0.12] bg-zinc-900 shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
-                <Image src={RIGHT} alt="Energy at the decks" fill className="object-cover" sizes="400px" priority={false} unoptimized />
+                <Image
+                  src={RIGHT}
+                  alt="Energy at the decks"
+                  fill
+                  className="object-cover [object-position:70%_50%]"
+                  sizes="400px"
+                  unoptimized
+                  priority={false}
+                />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-tl from-black/55 via-transparent to-transparent" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 text-right sm:p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/65">Run this</p>

@@ -18,7 +18,7 @@ export function HostProductSnapshot() {
       </div>
 
       <div className="relative aspect-[16/10] w-full bg-zinc-900">
-        <Image src={COVER} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 28rem" />
+        <Image src={COVER} alt="" fill className="object-cover [object-position:65%_50%]" sizes="(max-width: 768px) 100vw, 28rem" unoptimized />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
       </div>
 

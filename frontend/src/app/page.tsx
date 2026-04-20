@@ -240,8 +240,11 @@ export default async function HomePage() {
             <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/45 sm:text-left">
               How it feels to host
             </p>
-            <p className="mt-2 text-center text-sm text-zinc-500 sm:text-left">
-              Fast publish, one checkout link, and door tools that stay human, without a fake finance dashboard.
+            <h3 className="mt-3 text-balance text-center text-2xl font-black tracking-tight text-white sm:text-left sm:text-3xl">
+              Launch, collect, and scan in one clean flow.
+            </h3>
+            <p className="mt-3 max-w-2xl text-center text-sm text-zinc-400 sm:text-left">
+              Three steps: publish, get paid, scan at door.
             </p>
             <div className="mt-6">
               <HostWorkflowHighlight />

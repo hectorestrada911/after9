@@ -203,7 +203,7 @@ export default async function HomePage() {
                   href="/login"
                   className="inline-flex h-11 items-center rounded-full border border-white/25 px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/50 sm:h-12"
                 >
-                  Host login
+                  Login
                 </Link>
               </div>
             </div>

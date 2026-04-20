@@ -15,7 +15,10 @@ export default async function DashboardPage() {
     return <DashboardAuthFallback />;
   }
 
-  const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
+  if (profileError) {
+    return <DashboardAuthFallback />;
+  }
   if (!profile) {
     return (
       <main className="container-page min-w-0 py-16 sm:py-24">

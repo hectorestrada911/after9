@@ -38,21 +38,24 @@ function OnboardingForm() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) return setError("Please login first.");
+    const { data: sessionData } = await supabase.auth.getSession();
+    const authedUser = sessionData.session?.user;
+    if (!authedUser) return setError("Please login first.");
     const organizerName = String(formData.get("organizerName")).trim();
     const legalNameRaw = String(formData.get("legalName") ?? "").trim();
     const fullName = legalNameRaw || organizerName;
     if (!organizerName) return setError("Add the name guests should see on your event pages.");
 
     const payload = {
-      id: authData.user.id,
+      id: authedUser.id,
       full_name: fullName,
       school: null,
       organizer_name: organizerName,
     };
     const { error } = await supabase.from("profiles").upsert(payload);
     if (error) return setError(error.message);
+    // Ensure server-rendered routes (dashboard) read the updated session/profile immediately.
+    router.refresh();
     router.push(next);
   }
 

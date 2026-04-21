@@ -74,12 +74,6 @@ export function HostWorkflowHighlight() {
         >
           See live demo
         </Link>
-        <Link
-          href="/test"
-          className="pill-light inline-flex h-12 min-h-12 items-center justify-center px-8 text-[11px] font-semibold uppercase tracking-[0.16em] touch-manipulation"
-        >
-          Open test lab
-        </Link>
       </div>
 
       <Link

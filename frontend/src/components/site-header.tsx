@@ -68,6 +68,9 @@ export function SiteHeader() {
               <Link href="/account" className="font-semibold text-white transition hover:text-brand-green">
                 Account
               </Link>
+              <Link href="/dashboard#my-events" className="transition hover:text-white">
+                My events
+              </Link>
               <Link href="/my-tickets" className="transition hover:text-white">
                 My tickets
               </Link>
@@ -135,6 +138,13 @@ export function SiteHeader() {
                   className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.05]"
                 >
                   Account hub
+                </Link>
+                <Link
+                  href="/dashboard#my-events"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  My events
                 </Link>
                 <Link
                   href="/my-tickets"

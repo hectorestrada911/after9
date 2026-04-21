@@ -78,6 +78,21 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      <section className="mb-8 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Quick access</p>
+            <p className="mt-1 text-sm text-zinc-300">Jump straight to your event list and continue managing.</p>
+          </div>
+          <Link
+            href="#my-events"
+            className="inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-zinc-200"
+          >
+            My events
+          </Link>
+        </div>
+      </section>
+
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total revenue" value={`$${centsToDollars(revenue)}`} />
         <StatCard label="Tickets sold" value={ticketsSold} />
@@ -119,7 +134,7 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <section className="mt-10 space-y-3">
+      <section id="my-events" className="mt-10 space-y-3 scroll-mt-28">
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted">Your events</h2>
         {(events ?? []).length === 0 ? (
           <EmptyState title="No events yet" subtitle="Create your first event to start selling tickets." />

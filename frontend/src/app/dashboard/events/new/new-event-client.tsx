@@ -172,8 +172,9 @@ export default function NewEventClient() {
               </div>
               {qrCodeUrl && (
                 <div className="rounded-xl border border-line bg-white p-2.5 shadow-sm">
+                  <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-500">Share QR</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCodeUrl} alt="QR code for event link" className="h-24 w-24 rounded-md sm:h-28 sm:w-28" />
+                  <img src={qrCodeUrl} alt="QR code for guest event link" className="h-24 w-24 rounded-md sm:h-28 sm:w-28" />
                 </div>
               )}
             </div>
@@ -187,11 +188,14 @@ export default function NewEventClient() {
             <div className="rounded-xl border border-line bg-white/80 p-4">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Guest link</p>
               <p className="mt-2 break-all rounded-lg border border-line bg-white px-3 py-2 font-mono text-[11px] text-black">{createdLink}</p>
+              <p className="mt-2 text-xs text-muted">
+                Share this exact link (or the QR above). Guests buy tickets from this page.
+              </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={copyCreatedLink}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
                 >
                   <Link2 className="h-3.5 w-3.5" aria-hidden />
                   {copied ? "Copied" : "Copy link"}
@@ -199,7 +203,7 @@ export default function NewEventClient() {
                 <Link
                   href={createdLink}
                   target="_blank"
-                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-105"
                 >
                   <Share2 className="h-3.5 w-3.5" aria-hidden />
                   Preview guest page
@@ -229,13 +233,13 @@ export default function NewEventClient() {
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   <Calendar className="h-3.5 w-3.5" aria-hidden /> Next
                 </p>
-                <p className="mt-2 text-sm text-muted">Share the link, then open check-in when the line forms.</p>
+                <p className="mt-2 text-sm text-muted">Step 1: send this guest link/QR so people can buy. Step 2: open check-in at the door.</p>
               </div>
               <div className="rounded-xl border border-line bg-white/80 p-4">
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
-                  <QrCode className="h-3.5 w-3.5" aria-hidden /> Door
+                  <QrCode className="h-3.5 w-3.5" aria-hidden /> QR meaning
                 </p>
-                <p className="mt-2 text-sm text-muted">Scan tickets from your phone.</p>
+                <p className="mt-2 text-sm text-muted">This QR opens your event page for guests. Ticket-entry QR codes are generated after each purchase.</p>
                 {createdEventId ? (
                   <Link
                     href={`/dashboard/events/${createdEventId}/check-in`}

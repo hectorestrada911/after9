@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,7 +40,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not enough tickets remaining." }, { status: 409 });
     }
 
+    const feePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
     const totalAmount = event.ticket_price * quantity;
+    const platformFeeAmount = platformFeeFromGrossCents(totalAmount, feePercent);
+    const hostNetAmount = hostNetFromGrossCents(totalAmount, feePercent);
     const { data: orderRow, error: orderErr } = await supabase
       .from("orders")
       .insert({
@@ -79,6 +83,10 @@ export async function POST(req: NextRequest) {
         buyerName,
         buyerEmail,
         quantity: String(quantity),
+        platformFeePercent: String(feePercent),
+        grossAmount: String(totalAmount),
+        platformFeeAmount: String(platformFeeAmount),
+        hostNetAmount: String(hostNetAmount),
       },
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderRow.id}`,
       cancel_url: `${appUrl}/events/${slug}`,

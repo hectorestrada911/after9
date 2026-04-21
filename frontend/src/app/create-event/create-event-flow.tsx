@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2, Search, Sparkles, Upload } from 
 import { eventSchema } from "@/lib/validations";
 import { MAX_DRAFT_IMAGE_BYTES, placeholderCoverUrl, readEventDraft, writeEventDraft, type EventDraftV1 } from "@/lib/event-draft";
 import { FLYER_CATEGORIES, FLYER_STOCK, filterFlyerStock, type FlyerCategory } from "@/lib/flyer-stock";
+import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
@@ -233,6 +234,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [hasAuthedSession, setHasAuthedSession] = useState(false);
   const [restoredDraftStep, setRestoredDraftStep] = useState<number | null>(null);
   const hydratedDraftRef = useRef(false);
+  const platformFeePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
 
   const resolvedMode: "guestDraft" | "hostPublish" =
     flowMode === "hostPublish" ? "hostPublish" : flowMode === "guestDraft" ? "guestDraft" : hasAuthedSession ? "hostPublish" : "guestDraft";
@@ -541,6 +543,10 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
   const pctRaw = STEPS.length <= 1 ? 100 : (step / (STEPS.length - 1)) * 100;
   const pct = Math.min(100, Math.max(step === 0 ? 8 : 2, pctRaw));
+  const ticketPriceFloat = Number(ticketPrice) || 0;
+  const ticketPriceCents = Math.max(0, Math.round(ticketPriceFloat * 100));
+  const platformFeeCents = platformFeeFromGrossCents(ticketPriceCents, platformFeePercent);
+  const hostNetCents = hostNetFromGrossCents(ticketPriceCents, platformFeePercent);
 
   return (
     <main className="relative min-h-dvh bg-[#030303] text-zinc-300 antialiased">
@@ -797,6 +803,24 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     <span className={labelClass}>Tickets to sell</span>
                     <input className={field} type="number" min={1} value={ticketsAvailable} onChange={(e) => setTicketsAvailable(e.target.value)} />
                   </div>
+                </div>
+                <div className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Price preview</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Guest pays</p>
+                      <p className="mt-1 text-lg font-black text-white">${ticketPriceFloat.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Platform fee ({platformFeePercent}%)</p>
+                      <p className="mt-1 text-lg font-black text-zinc-300">-${(platformFeeCents / 100).toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">You receive (est.)</p>
+                      <p className="mt-1 text-lg font-black text-brand-green">${(hostNetCents / 100).toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-zinc-500">Stripe processing fees are separate and can vary by card/payment method.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>

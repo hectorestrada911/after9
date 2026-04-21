@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowUpRight, Calendar, CheckCircle2, Link2, QrCode, ScanLine, Share2 } from "lucide-react";
 import { CreateEventFlow, type CreateEventPublishPayload } from "@/app/create-event/create-event-flow";
 import { clearEventDraft, dataUrlToFile, readEventDraft } from "@/lib/event-draft";
+import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { centsToDollars } from "@/lib/utils";
@@ -24,6 +25,7 @@ export default function NewEventClient() {
   const [publishedTitle, setPublishedTitle] = useState<string | null>(null);
   const [publishedImageUrl, setPublishedImageUrl] = useState<string | null>(null);
   const [publishedTicketPriceCents, setPublishedTicketPriceCents] = useState<number | null>(null);
+  const platformFeePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
 
   useEffect(() => {
     setDraftLoaded(Boolean(readEventDraft()));
@@ -165,9 +167,19 @@ export default function NewEventClient() {
                 </p>
                 {publishedTitle ? <p className="mt-3 text-sm font-semibold text-black">{publishedTitle}</p> : null}
                 {publishedTicketPriceCents !== null ? (
-                  <p className="mt-1 text-sm text-muted">
-                    Ticket price on the public page: <span className="font-semibold text-black">${centsToDollars(publishedTicketPriceCents)}</span>
-                  </p>
+                  <div className="mt-1 space-y-1 text-sm text-muted">
+                    <p>
+                      Guest price (public): <span className="font-semibold text-black">${centsToDollars(publishedTicketPriceCents)}</span>
+                    </p>
+                    <p>
+                      You receive (est. after {platformFeePercent}% platform fee):{" "}
+                      <span className="font-semibold text-black">${centsToDollars(hostNetFromGrossCents(publishedTicketPriceCents, platformFeePercent))}</span>
+                    </p>
+                    <p>
+                      Platform fee:{" "}
+                      <span className="font-semibold text-black">-${centsToDollars(platformFeeFromGrossCents(publishedTicketPriceCents, platformFeePercent))}</span>
+                    </p>
+                  </div>
                 ) : null}
               </div>
               {qrCodeUrl && (

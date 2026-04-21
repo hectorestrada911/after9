@@ -84,7 +84,7 @@ export function EventWorkspaceHero({
           <div className="flex flex-wrap gap-2 lg:justify-end">
             <Link
               href={`/dashboard/events/${eventId}/edit`}
-              className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-zinc-200"
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-white/25 bg-white/[0.06] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
             >
               <Pencil className="h-3.5 w-3.5" aria-hidden />
               Edit details
@@ -100,7 +100,7 @@ export function EventWorkspaceHero({
             <EventShareActions slug={event.slug} shareTitle={event.title} shareText={`${event.title} — tickets on RAGE`} />
             <Link
               href={`/dashboard/events/${eventId}/check-in`}
-              className="inline-flex h-11 items-center rounded-full border border-white/25 px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45"
+              className="inline-flex h-11 items-center rounded-full border border-white/25 bg-white/[0.06] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
             >
               Check-in
             </Link>

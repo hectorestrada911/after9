@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Link
-                      className="inline-flex h-10 items-center rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
+                      className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] transition hover:brightness-110"
                       href={`/dashboard/events/${event.id}`}
                     >
                       Event hub

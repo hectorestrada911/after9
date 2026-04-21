@@ -103,7 +103,7 @@ export default async function AccountPage() {
           </div>
           <Link
             href="/my-tickets"
-            className="mt-4 inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-white px-6 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-zinc-200 sm:mt-0"
+            className="mt-4 inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-6 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_28px_-10px_rgba(75,250,148,0.7)] transition hover:brightness-110 sm:mt-0"
           >
             View my tickets
           </Link>
@@ -120,7 +120,7 @@ export default async function AccountPage() {
             </div>
             <Link
               href="/dashboard"
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/20 px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
             >
               {"All events & analytics →"}
             </Link>
@@ -183,7 +183,7 @@ export default async function AccountPage() {
                       <div className="mt-4 flex flex-wrap gap-2">
                         <Link
                           href={`/dashboard/events/${event.id}`}
-                          className="inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-zinc-200"
+                          className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] transition hover:brightness-110"
                         >
                           Manage event
                         </Link>
@@ -223,7 +223,7 @@ export default async function AccountPage() {
           <p className="mt-1 text-sm text-zinc-500">Create an event to get a flyer, public page, and sales tools like the dashboard.</p>
           <Link
             href="/dashboard/events/new"
-            className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-zinc-200"
+            className="mt-4 inline-flex h-11 items-center justify-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-6 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] transition hover:brightness-110"
           >
             Create your first event
           </Link>
@@ -237,7 +237,10 @@ export default async function AccountPage() {
           </p>
           <p className="mt-2 text-2xl font-black tracking-tight text-white">{purchasedCount}</p>
           <p className="text-sm text-zinc-500">Orders found for {user.email}</p>
-          <Link href="/my-tickets" className="mt-4 inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black">
+          <Link
+            href="/my-tickets"
+            className="mt-4 inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+          >
             Open my tickets
           </Link>
         </div>
@@ -279,15 +282,24 @@ export default async function AccountPage() {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {hasHostProfile ? (
-              <Link href="/dashboard" className="inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black">
+              <Link
+                href="/dashboard"
+                className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+              >
                 Open dashboard
               </Link>
             ) : eventCount > 0 ? (
-              <Link href="/onboarding?next=/dashboard" className="inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black">
+              <Link
+                href="/onboarding?next=/dashboard"
+                className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+              >
                 Finish organizer profile
               </Link>
             ) : (
-              <Link href="/onboarding?next=/dashboard" className="inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black">
+              <Link
+                href="/onboarding?next=/dashboard"
+                className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+              >
                 Become a host
               </Link>
             )}

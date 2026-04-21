@@ -7,6 +7,12 @@ import CopyEventLink from "@/components/copy-event-link";
 import SalesChart from "@/components/sales-chart";
 import DashboardAuthFallback from "@/components/dashboard-auth-fallback";
 
+function formatEventDate(isoDate: string) {
+  const d = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+}
+
 export default async function DashboardPage() {
   const supabase = await getSupabaseServerClient();
   const { data: sessionData } = await supabase.auth.getSession();
@@ -128,7 +134,7 @@ export default async function DashboardPage() {
                     <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
                       {event.title}
                     </Link>
-                    <p className="text-sm text-muted">{event.date}</p>
+                    <p className="text-sm text-muted">{formatEventDate(event.date)}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Link

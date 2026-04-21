@@ -141,6 +141,23 @@ const field =
 
 const labelClass = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-400";
 
+function inferResumeStepFromDraft(draft: EventDraftV1): 0 | 1 | 2 {
+  const hasFlyer = draft.coverMode === "upload" ? Boolean(draft.imageDataUrl) : Boolean(draft.imageUrl);
+  if (!hasFlyer) return 0;
+
+  const hasStory =
+    draft.title.trim().length >= 3 &&
+    draft.description.trim().length >= 10 &&
+    draft.location.trim().length >= 3 &&
+    Boolean(draft.date) &&
+    Boolean(draft.startTime) &&
+    Boolean(draft.endTime);
+  if (!hasStory) return 1;
+
+  const hasTickets = draft.capacity >= 1 && draft.ticketsAvailable >= 1 && draft.ticketPrice >= 0;
+  return hasTickets ? 2 : 1;
+}
+
 function StepDots({ step }: { step: number }) {
   return (
     <div className="rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-5">
@@ -214,6 +231,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [instructions, setInstructions] = useState("");
   const [locationNote, setLocationNote] = useState("");
   const [hasAuthedSession, setHasAuthedSession] = useState(false);
+  const [restoredDraftStep, setRestoredDraftStep] = useState<number | null>(null);
   const hydratedDraftRef = useRef(false);
 
   const resolvedMode: "guestDraft" | "hostPublish" =
@@ -258,6 +276,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     const draft = readEventDraft();
     if (!draft || draft.v !== 1) return;
     hydratedDraftRef.current = true;
+    const resumeStep = inferResumeStepFromDraft(draft);
+    setStep(resumeStep);
+    setRestoredDraftStep(resumeStep);
     setTitle(draft.title);
     setDescription(draft.description);
     setDate(draft.date);
@@ -566,6 +587,32 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             </p>
             <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">{STEPS[step]?.hint}</h1>
           </div>
+
+          {restoredDraftStep !== null ? (
+            <div className="mb-5 rounded-2xl border border-brand-green/30 bg-brand-green/12 px-4 py-3 text-sm text-zinc-100">
+              <p className="font-semibold">
+                Draft restored from before login. You are back on Step {restoredDraftStep + 1}: {STEPS[restoredDraftStep]?.label}.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {restoredDraftStep > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => setStep(0)}
+                    className="inline-flex h-8 items-center rounded-full border border-white/20 px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-white/40"
+                  >
+                    Review from step 1
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setRestoredDraftStep(null)}
+                  className="inline-flex h-8 items-center rounded-full border border-white/20 px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-white/40"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           {microWin && (
             <div

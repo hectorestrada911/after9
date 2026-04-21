@@ -59,8 +59,16 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             ))}
           </div>
         )}
+        {orderId && tickets && tickets.length === 0 ? (
+          <div className="mt-8 rounded-2xl border border-line bg-offwhite px-4 py-3 text-sm text-muted">
+            Payment is confirmed. Tickets are still generating — open My tickets in a few seconds.
+          </div>
+        ) : null}
 
-        <div className="mt-10">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+          <Link href="/my-tickets" className="pill-dark h-12 px-7 text-sm">
+            MY TICKETS
+          </Link>
           <Link href="/" className="pill-dark h-12 px-7 text-sm">
             BACK TO EVENTS
           </Link>

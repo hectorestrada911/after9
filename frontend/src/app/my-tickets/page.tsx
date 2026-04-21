@@ -155,10 +155,21 @@ export default async function MyTicketsPage() {
                       <span className="rounded-full border border-white/15 px-2.5 py-1 text-zinc-300">${centsToDollars(order.total_amount)}</span>
                       <span className="rounded-full border border-white/15 px-2.5 py-1 text-zinc-300">{order.payment_status}</span>
                     </div>
+                    {order.events?.slug ? (
+                      <Link
+                        href={`/events/${order.events.slug}`}
+                        className="mt-3 inline-flex h-9 items-center rounded-full border border-white/20 px-3 text-[11px] font-bold uppercase tracking-wide text-white transition hover:border-white/40"
+                      >
+                        View event page
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
                 <div className="border-t border-white/[0.08] bg-black/30 p-4 sm:p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Ticket codes</p>
+                  {orderTickets.length === 0 ? (
+                    <p className="mt-2 text-sm text-zinc-500">Tickets are still processing. Refresh in a moment.</p>
+                  ) : null}
                   <div className="mt-3 grid gap-4 sm:grid-cols-2">
                     {orderTickets.map((ticket) => (
                       <div key={ticket.id} className="rounded-xl border border-white/[0.12] bg-zinc-900/70 p-4">

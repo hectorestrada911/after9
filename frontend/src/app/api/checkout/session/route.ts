@@ -39,6 +39,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not enough tickets remaining." }, { status: 409 });
     }
 
+    const totalAmount = event.ticket_price * quantity;
+    const { data: orderRow, error: orderErr } = await supabase
+      .from("orders")
+      .insert({
+        event_id: eventId,
+        buyer_name: buyerName,
+        buyer_email: buyerEmail,
+        quantity,
+        total_amount: totalAmount,
+        payment_status: "pending",
+      })
+      .select("id")
+      .single();
+
+    if (orderErr || !orderRow) {
+      return NextResponse.json({ error: orderErr?.message ?? "Could not create order." }, { status: 500 });
+    }
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
     const session = await stripe.checkout.sessions.create({
@@ -54,8 +72,15 @@ export async function POST(req: NextRequest) {
           },
         },
       ],
-      metadata: { eventId, slug, buyerName, buyerEmail, quantity: String(quantity) },
-      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: {
+        orderId: orderRow.id,
+        eventId,
+        slug,
+        buyerName,
+        buyerEmail,
+        quantity: String(quantity),
+      },
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderRow.id}`,
       cancel_url: `${appUrl}/events/${slug}`,
     });
 

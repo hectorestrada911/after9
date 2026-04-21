@@ -26,45 +26,6 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const scanLockRef = useRef(false);
   const supabase = getSupabaseBrowserClient();
 
-  useEffect(() => {
-    params.then((result) => setEventId(result.id));
-  }, [params]);
-
-  useEffect(() => {
-    async function loadMatches() {
-      if (!eventId) return;
-      const query = supabase
-        .from("tickets")
-        .select("id,ticket_code,status,orders(buyer_name,buyer_email)")
-        .eq("event_id", eventId)
-        .limit(20);
-
-      const { data } = search.trim()
-        ? await query.or(`ticket_code.ilike.%${search}%,orders.buyer_name.ilike.%${search}%,orders.buyer_email.ilike.%${search}%`)
-        : await query;
-      setMatches(
-        (data ?? []).map((row) => ({
-          id: row.id,
-          ticket_code: row.ticket_code,
-          status: row.status,
-          orders: row.orders ?? [],
-        })) as TicketRow[],
-      );
-    }
-    loadMatches();
-  }, [eventId, search, supabase]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setScanSupported("BarcodeDetector" in window);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-  }, []);
-
   function stopScanner() {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
@@ -98,6 +59,45 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     if (trimmed.includes("ticket:")) return trimmed.split("ticket:")[1]?.trim() ?? trimmed;
     return trimmed;
   }
+
+  useEffect(() => {
+    params.then((result) => setEventId(result.id));
+  }, [params]);
+
+  useEffect(() => {
+    async function loadMatches() {
+      if (!eventId) return;
+      const query = supabase
+        .from("tickets")
+        .select("id,ticket_code,status,orders(buyer_name,buyer_email)")
+        .eq("event_id", eventId)
+        .limit(20);
+
+      const { data } = search.trim()
+        ? await query.or(`ticket_code.ilike.%${search}%,orders.buyer_name.ilike.%${search}%,orders.buyer_email.ilike.%${search}%`)
+        : await query;
+      setMatches(
+        (data ?? []).map((row) => ({
+          id: row.id,
+          ticket_code: row.ticket_code,
+          status: row.status,
+          orders: row.orders ?? [],
+        })) as TicketRow[],
+      );
+    }
+    loadMatches();
+  }, [eventId, search, supabase]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    queueMicrotask(() => setScanSupported("BarcodeDetector" in window));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      stopScanner();
+    };
+  }, []);
 
   async function checkInTicket(ticketCode: string, source: "manual" | "scan") {
     setMessage(null);
@@ -150,7 +150,8 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       }
       setScanning(true);
 
-      const Detector = (window as Window & { BarcodeDetector?: new (opts?: { formats?: string[] }) => { detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue?: string }>> } }).BarcodeDetector;
+      // BarcodeDetector is experimental; DOM typings vary by browser / TS version.
+      const Detector = (window as any).BarcodeDetector;
       if (!Detector) {
         setCameraError("QR scan unavailable in this browser.");
         stopScanner();
@@ -187,65 +188,70 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <main className="container-page min-w-0 py-10 sm:py-14">
-      <div className="mx-auto max-w-md min-w-0">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted">Door tools</p>
-        <h1 className="mt-3 display-section-fluid">Check-in</h1>
-        <p className="mt-4 text-base text-muted">
-          Search by attendee name, email, or ticket code.
-        </p>
+    <div className="mx-auto max-w-lg min-w-0">
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Check-in</p>
+      <h1 className="mt-2 text-2xl font-black tracking-tight text-white">Door tools</h1>
+      <p className="mt-2 text-sm text-zinc-500">Search by attendee name, email, or ticket code.</p>
 
+      <Input
+        className="mt-8 min-h-12 w-full rounded-xl border border-white/[0.12] bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-brand-green/40 focus:ring-2 focus:ring-brand-green/15"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search attendee or code"
+      />
+
+      <form className="mt-4 space-y-3" onSubmit={onSubmit}>
         <Input
-          className="mt-8"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search attendee or code"
+          name="ticketCode"
+          placeholder="Enter ticket code"
+          required
+          className="min-h-12 w-full rounded-xl border border-white/[0.12] bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-brand-green/40 focus:ring-2 focus:ring-brand-green/15"
         />
+        {error && <p className="text-sm font-medium text-red-400">{error}</p>}
+        {message && <p className="text-sm font-medium text-brand-green">{message}</p>}
+        <Button className="w-full bg-white text-black hover:bg-zinc-200">Check in guest</Button>
+      </form>
 
-        <form className="mt-4 space-y-3" onSubmit={onSubmit}>
-          <Input name="ticketCode" placeholder="Enter ticket code" required />
-          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
-          {message && <p className="text-sm font-medium text-green-700">{message}</p>}
-          <Button className="w-full">Check in guest</Button>
-        </form>
-
-        <div className="mt-4 space-y-2">
-          <div className="flex gap-2">
-            <Button className="w-full" type="button" onClick={startScanner} disabled={scanning || !scanSupported}>
-              {scanning ? "Scanning..." : "Scan QR with camera"}
-            </Button>
-            {scanning ? (
-              <Button className="w-full" type="button" onClick={stopScanner}>
-                Stop scanner
-              </Button>
-            ) : null}
-          </div>
-          {!scanSupported ? <p className="text-xs text-muted">QR scanning requires a modern browser with BarcodeDetector support.</p> : null}
-          {cameraError ? <p className="text-xs font-medium text-red-600">{cameraError}</p> : null}
+      <div className="mt-4 space-y-2">
+        <div className="flex gap-2">
+          <Button className="w-full bg-white text-black hover:bg-zinc-200" type="button" onClick={startScanner} disabled={scanning || !scanSupported}>
+            {scanning ? "Scanning..." : "Scan QR with camera"}
+          </Button>
           {scanning ? (
-            <div className="overflow-hidden rounded-2xl border border-line bg-black">
-              <video ref={videoRef} className="aspect-video w-full object-cover" playsInline muted autoPlay />
-            </div>
+            <Button className="w-full border border-white/25 bg-transparent text-white hover:bg-white/10" type="button" onClick={stopScanner}>
+              Stop scanner
+            </Button>
           ) : null}
         </div>
-
-        <div className="mt-8 space-y-3">
-          {matches.map((ticket) => (
-            <div key={ticket.id} className="rounded-2xl border border-line p-4 text-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-bold">{ticket.orders?.[0]?.buyer_name ?? "Guest"}</p>
-                  <p className="mt-0.5 text-xs font-mono break-all text-muted">{ticket.ticket_code}</p>
-                  <p className="mt-0.5 text-xs text-muted">{ticket.orders?.[0]?.buyer_email ?? "No email"}</p>
-                </div>
-                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${ticket.status === "checked_in" ? "bg-brand-green/40 text-black" : "bg-offwhite text-muted"}`}>
-                  {ticket.status === "checked_in" ? "In" : "Pending"}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {!scanSupported ? <p className="text-xs text-zinc-500">QR scanning requires a modern browser with BarcodeDetector support.</p> : null}
+        {cameraError ? <p className="text-xs font-medium text-red-400">{cameraError}</p> : null}
+        {scanning ? (
+          <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-black">
+            <video ref={videoRef} className="aspect-video w-full object-cover" playsInline muted autoPlay />
+          </div>
+        ) : null}
       </div>
-    </main>
+
+      <div className="mt-8 space-y-3">
+        {matches.map((ticket) => (
+          <div key={ticket.id} className="rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-bold text-white">{ticket.orders?.[0]?.buyer_name ?? "Guest"}</p>
+                <p className="mt-0.5 break-all font-mono text-xs text-zinc-500">{ticket.ticket_code}</p>
+                <p className="mt-0.5 text-xs text-zinc-500">{ticket.orders?.[0]?.buyer_email ?? "No email"}</p>
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                  ticket.status === "checked_in" ? "bg-brand-green/40 text-black" : "bg-zinc-800 text-zinc-400"
+                }`}
+              >
+                {ticket.status === "checked_in" ? "In" : "Pending"}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -159,11 +159,26 @@ export default async function MyTicketsPage() {
                 </div>
                 <div className="border-t border-white/[0.08] bg-black/30 p-4 sm:p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Ticket codes</p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
                     {orderTickets.map((ticket) => (
-                      <div key={ticket.id} className="rounded-xl border border-white/[0.12] bg-zinc-900/70 p-3">
-                        <p className="font-mono text-xs text-zinc-300">{ticket.ticket_code}</p>
-                        <p className="mt-1 text-xs text-zinc-500">{ticket.status}</p>
+                      <div key={ticket.id} className="rounded-xl border border-white/[0.12] bg-zinc-900/70 p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Entry QR</p>
+                        {ticket.qr_code_url ? (
+                          <div className="mt-2 inline-block rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5">
+                            {/* eslint-disable-next-line @next/next/no-img-element -- data URL from Stripe webhook */}
+                            <img
+                              src={ticket.qr_code_url}
+                              alt={`QR for ${ticket.ticket_code}`}
+                              width={200}
+                              height={200}
+                              className="h-[200px] w-[200px] max-w-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs text-zinc-500">QR generating after payment…</p>
+                        )}
+                        <p className="mt-3 font-mono text-xs text-zinc-300">{ticket.ticket_code}</p>
+                        <p className="mt-1 text-xs capitalize text-zinc-500">{ticket.status.replace("_", " ")}</p>
                       </div>
                     ))}
                   </div>

@@ -59,10 +59,13 @@ export default async function DashboardPage() {
 
   return (
     <main className="container-page min-w-0 py-10 sm:py-14">
-      <div className="mb-10 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <Link href="/account" className="inline-flex text-xs font-semibold uppercase tracking-wider text-zinc-500 transition hover:text-white">
+        ← Account hub
+      </Link>
+      <div className="mb-10 mt-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">Host workspace</p>
-          <h1 className="mt-3 display-section-fluid">Dashboard</h1>
+          <h1 className="mt-3 display-section-fluid">{"Events & analytics"}</h1>
         </div>
         <Link href="/dashboard/events/new" className="inline-flex pill-dark h-12 px-6 text-sm">
           CREATE EVENT <ArrowUpRight size={16} />
@@ -121,11 +124,19 @@ export default async function DashboardPage() {
             return (
               <Card key={event.id} className="transition hover:border-black">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-lg font-bold tracking-tight">{event.title}</p>
+                  <div className="min-w-0">
+                    <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
+                      {event.title}
+                    </Link>
                     <p className="text-sm text-muted">{event.date}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <Link
+                      className="inline-flex h-10 items-center rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
+                      href={`/dashboard/events/${event.id}`}
+                    >
+                      Event hub
+                    </Link>
                     <Link className="inline-flex h-10 items-center rounded-full border border-line px-4 text-xs font-bold uppercase tracking-wide hover:border-black transition" href={`/events/${event.slug}`}>View</Link>
                     <Link className="inline-flex h-10 items-center rounded-full border border-line px-4 text-xs font-bold uppercase tracking-wide hover:border-black transition" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
                     <CopyEventLink slug={event.slug} />

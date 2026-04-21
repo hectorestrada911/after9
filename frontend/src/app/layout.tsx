@@ -57,6 +57,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Hosts</p>
                 <ul className="space-y-2 text-sm text-zinc-300">
                   <li>
+                    <Link href="/account" className="transition hover:text-white">
+                      Account hub
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/my-tickets" className="transition hover:text-white">
                       My tickets
                     </Link>
@@ -73,7 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </li>
                   <li>
                     <Link href="/dashboard" className="transition hover:text-white">
-                      Dashboard
+                      {"Events & analytics"}
                     </Link>
                   </li>
                 </ul>

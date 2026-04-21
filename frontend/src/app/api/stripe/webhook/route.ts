@@ -1,8 +1,9 @@
 import crypto from "crypto";
 import QRCode from "qrcode";
 import { NextResponse } from "next/server";
+import { TICKET_QR_TO_PNG_OPTIONS } from "@/lib/qr-ticket";
 import { getStripe } from "@/lib/stripe";
-import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
 
 export async function POST(req: Request) {
   const stripe = getStripe();
@@ -22,7 +23,13 @@ export async function POST(req: Request) {
     const eventId = session.metadata?.eventId;
     if (!orderId || !eventId) return NextResponse.json({ ok: true });
 
-    const supabase = await getSupabaseServerClient();
+    let supabase;
+    try {
+      supabase = getSupabaseServiceRoleClient();
+    } catch {
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+
     const { data: order } = await supabase.from("orders").select("id, quantity").eq("id", orderId).single();
     if (order) {
       await supabase.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
@@ -30,13 +37,13 @@ export async function POST(req: Request) {
       const tickets = await Promise.all(
         Array.from({ length: order.quantity }).map(async () => {
           const ticketCode = `TK-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-          const qrCodeUrl = await QRCode.toDataURL(ticketCode);
+          const qrCodeUrl = await QRCode.toDataURL(ticketCode, TICKET_QR_TO_PNG_OPTIONS);
           return {
             order_id: orderId,
             event_id: eventId,
             ticket_code: ticketCode,
             qr_code_url: qrCodeUrl,
-            status: "active",
+            status: "active" as const,
           };
         }),
       );

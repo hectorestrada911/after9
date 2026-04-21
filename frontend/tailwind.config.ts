@@ -39,10 +39,20 @@ const config: Config = {
           "0%": { opacity: "0", transform: "scale(0.92)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        heroZoom: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.06)" },
+        },
+        ctaGlow: {
+          "0%, 100%": { boxShadow: "0 0 32px -8px rgba(75, 250, 148, 0.45)" },
+          "50%": { boxShadow: "0 0 48px -4px rgba(75, 250, 148, 0.7)" },
+        },
       },
       animation: {
         fadeUp: "fadeUp 500ms ease-out",
         createPop: "createPop 0.45s ease-out both",
+        heroZoom: "heroZoom 22s ease-in-out infinite",
+        ctaGlow: "ctaGlow 2.8s ease-in-out infinite",
       },
     },
   },

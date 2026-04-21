@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Calendar, CheckCircle2, Link2, MapPin, QrCode, ScanLine, Share2 } from "lucide-react";
+import { ArrowUpRight, Calendar, CheckCircle2, Link2, QrCode, ScanLine, Share2 } from "lucide-react";
 import { CreateEventFlow, type CreateEventPublishPayload } from "@/app/create-event/create-event-flow";
 import { clearEventDraft, dataUrlToFile, readEventDraft } from "@/lib/event-draft";
 import { eventSchema } from "@/lib/validations";
@@ -203,6 +203,14 @@ export default function NewEventClient() {
                     className="inline-flex h-10 items-center gap-1.5 rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
                   >
                     Open event <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                ) : null}
+                {createdEventId ? (
+                  <Link
+                    href={`/dashboard/events/${createdEventId}`}
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-105"
+                  >
+                    Event hub
                   </Link>
                 ) : null}
               </div>

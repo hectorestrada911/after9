@@ -39,7 +39,7 @@ export function SiteHeader() {
     setMobileOpen(false);
   }
 
-  const navItems = [
+  const discoverItems = [
     { href: "/", label: "Browse events" },
     { href: "/demo", label: "Sample event" },
     { href: "/test", label: "Test flow" },
@@ -64,13 +64,29 @@ export function SiteHeader() {
         </div>
 
         <nav className="ml-auto hidden items-center gap-7 text-sm font-medium text-zinc-400 lg:ml-0 lg:flex">
-          <Link href="/my-tickets" className="transition hover:text-white">
-            My tickets
-          </Link>
-          <Link href="/dashboard" className="transition hover:text-white">
-            Dashboard
-          </Link>
-          {navItems.map((item) => (
+          {authedEmail ? (
+            <>
+              <Link href="/account" className="font-semibold text-white transition hover:text-brand-green">
+                Account
+              </Link>
+              <Link href="/my-tickets" className="transition hover:text-white">
+                My tickets
+              </Link>
+              <Link href="/dashboard" className="transition hover:text-white">
+                {"Events & analytics"}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/my-tickets" className="transition hover:text-white">
+                My tickets
+              </Link>
+              <Link href="/dashboard" className="transition hover:text-white">
+                Host dashboard
+              </Link>
+            </>
+          )}
+          {discoverItems.map((item) => (
             <Link key={item.href} href={item.href} className="transition hover:text-white">
               {item.label}
             </Link>
@@ -111,7 +127,51 @@ export function SiteHeader() {
       {mobileOpen && (
         <div className="border-t border-white/[0.08] px-4 py-4 lg:hidden">
           <div className="container-page space-y-2 px-0">
-            {navItems.map((item) => (
+            {authedEmail ? (
+              <>
+                <p className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Your account</p>
+                <Link
+                  href="/account"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.05]"
+                >
+                  Account hub
+                </Link>
+                <Link
+                  href="/my-tickets"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  My tickets
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  {"Events & analytics"}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/my-tickets"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  My tickets
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Host dashboard
+                </Link>
+              </>
+            )}
+            <p className="px-2.5 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Discover</p>
+            {discoverItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -121,20 +181,6 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/my-tickets"
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-            >
-              My tickets
-            </Link>
-            <Link
-              href="/dashboard"
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-            >
-              Dashboard
-            </Link>
             <Link
               href="/create-event"
               onClick={() => setMobileOpen(false)}

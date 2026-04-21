@@ -86,7 +86,7 @@ export default async function DashboardPage() {
           </div>
           <Link
             href="#my-events"
-            className="inline-flex h-10 items-center rounded-full bg-white px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-zinc-200"
+            className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
           >
             My events
           </Link>
@@ -94,10 +94,30 @@ export default async function DashboardPage() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total revenue" value={`$${centsToDollars(revenue)}`} />
-        <StatCard label="Tickets sold" value={ticketsSold} />
-        <StatCard label="Upcoming events" value={events?.length ?? 0} />
-        <StatCard label="Checked-in guests" value={checkedIn ?? 0} />
+        <StatCard
+          label="Total revenue"
+          value={`$${centsToDollars(revenue)}`}
+          className="border-white/[0.1] bg-zinc-950/60"
+          valueClassName="text-white"
+        />
+        <StatCard
+          label="Tickets sold"
+          value={ticketsSold}
+          className="border-white/[0.1] bg-zinc-950/60"
+          valueClassName="text-white"
+        />
+        <StatCard
+          label="Upcoming events"
+          value={events?.length ?? 0}
+          className="border-white/[0.1] bg-zinc-950/60"
+          valueClassName="text-white"
+        />
+        <StatCard
+          label="Checked-in guests"
+          value={checkedIn ?? 0}
+          className="border-white/[0.1] bg-zinc-950/60"
+          valueClassName="text-white"
+        />
       </section>
 
       <section className="mt-10">
@@ -137,19 +157,25 @@ export default async function DashboardPage() {
       <section id="my-events" className="mt-10 space-y-3 scroll-mt-28">
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted">Your events</h2>
         {(events ?? []).length === 0 ? (
-          <EmptyState title="No events yet" subtitle="Create your first event to start selling tickets." />
+          <EmptyState
+            title="No events yet"
+            subtitle="Create your first event to start selling tickets."
+            className="border-white/[0.16] bg-zinc-950/50"
+            titleClassName="text-white"
+            subtitleClassName="text-zinc-400"
+          />
         ) : (
           (events ?? []).map((event) => {
             const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
             const pct = Math.min(Math.round((sold / Math.max(event.tickets_available, 1)) * 100), 100);
             return (
-              <Card key={event.id} className="transition hover:border-black">
+              <Card key={event.id} className="border-white/[0.1] bg-zinc-950/60 text-white transition hover:border-white/25">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
                       {event.title}
                     </Link>
-                    <p className="text-sm text-muted">{formatEventDate(event.date)}</p>
+                    <p className="text-sm text-zinc-400">{formatEventDate(event.date)}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Link
@@ -158,18 +184,28 @@ export default async function DashboardPage() {
                     >
                       Event hub
                     </Link>
-                    <Link className="inline-flex h-10 items-center rounded-full border border-line px-4 text-xs font-bold uppercase tracking-wide hover:border-black transition" href={`/events/${event.slug}`}>View</Link>
-                    <Link className="inline-flex h-10 items-center rounded-full border border-line px-4 text-xs font-bold uppercase tracking-wide hover:border-black transition" href={`/dashboard/events/${event.id}/check-in`}>Check-in</Link>
-                    <CopyEventLink slug={event.slug} />
+                    <Link
+                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
+                      href={`/events/${event.slug}`}
+                    >
+                      View
+                    </Link>
+                    <Link
+                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
+                      href={`/dashboard/events/${event.id}/check-in`}
+                    >
+                      Check-in
+                    </Link>
+                    <CopyEventLink slug={event.slug} variant="dark" />
                   </div>
                 </div>
                 <div className="mt-5">
-                  <div className="mb-1.5 flex justify-between text-xs font-medium text-muted">
+                  <div className="mb-1.5 flex justify-between text-xs font-medium text-zinc-400">
                     <span>Sales progress</span>
                     <span>{pct}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-offwhite overflow-hidden">
-                    <div className="h-full bg-black" style={{ width: `${pct}%` }} />
+                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+                    <div className="h-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               </Card>
@@ -179,30 +215,36 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-12 space-y-4">
-        <Card>
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-muted">Sales analytics</h2>
+        <Card className="border-white/[0.1] bg-zinc-950/60 text-white">
+          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-zinc-400">Sales analytics</h2>
           <SalesChart data={salesData} />
         </Card>
-        <Card>
+        <Card className="border-white/[0.1] bg-zinc-950/60 text-white">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted">Recent attendees</h2>
-            <Link className="inline-flex h-10 items-center gap-1.5 rounded-full border border-line px-4 text-xs font-bold uppercase tracking-wide hover:border-black transition" href="/api/attendees/csv">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Recent attendees</h2>
+            <Link
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
+              href="/api/attendees/csv"
+            >
               <Download size={14} /> Download CSV
             </Link>
           </div>
           {attendeeRows.length === 0 ? (
-            <p className="text-sm text-muted">No ticket purchases yet.</p>
+            <p className="text-sm text-zinc-400">No ticket purchases yet.</p>
           ) : (
             <div className="space-y-2">
               {attendeeRows.map((order) => (
-                <div key={order.id} className="flex flex-col gap-2 rounded-xl border border-line p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  key={order.id}
+                  className="flex flex-col gap-2 rounded-xl border border-white/[0.1] bg-zinc-900/50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div>
-                    <p className="font-bold">{order.buyer_name}</p>
-                    <p className="break-all text-muted">{order.buyer_email}</p>
+                    <p className="font-bold text-white">{order.buyer_name}</p>
+                    <p className="break-all text-zinc-400">{order.buyer_email}</p>
                   </div>
                   <div className="sm:text-right">
-                    <p className="font-bold">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</p>
-                    <p className="text-muted">${centsToDollars(order.total_amount)}</p>
+                    <p className="font-bold text-white">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</p>
+                    <p className="text-zinc-400">${centsToDollars(order.total_amount)}</p>
                   </div>
                 </div>
               ))}

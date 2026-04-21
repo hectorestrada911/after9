@@ -63,15 +63,19 @@ export function StatCard({
   label,
   value,
   hint,
+  className,
+  valueClassName,
 }: {
   label: string;
   value: string | number;
   hint?: string;
+  className?: string;
+  valueClassName?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-line bg-white p-5">
+    <div className={cn("rounded-2xl border border-line bg-white p-5", className)}>
       <p className="text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
-      <p className="mt-2 text-3xl font-black tracking-tighter text-black">{value}</p>
+      <p className={cn("mt-2 text-3xl font-black tracking-tighter text-black", valueClassName)}>{value}</p>
       {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   );
@@ -98,14 +102,20 @@ export function SectionTitle({
 export function EmptyState({
   title,
   subtitle,
+  className,
+  titleClassName,
+  subtitleClassName,
 }: {
   title: string;
   subtitle: string;
+  className?: string;
+  titleClassName?: string;
+  subtitleClassName?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line bg-offwhite p-10 text-center">
-      <p className="text-base font-bold text-black">{title}</p>
-      <p className="mt-1 text-sm text-muted">{subtitle}</p>
+    <div className={cn("rounded-2xl border border-dashed border-line bg-offwhite p-10 text-center", className)}>
+      <p className={cn("text-base font-bold text-black", titleClassName)}>{title}</p>
+      <p className={cn("mt-1 text-sm text-muted", subtitleClassName)}>{subtitle}</p>
     </div>
   );
 }

@@ -111,7 +111,7 @@ export default async function AccountPage() {
       ) : null}
 
       {eventCount > 0 ? (
-        <section className="mt-8">
+        <section id="my-events" className="mt-8 scroll-mt-28">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Hosting</p>

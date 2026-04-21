@@ -62,6 +62,7 @@ export default async function DashboardPage() {
     name: event.title.length > 16 ? `${event.title.slice(0, 16)}…` : event.title,
     sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
   }));
+  const scannerHref = events?.[0] ? `/dashboard/events/${events[0].id}/check-in` : "/dashboard/events/new";
 
   return (
     <main className="container-page min-w-0 py-10 sm:py-14">
@@ -78,18 +79,26 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <section className="mb-8 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4">
+      <section id="scan-qr" className="mb-8 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4 scroll-mt-28">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Quick access</p>
-            <p className="mt-1 text-sm text-zinc-300">Jump straight to your event list and continue managing.</p>
+            <p className="mt-1 text-sm text-zinc-300">At the door? Open your scanner in one tap, or jump to your event list.</p>
           </div>
-          <Link
-            href="#my-events"
-            className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
-          >
-            My events
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={scannerHref}
+              className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+            >
+              Start scanner now
+            </Link>
+            <Link
+              href="#my-events"
+              className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
+            >
+              My events
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -194,7 +203,7 @@ export default async function DashboardPage() {
                       className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
                       href={`/dashboard/events/${event.id}/check-in`}
                     >
-                      Check-in
+                      Scan QR
                     </Link>
                     <CopyEventLink slug={event.slug} variant="dark" />
                   </div>

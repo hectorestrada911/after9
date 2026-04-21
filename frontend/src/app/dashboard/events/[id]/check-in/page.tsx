@@ -189,9 +189,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="mx-auto max-w-lg min-w-0">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Check-in</p>
-      <h1 className="mt-2 text-2xl font-black tracking-tight text-white">Door tools</h1>
-      <p className="mt-2 text-sm text-zinc-500">Search by attendee name, email, or ticket code.</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Scan QR</p>
+      <h1 className="mt-2 text-2xl font-black tracking-tight text-white">Door scanner</h1>
+      <p className="mt-2 text-sm text-zinc-500">Point camera at guest QR. You can also search by attendee name, email, or ticket code.</p>
 
       <Input
         className="mt-8 min-h-12 w-full rounded-xl border border-white/[0.12] bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-brand-green/40 focus:ring-2 focus:ring-brand-green/15"
@@ -209,12 +209,12 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         />
         {error && <p className="text-sm font-medium text-red-400">{error}</p>}
         {message && <p className="text-sm font-medium text-brand-green">{message}</p>}
-        <Button className="w-full bg-white text-black hover:bg-zinc-200">Check in guest</Button>
+        <Button className="w-full bg-white text-black hover:bg-zinc-200">Check in manually</Button>
       </form>
 
       <div className="mt-4 space-y-2">
         <div className="flex gap-2">
-          <Button className="w-full bg-white text-black hover:bg-zinc-200" type="button" onClick={startScanner} disabled={scanning || !scanSupported}>
+          <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] hover:brightness-110" type="button" onClick={startScanner} disabled={scanning || !scanSupported}>
             {scanning ? "Scanning..." : "Scan QR with camera"}
           </Button>
           {scanning ? (
@@ -224,6 +224,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
           ) : null}
         </div>
         {!scanSupported ? <p className="text-xs text-zinc-500">QR scanning requires a modern browser with BarcodeDetector support.</p> : null}
+        <p className="text-xs text-zinc-500">Tip: best on mobile Safari/Chrome with camera permission enabled.</p>
         {cameraError ? <p className="text-xs font-medium text-red-400">{cameraError}</p> : null}
         {scanning ? (
           <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-black">

@@ -71,6 +71,9 @@ export function SiteHeader() {
               <Link href="/account#my-events" className="transition hover:text-white">
                 My events
               </Link>
+              <Link href="/dashboard#scan-qr" className="font-semibold text-brand-green transition hover:text-emerald-300">
+                Scan QR
+              </Link>
               <Link href="/my-tickets" className="transition hover:text-white">
                 My tickets
               </Link>
@@ -145,6 +148,13 @@ export function SiteHeader() {
                   className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
                   My events
+                </Link>
+                <Link
+                  href="/dashboard#scan-qr"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-brand-green transition hover:bg-white/[0.05] hover:text-emerald-300"
+                >
+                  Scan QR
                 </Link>
                 <Link
                   href="/my-tickets"

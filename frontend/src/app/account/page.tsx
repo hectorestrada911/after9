@@ -197,7 +197,7 @@ export default async function AccountPage() {
                           href={`/dashboard/events/${event.id}/check-in`}
                           className="inline-flex h-10 items-center rounded-full border border-white/20 px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40"
                         >
-                          Check-in
+                          Scan QR
                         </Link>
                       </div>
                     </div>

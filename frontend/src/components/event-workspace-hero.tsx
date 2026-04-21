@@ -102,7 +102,7 @@ export function EventWorkspaceHero({
               href={`/dashboard/events/${eventId}/check-in`}
               className="inline-flex h-11 items-center rounded-full border border-white/25 bg-white/[0.06] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
             >
-              Check-in
+              Scan QR
             </Link>
           </div>
         </div>

@@ -42,7 +42,6 @@ export function SiteHeader() {
   const discoverItems = [
     { href: "/", label: "Browse events" },
     { href: "/demo", label: "Sample event" },
-    { href: "/test", label: "Test flow" },
   ];
 
   if (hideHeader) return null;

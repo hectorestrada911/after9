@@ -46,11 +46,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       Sample event
                     </Link>
                   </li>
-                  <li>
-                    <Link href="/test" className="transition hover:text-white">
-                      Test flow
-                    </Link>
-                  </li>
                 </ul>
               </div>
               <div>

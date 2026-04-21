@@ -52,11 +52,20 @@ function OnboardingForm() {
       school: null,
       organizer_name: organizerName,
     };
-    const { error } = await supabase.from("profiles").upsert(payload);
-    if (error) return setError(error.message);
+    const { error: upsertError } = await supabase.from("profiles").upsert(payload);
+    if (upsertError) return setError(upsertError.message);
+
+    const { data: verify, error: verifyError } = await supabase.from("profiles").select("id").eq("id", authedUser.id).maybeSingle();
+    if (verifyError) return setError(verifyError.message);
+    if (!verify?.id) {
+      return setError(
+        "Profile saved, but your account cannot read it back yet. Refresh once, or confirm your Supabase project matches this app’s env vars.",
+      );
+    }
+
     // Ensure server-rendered routes (dashboard) read the updated session/profile immediately.
     router.refresh();
-    router.push(next);
+    router.replace(next);
   }
 
   if (checkingAuth) {

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, Calendar, CheckCircle2, Link2, MapPin, QrCode, ScanLine, Share2 } from "lucide-react";
 import { CreateEventFlow, type CreateEventPublishPayload } from "@/app/create-event/create-event-flow";
 import { clearEventDraft, dataUrlToFile, readEventDraft } from "@/lib/event-draft";
 import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { centsToDollars } from "@/lib/utils";
 
 export default function NewEventClient() {
   const supabase = getSupabaseBrowserClient();
@@ -17,6 +19,9 @@ export default function NewEventClient() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [publishedTitle, setPublishedTitle] = useState<string | null>(null);
+  const [publishedImageUrl, setPublishedImageUrl] = useState<string | null>(null);
+  const [publishedTicketPriceCents, setPublishedTicketPriceCents] = useState<number | null>(null);
 
   useEffect(() => {
     setDraftLoaded(Boolean(readEventDraft()));
@@ -131,6 +136,9 @@ export default function NewEventClient() {
     setCreatedLink(link);
     setCreatedSlug(created.slug);
     setCreatedEventId(created.id);
+    setPublishedTitle(title);
+    setPublishedImageUrl(imageUrl);
+    setPublishedTicketPriceCents(Math.round(parsed.data.ticketPrice * 100));
   }
 
   if (createdLink) {
@@ -147,6 +155,12 @@ export default function NewEventClient() {
                 <p className="mt-1 max-w-md text-sm text-muted">
                   Share the guest page, then watch sales and check-ins from your dashboard. You can always edit details later.
                 </p>
+                {publishedTitle ? <p className="mt-3 text-sm font-semibold text-black">{publishedTitle}</p> : null}
+                {publishedTicketPriceCents !== null ? (
+                  <p className="mt-1 text-sm text-muted">
+                    Ticket price on the public page: <span className="font-semibold text-black">${centsToDollars(publishedTicketPriceCents)}</span>
+                  </p>
+                ) : null}
               </div>
               {qrCodeUrl && (
                 <div className="rounded-xl border border-line bg-white p-2.5 shadow-sm">
@@ -155,6 +169,12 @@ export default function NewEventClient() {
                 </div>
               )}
             </div>
+
+            {publishedImageUrl ? (
+              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-line bg-offwhite">
+                <Image src={publishedImageUrl} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 42rem" unoptimized />
+              </div>
+            ) : null}
 
             <div className="rounded-xl border border-line bg-white/80 p-4">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Guest link</p>

@@ -481,7 +481,7 @@ export function CreateEventFlow({
         await onPublish({
           title: parsed.data.title,
           description: parsed.data.description,
-          imageUrl: coverMode === "stock" ? selectedStock.url : placeholderCoverUrl(),
+          imageUrl: parsed.data.imageUrl,
           date: parsed.data.date,
           startTime: parsed.data.startTime,
           endTime: parsed.data.endTime,

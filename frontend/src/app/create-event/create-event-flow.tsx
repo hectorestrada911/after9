@@ -131,7 +131,7 @@ function compressToJpegDataUrl(file: File, maxStrLen: number): Promise<string> {
 
 const STEPS = [
   { id: 0, label: "Flyer", hint: "Pick the vibe guests see first" },
-  { id: 1, label: "Story", hint: "Name it, describe it, set the time" },
+  { id: 1, label: "Story", hint: "Name it, describe it, set the time (ticket pricing is next)" },
   { id: 2, label: "Tickets", hint: "Price, capacity, and who gets in" },
 ] as const;
 
@@ -178,13 +178,13 @@ function StepDots({ step }: { step: number }) {
   );
 }
 
-export function CreateEventFlow({
-  flowMode = "auto",
-  onPublish,
-}: {
+type CreateEventFlowProps = {
   flowMode?: CreateEventFlowMode;
-  onPublish?: (payload: CreateEventPublishPayload) => void | Promise<void>;
-}) {
+  // eslint-disable-next-line no-unused-vars -- type-only callback payload name
+  onPublish?(payload: CreateEventPublishPayload): void | Promise<void>;
+};
+
+export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlowProps) {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -544,12 +544,18 @@ export function CreateEventFlow({
             <span className="text-xs font-black tracking-tight text-white">RAGE</span>
             <span className="text-[11px] text-zinc-600">· create</span>
           </Link>
-          <Link
-            href={`/login?next=${encodeURIComponent(NEXT_AFTER_AUTH)}`}
-            className="text-[12px] font-medium text-zinc-500 transition hover:text-white"
-          >
-            Log in
-          </Link>
+          {hasAuthedSession ? (
+            <Link href={NEXT_AFTER_AUTH} className="text-[12px] font-medium text-zinc-500 transition hover:text-white">
+              Host tools
+            </Link>
+          ) : (
+            <Link
+              href={`/login?next=${encodeURIComponent(NEXT_AFTER_AUTH)}`}
+              className="text-[12px] font-medium text-zinc-500 transition hover:text-white"
+            >
+              Log in
+            </Link>
+          )}
         </header>
 
         <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-2 sm:max-w-lg sm:px-6 sm:pb-28 sm:pt-4">

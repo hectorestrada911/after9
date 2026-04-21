@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { safeNextPath } from "@/lib/event-draft";
+import { readEventDraft, safeNextPath } from "@/lib/event-draft";
 import { Button, Input } from "@/components/ui";
 
 function SignupForm() {
@@ -14,7 +14,9 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const next = safeNextPath(nextParam);
-  const hostIntent = next.startsWith("/dashboard");
+  const hasEventDraft = Boolean(readEventDraft());
+  const hostIntent = next.startsWith("/dashboard") || hasEventDraft;
+  const hostNext = next.startsWith("/dashboard") ? next : "/dashboard/events/new";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +34,7 @@ function SignupForm() {
     }
     if (!data.session) {
       setLoading(false);
-      const loginTarget = hostIntent ? next : "/account";
+      const loginTarget = hostIntent ? hostNext : "/account";
       router.push(`/login?next=${encodeURIComponent(loginTarget)}&justSignedUp=1`);
       return;
     }
@@ -40,10 +42,10 @@ function SignupForm() {
       const { data: profile } = await supabase.from("profiles").select("id").eq("id", data.session.user.id).maybeSingle();
       setLoading(false);
       if (profile) {
-        router.push(next);
+        router.push(hostNext);
         return;
       }
-      router.push(`/onboarding?next=${encodeURIComponent(next)}`);
+      router.push(`/onboarding?next=${encodeURIComponent(hostNext)}`);
       return;
     }
     setLoading(false);
@@ -73,6 +75,11 @@ function SignupForm() {
           <p className="mt-4 text-base leading-relaxed text-zinc-400">
             Launch trusted event pages and monetize your community.
           </p>
+          {hasEventDraft ? (
+            <p className="mt-3 rounded-xl border border-brand-green/25 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
+              Draft found. After signup, we will return you to publish that event.
+            </p>
+          ) : null}
 
           <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
             <span className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-2 py-1.5">One login</span>

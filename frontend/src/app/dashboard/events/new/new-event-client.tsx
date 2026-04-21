@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, Calendar, CheckCircle2, Link2, QrCode, ScanLine, Share2 } from "lucide-react";
 import { CreateEventFlow, type CreateEventPublishPayload } from "@/app/create-event/create-event-flow";
 import { clearEventDraft, dataUrlToFile, readEventDraft } from "@/lib/event-draft";
@@ -11,6 +12,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { centsToDollars } from "@/lib/utils";
 
 export default function NewEventClient() {
+  const router = useRouter();
   const supabase = getSupabaseBrowserClient();
   const [error, setError] = useState<string | null>(null);
   const [createdLink, setCreatedLink] = useState<string | null>(null);
@@ -84,6 +86,12 @@ export default function NewEventClient() {
     const { data: sessionData } = await supabase.auth.getSession();
     const authedUser = sessionData.session?.user;
     if (!authedUser) return setError("Please login first.");
+    const { data: profile } = await supabase.from("profiles").select("id").eq("id", authedUser.id).maybeSingle();
+    if (!profile) {
+      const next = encodeURIComponent("/dashboard/events/new");
+      router.push(`/onboarding?next=${next}`);
+      return;
+    }
 
     const title = parsed.data.title;
     const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString().slice(-4)}`;

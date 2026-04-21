@@ -5,11 +5,34 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Loader2, Search, Sparkles, Upload } from "lucide-react";
 import { eventSchema } from "@/lib/validations";
-import { MAX_DRAFT_IMAGE_BYTES, placeholderCoverUrl, writeEventDraft, type EventDraftV1 } from "@/lib/event-draft";
+import { MAX_DRAFT_IMAGE_BYTES, placeholderCoverUrl, readEventDraft, writeEventDraft, type EventDraftV1 } from "@/lib/event-draft";
 import { FLYER_CATEGORIES, FLYER_STOCK, filterFlyerStock, type FlyerCategory } from "@/lib/flyer-stock";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
 const NEXT_AFTER_AUTH = "/dashboard/events/new";
+
+export type CreateEventFlowMode = "auto" | "guestDraft" | "hostPublish";
+
+export type CreateEventPublishPayload = {
+  title: string;
+  description: string;
+  imageUrl: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  capacity: number;
+  ticketPrice: number;
+  ticketsAvailable: number;
+  visibility: "public" | "private";
+  ageRestriction: EventDraftV1["ageRestriction"];
+  dressCode?: string;
+  instructions?: string;
+  locationNote?: string;
+  coverMode: "stock" | "upload";
+  uploadDataUrl: string | null;
+};
 
 function localDateISO(d = new Date()) {
   const y = d.getFullYear();
@@ -155,8 +178,15 @@ function StepDots({ step }: { step: number }) {
   );
 }
 
-export function CreateEventFlow() {
+export function CreateEventFlow({
+  flowMode = "auto",
+  onPublish,
+}: {
+  flowMode?: CreateEventFlowMode;
+  onPublish?: (payload: CreateEventPublishPayload) => void | Promise<void>;
+}) {
   const router = useRouter();
+  const supabase = getSupabaseBrowserClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(0);
   const [microWin, setMicroWin] = useState<string | null>(null);
@@ -183,6 +213,11 @@ export function CreateEventFlow() {
   const [dressCode, setDressCode] = useState("");
   const [instructions, setInstructions] = useState("");
   const [locationNote, setLocationNote] = useState("");
+  const [hasAuthedSession, setHasAuthedSession] = useState(false);
+  const hydratedDraftRef = useRef(false);
+
+  const resolvedMode: "guestDraft" | "hostPublish" =
+    flowMode === "hostPublish" ? "hostPublish" : flowMode === "guestDraft" ? "guestDraft" : hasAuthedSession ? "hostPublish" : "guestDraft";
 
   const filteredStock = useMemo(() => filterFlyerStock(search, flyCategory), [search, flyCategory]);
   const selectedStock = FLYER_STOCK.find((i) => i.id === selectedStockId) ?? FLYER_STOCK[0]!;
@@ -196,6 +231,61 @@ export function CreateEventFlow() {
     setStartTime((t) => t || "20:00");
     setEndTime((t) => t || "23:30");
   }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (ignore) return;
+        setHasAuthedSession(Boolean(data.session?.user));
+      })
+      .catch(() => {
+        if (!ignore) setHasAuthedSession(false);
+      });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setHasAuthedSession(Boolean(session?.user));
+    });
+    return () => {
+      ignore = true;
+      listener.subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
+  useEffect(() => {
+    if (resolvedMode !== "hostPublish") return;
+    if (hydratedDraftRef.current) return;
+    const draft = readEventDraft();
+    if (!draft || draft.v !== 1) return;
+    hydratedDraftRef.current = true;
+    setTitle(draft.title);
+    setDescription(draft.description);
+    setDate(draft.date);
+    setStartTime(draft.startTime);
+    setEndTime(draft.endTime);
+    setLocation(draft.location);
+    setCapacity(String(draft.capacity));
+    setTicketPrice(String(draft.ticketPrice));
+    setTicketsAvailable(String(draft.ticketsAvailable));
+    setVisibility(draft.visibility);
+    setAgeRestriction(draft.ageRestriction);
+    setDressCode(draft.dressCode ?? "");
+    setInstructions(draft.instructions ?? "");
+    setLocationNote(draft.locationNote ?? "");
+    if (draft.coverMode === "upload" && draft.imageDataUrl) {
+      setCoverMode("upload");
+      setUploadDataUrl(draft.imageDataUrl);
+      setUploadName("draft-flyer");
+      if (fileRef.current) fileRef.current.value = "";
+    } else {
+      setCoverMode("stock");
+      const match = FLYER_STOCK.find((i) => i.url === draft.imageUrl);
+      if (match) setSelectedStockId(match.id);
+      setUploadDataUrl(null);
+      setUploadName(null);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }, [resolvedMode]);
 
   useEffect(() => {
     if (filteredStock.some((i) => i.id === selectedStockId)) return;
@@ -325,7 +415,7 @@ export function CreateEventFlow() {
     );
   }
 
-  function continueToAuth(e: FormEvent) {
+  async function finalizeWizard(e: FormEvent) {
     e.preventDefault();
     if (step !== 2) return;
     setError(null);
@@ -377,6 +467,40 @@ export function CreateEventFlow() {
 
     if (coverMode === "upload" && !uploadDataUrl) {
       setError("Upload a flyer or choose from the gallery.");
+      return;
+    }
+
+    if (resolvedMode === "hostPublish") {
+      try {
+        writeEventDraft(draft);
+      } catch {
+        setError("Couldn't save the draft. Try a smaller image.");
+        return;
+      }
+      if (onPublish) {
+        await onPublish({
+          title: parsed.data.title,
+          description: parsed.data.description,
+          imageUrl: coverMode === "stock" ? selectedStock.url : placeholderCoverUrl(),
+          date: parsed.data.date,
+          startTime: parsed.data.startTime,
+          endTime: parsed.data.endTime,
+          location: parsed.data.location,
+          capacity: parsed.data.capacity,
+          ticketPrice: parsed.data.ticketPrice,
+          ticketsAvailable: parsed.data.ticketsAvailable,
+          visibility: parsed.data.visibility,
+          ageRestriction: parsed.data.ageRestriction,
+          dressCode: parsed.data.dressCode,
+          instructions: parsed.data.instructions,
+          locationNote: parsed.data.locationNote,
+          coverMode,
+          uploadDataUrl: coverMode === "upload" ? uploadDataUrl : null,
+        });
+        return;
+      }
+
+      router.replace(NEXT_AFTER_AUTH);
       return;
     }
 
@@ -447,7 +571,7 @@ export function CreateEventFlow() {
             </div>
           )}
 
-          <form onSubmit={continueToAuth} className="min-h-[320px]">
+          <form onSubmit={finalizeWizard} className="min-h-[320px]">
             {error && (
               <p className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-center text-[12px] text-red-200">{error}</p>
             )}
@@ -685,13 +809,19 @@ export function CreateEventFlow() {
                     type="submit"
                     className="group flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 text-[12px] font-bold uppercase tracking-[0.12em] text-black shadow-[0_0_36px_-6px_rgba(75,250,148,0.55)] transition hover:brightness-110"
                   >
-                    Continue to login
+                    {resolvedMode === "hostPublish" ? (onPublish ? "Publish event" : "Continue in dashboard") : "Continue to login"}
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" strokeWidth={2} />
                   </button>
                 )}
               </div>
               <p className="mx-auto mt-2.5 max-w-sm text-center text-[11px] leading-relaxed text-zinc-600">
-                {step < 2 ? "Small wins add up. You're almost publish-ready." : "Log in next. Your draft stays in this browser until you publish."}
+                {step < 2
+                  ? "Small wins add up. You're almost publish-ready."
+                  : resolvedMode === "hostPublish"
+                    ? onPublish
+                      ? "You’re signed in — publish straight from here when you’re ready."
+                      : "You’re signed in — we’ll open the host publisher next so you can publish."
+                    : "Log in next. Your draft stays in this browser until you publish."}
               </p>
             </div>
           </form>

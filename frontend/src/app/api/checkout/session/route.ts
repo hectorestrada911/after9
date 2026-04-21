@@ -72,10 +72,23 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             unit_amount: event.ticket_price,
-            product_data: { name: title },
+            product_data: {
+              name: title,
+              description: "Mobile ticket + QR · Instant confirmation",
+            },
           },
         },
       ],
+      branding_settings: {
+        display_name: "RAGE",
+        font_family: "inter",
+        border_style: "rounded",
+        background_color: "#030303",
+        button_color: "#4BFA94",
+      },
+      custom_text: {
+        submit: { message: "Secure checkout · Tickets emailed instantly" },
+      },
       metadata: {
         orderId: orderRow.id,
         eventId,

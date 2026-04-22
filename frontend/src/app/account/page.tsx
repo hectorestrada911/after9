@@ -92,7 +92,7 @@ export default async function AccountPage() {
       <p className="mt-2 max-w-2xl text-xs leading-relaxed text-zinc-500">
         <span className="font-semibold text-zinc-400">Where things live:</span> this page is your overview.{" "}
         <span className="text-zinc-400">My tickets</span> is everything you bought.{" "}
-        <span className="text-zinc-400">{"Events & analytics"}</span> in the header is your host home — event list, sales, check-in, and exports.
+        <span className="text-zinc-400">{"Events & analytics"}</span> in the header is your host home: event list, sales, check-in, and exports.
       </p>
 
       {purchasedCount > 0 ? (
@@ -117,7 +117,7 @@ export default async function AccountPage() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Hosting</p>
               <h2 className="mt-1 text-xl font-black tracking-tight text-white sm:text-2xl">Your events</h2>
-              <p className="mt-1 text-sm text-zinc-500">Flyer, public link, and host tools — pick up where you left off.</p>
+              <p className="mt-1 text-sm text-zinc-500">Flyer, public link, and host tools. Pick up where you left off.</p>
             </div>
             <Link
               href="/dashboard"

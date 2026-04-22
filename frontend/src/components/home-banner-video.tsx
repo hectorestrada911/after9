@@ -10,7 +10,7 @@ type Props = {
 };
 
 /**
- * Banner video: `public/a9-banner.mp4` is large (~10MB) — biggest win is re-encoding (720p H.264 + `faststart`, target ≤3MB) and/or a short WebM.
+ * Banner video: `public/a9-banner.mp4` is large (~10MB). The biggest win is re-encoding (720p H.264 + `faststart`, target ≤3MB) and/or a short WebM.
  * - Autoplay after it enters view and the browser is idle (or timeout) so critical JS/CSS/fonts go first.
  */
 export function HomeBannerVideo({ className }: Props) {

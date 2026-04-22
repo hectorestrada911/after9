@@ -323,7 +323,7 @@ export default function NewEventClient() {
       <div className="mx-auto max-w-2xl min-w-0">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">Host tools</p>
         <h1 className="mt-3 display-section-fluid">Create event</h1>
-        <p className="mt-4 text-base text-muted max-w-xl">Same guided flow as the marketing builder — publish when you are ready.</p>
+        <p className="mt-4 text-base text-muted max-w-xl">Same guided flow as the marketing builder. Publish when you are ready.</p>
         {draftLoaded ? (
           <div className="mt-6 rounded-2xl border border-black bg-brand-green/20 px-4 py-3 text-sm font-medium text-black">
             We found a saved draft in this browser. Your wizard is prefilled from it.

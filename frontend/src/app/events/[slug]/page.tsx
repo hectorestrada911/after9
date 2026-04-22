@@ -109,7 +109,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
             <EventShareActions
               slug={slug}
               shareTitle={event.title}
-              shareText={`${event.title} — ${formatEventDate(event.date)}. Get tickets:`}
+              shareText={`${event.title}, ${formatEventDate(event.date)}. Get tickets:`}
               className="pt-1"
             />
           </div>
@@ -241,7 +241,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
 
                   {remaining <= 0 && (
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-bold text-white">
-                      Sold out — contact the host for a waitlist.
+                      Sold out. Contact the host for a waitlist.
                     </div>
                   )}
 

@@ -259,7 +259,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         return;
       }
 
-      // iOS Safari and many browsers: no BarcodeDetector — ZXing reads frames in JS.
+      // iOS Safari and many browsers: no BarcodeDetector; ZXing reads frames in JS.
       video.srcObject = null;
 
       if (!zxingModulePromise) {

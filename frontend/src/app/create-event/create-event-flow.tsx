@@ -500,7 +500,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
           <div className="mb-8">
             <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">Create your event</p>
             <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">
-              Flyer, story, and tickets — all in one place
+              Flyer, story, and tickets, all in one place
             </h1>
           </div>
 

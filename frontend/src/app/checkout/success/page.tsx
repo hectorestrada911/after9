@@ -126,7 +126,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
 
         {orderId && tickets && tickets.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-white/[0.15] bg-white/[0.04] px-4 py-3 text-sm text-zinc-300">
-            Payment confirmed. Tickets are still generating — open My tickets in a few seconds.
+            Payment confirmed. Tickets are still generating. Open My tickets in a few seconds.
           </div>
         ) : null}
 
@@ -141,7 +141,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
               from your account.
             </p>
             <p>
-              <span className="font-semibold text-zinc-900">Should I save this QR?</span> Yes — screenshot it now for quicker entry.
+              <span className="font-semibold text-zinc-900">Should I save this QR?</span> Yes. Screenshot it now for quicker entry.
             </p>
             <p>
               <span className="font-semibold text-zinc-900">Need support?</span> Email{" "}

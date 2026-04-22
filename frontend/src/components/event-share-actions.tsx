@@ -37,7 +37,7 @@ export function EventShareActions({
       try {
         await navigator.share({
           title: shareTitle ?? "Event on RAGE",
-          text: shareText ?? "Grab your ticket — link below.",
+          text: shareText ?? "Grab your ticket. Link below.",
           url,
         });
         return;

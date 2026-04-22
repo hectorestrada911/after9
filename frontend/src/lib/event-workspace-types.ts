@@ -1,3 +1,5 @@
+import type { Visibility } from "@/lib/types";
+
 export type HostEventRow = {
   id: string;
   slug: string;
@@ -11,7 +13,7 @@ export type HostEventRow = {
   capacity: number;
   ticket_price: number;
   tickets_available: number;
-  visibility: "public" | "private";
+  visibility: Visibility;
   age_restriction: "all_ages" | "age_18_plus" | "age_21_plus";
   dress_code: string | null;
   instructions: string | null;

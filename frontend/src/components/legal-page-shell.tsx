@@ -25,7 +25,7 @@ export function LegalPageShell({ title, subtitle, effectiveDate, children }: Leg
               Privacy
             </Link>
             <a
-              href="mailto:support@after9.app"
+              href="mailto:ragesupportpage@gmail.com"
               className="rounded-full border border-white/20 px-3 py-1 text-zinc-300 transition hover:border-white/40 hover:text-white"
             >
               Contact

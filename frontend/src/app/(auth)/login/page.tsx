@@ -7,6 +7,7 @@ import { Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { readEventDraft, safeNextPath } from "@/lib/event-draft";
 import { Button, Input } from "@/components/ui";
+import { flushUi } from "@/lib/flush-ui";
 
 type AuthMode = "password" | "magic";
 
@@ -56,8 +57,10 @@ function LoginForm() {
 
   async function onPasswordSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const formData = new FormData(e.currentTarget);
     const formEmail = String(formData.get("email"));
     const password = String(formData.get("password"));
@@ -96,8 +99,10 @@ function LoginForm() {
     }
     if (resendSecondsLeft > 0) return;
 
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNextPath(effectiveNext))}`;
     const { error: otpErr } = await supabase.auth.signInWithOtp({
       email: trimmed,
@@ -120,8 +125,10 @@ function LoginForm() {
       setError("Enter your email first so we know where to send reset instructions.");
       return;
     }
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const redirectTo = `${window.location.origin}/auth/callback?type=recovery`;
     const { error: resetErr } = await supabase.auth.resetPasswordForEmail(trimmed, { redirectTo });
     setLoading(false);

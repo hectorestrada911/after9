@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
+import { flushUi } from "@/lib/flush-ui";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export default function ResetPasswordPage() {
@@ -28,8 +29,10 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const { error: updateErr } = await supabase.auth.updateUser({ password });
     setLoading(false);
 

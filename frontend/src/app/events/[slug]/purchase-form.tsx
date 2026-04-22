@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button, Input } from "@/components/ui";
+import { flushUi } from "@/lib/flush-ui";
 import { cn } from "@/lib/utils";
 
 export default function PurchaseForm({
@@ -34,8 +35,10 @@ export default function PurchaseForm({
       setError("Emails must match so we can deliver and recover your ticket.");
       return;
     }
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const form = new FormData(e.currentTarget);
     const body = {
       eventId,

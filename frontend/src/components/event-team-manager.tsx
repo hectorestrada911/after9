@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { flushUi } from "@/lib/flush-ui";
 
 type Invite = {
   id: string;
@@ -41,9 +42,11 @@ export default function EventTeamManager({ eventId }: { eventId: string }) {
 
   async function onInvite(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setInfo(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+      setInfo(null);
+    });
     const res = await fetch("/api/host/team/invite", {
       method: "POST",
       headers: { "content-type": "application/json" },

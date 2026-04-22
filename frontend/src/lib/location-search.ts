@@ -55,14 +55,17 @@ async function searchWithMapbox(query: string, token: string): Promise<LocationS
   return uniqueByFullText(suggestions);
 }
 
-async function searchWithNominatim(query: string): Promise<LocationSuggestion[]> {
+async function searchWithNominatim(query: string, userAgent: string): Promise<LocationSuggestion[]> {
   const url = new URL("https://nominatim.openstreetmap.org/search");
   url.searchParams.set("q", query);
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("limit", "6");
 
-  const res = await fetch(url.toString(), { cache: "no-store" });
+  const res = await fetch(url.toString(), {
+    cache: "no-store",
+    headers: { "User-Agent": userAgent, Accept: "application/json" },
+  });
   if (!res.ok) throw new Error("Location search unavailable right now.");
 
   const json = (await res.json()) as Array<{
@@ -90,7 +93,13 @@ async function searchWithNominatim(query: string): Promise<LocationSuggestion[]>
   return uniqueByFullText(suggestions);
 }
 
-export async function searchLocationSuggestions(query: string): Promise<LocationSuggestion[]> {
+function nominatimUserAgent() {
+  const app = process.env.NEXT_PUBLIC_APP_URL || "https://rage.events";
+  return `RAGE-After9/1.0 (+${app})`;
+}
+
+/** Server-side search (Mapbox token from env, then Nominatim with a proper User-Agent). */
+export async function runLocationSearch(query: string): Promise<LocationSuggestion[]> {
   const cleaned = query.trim();
   if (cleaned.length < 3) return [];
 
@@ -99,9 +108,23 @@ export async function searchLocationSuggestions(query: string): Promise<Location
     try {
       return await searchWithMapbox(cleaned, mapboxToken);
     } catch {
-      // Fall back so local development still has real location search.
+      // Fall through to Nominatim.
     }
   }
 
-  return searchWithNominatim(cleaned);
+  return searchWithNominatim(cleaned, nominatimUserAgent());
+}
+
+/** Browser: calls the API route so the token is read on the server at request time (reliable on Vercel). */
+export async function searchLocationSuggestions(query: string): Promise<LocationSuggestion[]> {
+  const cleaned = query.trim();
+  if (cleaned.length < 3) return [];
+
+  if (typeof window === "undefined") {
+    return runLocationSearch(cleaned);
+  }
+
+  const res = await fetch(`/api/location/suggest?q=${encodeURIComponent(cleaned)}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Location search unavailable right now.");
+  return (await res.json()) as LocationSuggestion[];
 }

@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { HostEventRow } from "@/lib/event-workspace-types";
+import type { Visibility } from "@/lib/types";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { Input, Select, Textarea } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -146,9 +147,10 @@ export function EventEditClient({ event }: { event: HostEventRow }) {
       <div className="grid gap-4 rounded-2xl border border-white/[0.1] bg-zinc-950/50 p-5 sm:grid-cols-2">
         <label className="block space-y-1.5">
           <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Visibility</span>
-          <Select className={cn(inputDark)} value={visibility} onChange={(ev) => setVisibility(ev.target.value as "public" | "private")}>
-            <option value="public">Public</option>
-            <option value="private">Private</option>
+          <Select className={cn(inputDark)} value={visibility} onChange={(ev) => setVisibility(ev.target.value as Visibility)}>
+            <option value="public">Public (shown on home page)</option>
+            <option value="unlisted">Unlisted (link only, not on home)</option>
+            <option value="private">Private (guest page hidden)</option>
           </Select>
         </label>
         <label className="block space-y-1.5">

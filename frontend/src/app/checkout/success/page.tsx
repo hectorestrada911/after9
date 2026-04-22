@@ -145,8 +145,8 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             </p>
             <p>
               <span className="font-semibold text-zinc-900">Need support?</span> Email{" "}
-              <a className="underline underline-offset-2" href="mailto:support@after9.app">
-                support@after9.app
+              <a className="underline underline-offset-2" href="mailto:ragesupportpage@gmail.com">
+                ragesupportpage@gmail.com
               </a>{" "}
               and we usually reply within 24 hours.
             </p>

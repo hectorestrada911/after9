@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { CalendarRange, DollarSign, ExternalLink, ScanLine, Ticket, UserRound } from "lucide-react";
+import { eventVisibilityLabel } from "@/lib/event-visibility";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 
@@ -130,7 +131,7 @@ export default async function AccountPage() {
               const sold = soldByEvent.get(event.id) ?? 0;
               const cap = Math.max(event.tickets_available ?? 0, 1);
               const pct = Math.min(Math.round((sold / cap) * 100), 100);
-              const vis = event.visibility === "private" ? "Private" : "Public";
+              const vis = eventVisibilityLabel(event.visibility);
               return (
                 <li
                   key={event.id}
@@ -325,8 +326,8 @@ export default async function AccountPage() {
           <p className="font-semibold text-zinc-200">Need help?</p>
           <p className="mt-1">
             Email{" "}
-            <a href="mailto:support@after9.app" className="font-semibold text-brand-green underline underline-offset-2">
-              support@after9.app
+            <a href="mailto:ragesupportpage@gmail.com" className="font-semibold text-brand-green underline underline-offset-2">
+              ragesupportpage@gmail.com
             </a>{" "}
             and we usually respond within 24 hours.
           </p>

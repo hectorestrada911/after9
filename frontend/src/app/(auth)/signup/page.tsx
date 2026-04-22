@@ -7,6 +7,7 @@ import { Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { readEventDraft, safeNextPath } from "@/lib/event-draft";
 import { Button, Input } from "@/components/ui";
+import { flushUi } from "@/lib/flush-ui";
 
 type AuthMode = "password" | "magic";
 
@@ -36,49 +37,48 @@ function SignupForm() {
 
   async function onPasswordSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     const formData = new FormData(e.currentTarget);
     const formEmail = String(formData.get("email"));
     const password = String(formData.get("password"));
     const confirmPassword = String(formData.get("confirmPassword"));
     if (password.length < 8) {
-      setLoading(false);
       return setError("Use at least 8 characters for your password.");
     }
     if (password !== confirmPassword) {
-      setLoading(false);
       return setError("Passwords do not match.");
     }
 
-    const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup`;
-    const { data, error: signErr } = await supabase.auth.signUp({
-      email: formEmail,
-      password,
-      options: { emailRedirectTo },
-    });
-    if (signErr) {
-      setLoading(false);
-      return setError(signErr.message);
-    }
-    if (!data.session) {
-      setLoading(false);
-      const loginTarget = hostIntent ? hostNext : "/account";
-      router.push(`/login?next=${encodeURIComponent(loginTarget)}&justSignedUp=1`);
-      return;
-    }
-    if (hostIntent) {
-      const { data: profile } = await supabase.from("profiles").select("id").eq("id", data.session.user.id).maybeSingle();
-      setLoading(false);
-      if (profile) {
-        router.push(hostNext);
+    flushUi(() => setLoading(true));
+    try {
+      const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup`;
+      const { data, error: signErr } = await supabase.auth.signUp({
+        email: formEmail,
+        password,
+        options: { emailRedirectTo },
+      });
+      if (signErr) {
+        setError(signErr.message);
         return;
       }
-      router.push(`/onboarding?next=${encodeURIComponent(hostNext)}`);
-      return;
+      if (!data.session) {
+        const loginTarget = hostIntent ? hostNext : "/account";
+        router.push(`/login?next=${encodeURIComponent(loginTarget)}&justSignedUp=1`);
+        return;
+      }
+      if (hostIntent) {
+        const { data: profile } = await supabase.from("profiles").select("id").eq("id", data.session.user.id).maybeSingle();
+        if (profile) {
+          router.push(hostNext);
+          return;
+        }
+        router.push(`/onboarding?next=${encodeURIComponent(hostNext)}`);
+        return;
+      }
+      router.push("/account");
+    } finally {
+      flushUi(() => setLoading(false));
     }
-    setLoading(false);
-    router.push("/account");
   }
 
   async function sendMagicLink() {
@@ -89,23 +89,29 @@ function SignupForm() {
     }
     if (resendSecondsLeft > 0) return;
 
-    setLoading(true);
-    setError(null);
-    const destination = hostIntent ? hostNext : "/account";
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNextPath(destination))}`;
-    const { error: otpErr } = await supabase.auth.signInWithOtp({
-      email: trimmed,
-      options: {
-        emailRedirectTo: redirectTo,
-        shouldCreateUser: true,
-      },
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
     });
-    setLoading(false);
-    if (otpErr) {
-      return setError(otpErr.message);
+    try {
+      const destination = hostIntent ? hostNext : "/account";
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNextPath(destination))}`;
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email: trimmed,
+        options: {
+          emailRedirectTo: redirectTo,
+          shouldCreateUser: true,
+        },
+      });
+      if (otpErr) {
+        setError(otpErr.message);
+        return;
+      }
+      setMagicSent(true);
+      setResendSecondsLeft(45);
+    } finally {
+      flushUi(() => setLoading(false));
     }
-    setMagicSent(true);
-    setResendSecondsLeft(45);
   }
 
   const loginHref = `/login?next=${encodeURIComponent(hostIntent ? hostNext : next)}`;

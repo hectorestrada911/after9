@@ -88,7 +88,7 @@ export default function PrivacyPage() {
         <li>Withdraw consent where processing is based on consent.</li>
       </ul>
       <p>
-        To exercise rights, email <a href="mailto:support@after9.app">support@after9.app</a>. We may need to verify identity before processing a
+        To exercise rights, email <a href="mailto:ragesupportpage@gmail.com">ragesupportpage@gmail.com</a>. We may need to verify identity before processing a
         request.
       </p>
 
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
 
       <h2>16. Contact</h2>
       <p>
-        Privacy and data requests: <a href="mailto:support@after9.app">support@after9.app</a>
+        Privacy and data requests: <a href="mailto:ragesupportpage@gmail.com">ragesupportpage@gmail.com</a>
       </p>
     </LegalPageShell>
   );

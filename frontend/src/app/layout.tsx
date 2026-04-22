@@ -82,7 +82,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Company</p>
                 <ul className="space-y-2 text-sm text-zinc-300">
                   <li>
-                    <a href="mailto:support@after9.app" className="transition hover:text-white">
+                    <a href="mailto:ragesupportpage@gmail.com" className="transition hover:text-white">
                       Get help
                     </a>
                   </li>

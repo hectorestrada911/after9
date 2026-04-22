@@ -135,7 +135,7 @@ export default function TermsPage() {
       <p>
         Except where prohibited by law, disputes will be resolved by binding individual arbitration, not jury trial or class action. You and we each
         waive any right to participate in a class, consolidated, or representative proceeding. You may opt out of arbitration by emailing{" "}
-        <a href="mailto:support@after9.app">support@after9.app</a> within 30 days of first accepting these terms, including your name and account
+        <a href="mailto:ragesupportpage@gmail.com">ragesupportpage@gmail.com</a> within 30 days of first accepting these terms, including your name and account
         email.
       </p>
 
@@ -153,7 +153,7 @@ export default function TermsPage() {
 
       <h2>22. Contact</h2>
       <p>
-        Legal, compliance, and support requests: <a href="mailto:support@after9.app">support@after9.app</a>
+        Legal, compliance, and support requests: <a href="mailto:ragesupportpage@gmail.com">ragesupportpage@gmail.com</a>
       </p>
     </LegalPageShell>
   );

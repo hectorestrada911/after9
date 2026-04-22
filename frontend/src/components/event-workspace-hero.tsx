@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, CalendarRange, MapPin, Pencil } from "lucide-react";
 import CopyEventLink from "@/components/copy-event-link";
 import { EventShareActions } from "@/components/event-share-actions";
+import { eventVisibilityLabel } from "@/lib/event-visibility";
 
 function formatEventDate(isoDate: string) {
   const d = new Date(`${isoDate}T12:00:00`);
@@ -25,7 +26,7 @@ export function EventWorkspaceHero({
   eventId: string;
   publicBaseUrl: string;
 }) {
-  const vis = event.visibility === "private" ? "Private" : "Public";
+  const vis = eventVisibilityLabel(event.visibility);
   const publicPath = `/events/${event.slug}`;
   const fullUrl = publicBaseUrl ? `${publicBaseUrl.replace(/\/$/, "")}${publicPath}` : publicPath;
 

@@ -1,4 +1,4 @@
-export type Visibility = "public" | "private";
+export type Visibility = "public" | "unlisted" | "private";
 export type AgeRestriction = "all_ages" | "age_18_plus" | "age_21_plus";
 
 export interface EventInput {

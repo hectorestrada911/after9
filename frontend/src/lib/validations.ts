@@ -11,7 +11,7 @@ export const eventSchema = z.object({
   capacity: z.coerce.number().min(1),
   ticketPrice: z.coerce.number().min(0.5),
   ticketsAvailable: z.coerce.number().min(1),
-  visibility: z.enum(["public", "private"]),
+  visibility: z.enum(["public", "unlisted", "private"]),
   ageRestriction: z.enum(["all_ages", "age_18_plus", "age_21_plus"]),
   dressCode: z.string().optional(),
   instructions: z.string().optional(),

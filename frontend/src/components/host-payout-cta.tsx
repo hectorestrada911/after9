@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { flushUi } from "@/lib/flush-ui";
 
 type PayoutStatus = {
   hasAccount: boolean;
@@ -27,8 +28,10 @@ export default function HostPayoutCta() {
   }, []);
 
   async function openPayoutSetup() {
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const res = await fetch("/api/host/payout/onboard", { method: "POST" });
     const json = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
     setLoading(false);
@@ -40,8 +43,10 @@ export default function HostPayoutCta() {
   }
 
   async function withdrawNow() {
-    setLoading(true);
-    setError(null);
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const res = await fetch("/api/host/payout/withdraw", { method: "POST" });
     const json = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
     setLoading(false);

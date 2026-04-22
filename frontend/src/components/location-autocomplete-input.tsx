@@ -35,8 +35,22 @@ export function LocationAutocompleteInput({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Mapbox `proximity=lng,lat` when the browser shares coarse location (biases toward e.g. San Diego). */
+  const [proximity, setProximity] = useState<string | undefined>();
 
   useEffect(() => setQuery(value), [value]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { longitude, latitude } = pos.coords;
+        setProximity(`${longitude},${latitude}`);
+      },
+      () => {},
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 10_000 },
+    );
+  }, []);
 
   useEffect(() => {
     const q = query.trim();
@@ -52,7 +66,7 @@ export function LocationAutocompleteInput({
       try {
         setLoading(true);
         setError(null);
-        const next = await searchLocationSuggestions(q);
+        const next = await searchLocationSuggestions(q, { proximity });
         if (!ignore) {
           setItems(next);
           setOpen(true);
@@ -68,7 +82,7 @@ export function LocationAutocompleteInput({
       ignore = true;
       window.clearTimeout(timeout);
     };
-  }, [query]);
+  }, [query, proximity]);
 
   const showMenu = useMemo(() => open && (items.length > 0 || loading || !!error), [error, items.length, loading, open]);
 

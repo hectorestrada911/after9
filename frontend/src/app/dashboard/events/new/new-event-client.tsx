@@ -258,7 +258,10 @@ export default function NewEventClient() {
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   <Calendar className="h-3.5 w-3.5" aria-hidden /> Next
                 </p>
-                <p className="mt-2 text-sm text-muted">Step 1: send this guest link/QR so people can buy. Step 2: open check-in at the door.</p>
+                <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-muted">
+                  <li>Share the guest link or share QR so people can buy.</li>
+                  <li>At the door, open check-in and scan attendee ticket QRs.</li>
+                </ol>
               </div>
               <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-4">
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
@@ -268,7 +271,7 @@ export default function NewEventClient() {
                 {createdEventId ? (
                   <Link
                     href={`/dashboard/events/${createdEventId}/check-in`}
-                    className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border border-line bg-white text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                    className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white text-xs font-bold uppercase tracking-wide text-black transition hover:border-white/40 hover:bg-zinc-100"
                   >
                     <ScanLine className="h-3.5 w-3.5" aria-hidden />
                     Open check-in
@@ -276,7 +279,7 @@ export default function NewEventClient() {
                 ) : (
                   <Link
                     href="/dashboard"
-                    className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border border-line bg-white text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                    className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white text-xs font-bold uppercase tracking-wide text-black transition hover:border-white/40 hover:bg-zinc-100"
                   >
                     Open dashboard
                   </Link>
@@ -284,16 +287,16 @@ export default function NewEventClient() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 border-t border-black/5 pt-4">
+            <div className="flex flex-wrap gap-2 border-t border-white/[0.08] pt-4">
               <Link
-                href="/dashboard"
-                className="inline-flex h-10 flex-1 min-w-[10rem] items-center justify-center rounded-full bg-black px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-neutral-800"
+                href={createdEventId ? `/dashboard/events/${createdEventId}` : "/dashboard"}
+                className="inline-flex h-10 flex-1 min-w-[10rem] items-center justify-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-105"
               >
-                Go to dashboard
+                Go to event hub
               </Link>
               <Link
                 href="/create-event"
-                className="inline-flex h-10 flex-1 min-w-[10rem] items-center justify-center rounded-full border border-line bg-white px-4 text-xs font-bold uppercase tracking-wide transition hover:border-black"
+                className="inline-flex h-10 flex-1 min-w-[10rem] items-center justify-center rounded-full border border-white/20 bg-white/[0.04] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40 hover:bg-white/[0.08]"
               >
                 Create another
               </Link>

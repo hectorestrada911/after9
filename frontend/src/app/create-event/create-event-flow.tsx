@@ -143,6 +143,12 @@ const field =
 
 const labelClass = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-400";
 
+function formatAgeBadge(a: EventDraftV1["ageRestriction"]) {
+  if (a === "age_18_plus") return "18+";
+  if (a === "age_21_plus") return "21+";
+  return "All ages";
+}
+
 function inferResumeStepFromDraft(draft: EventDraftV1): 0 | 1 | 2 {
   const hasFlyer = draft.coverMode === "upload" ? Boolean(draft.imageDataUrl) : Boolean(draft.imageUrl);
   if (!hasFlyer) return 0;
@@ -676,6 +682,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-zinc-900">
                       {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
                       <img src={coverThumbSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
+                      <span className="absolute left-2.5 top-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                        {formatAgeBadge(ageRestriction)}
+                      </span>
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <p className="text-xs text-zinc-500">Tap to change flyer, upload, or browse styles.</p>

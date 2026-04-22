@@ -34,6 +34,7 @@ export default function TermsPage() {
         <li>Hosts are solely responsible for permits, licenses, staffing, age-gate checks, and venue compliance.</li>
         <li>Hosts must honor valid purchases except where cancellation/refund terms lawfully apply.</li>
         <li>Hosts must not oversell capacity beyond venue/legal limits.</li>
+        <li>Hosts are solely responsible for all conduct at their events, including criminal, unsafe, or otherwise unlawful acts by hosts, staff, contractors, guests, or third parties at or around the venue.</li>
       </ul>
 
       <h2>5. Team Invites and Operator Access</h2>
@@ -63,7 +64,21 @@ export default function TermsPage() {
         <li>Chargebacks and payment disputes may result in holds, reversals, and admin actions.</li>
       </ul>
 
-      <h2>9. Acceptable Use</h2>
+      <h2>9. Age Restrictions and Identity Checks</h2>
+      <ul>
+        <li>Hosts are solely responsible for enforcing age restrictions and verifying identification at entry.</li>
+        <li>Any displayed age guidance on the platform is informational and does not replace legal compliance obligations.</li>
+        <li>We are not liable for underage attendance, false identification, or host failures to enforce age-gate requirements.</li>
+      </ul>
+
+      <h2>10. Illegal Events and Prohibited Activity</h2>
+      <p>
+        You may not use the platform to organize or facilitate illegal activity. We may remove content, suspend accounts, and cooperate with law
+        enforcement where required. We do not monitor every event in real time and are not responsible for unlawful acts carried out by hosts,
+        operators, attendees, or third parties.
+      </p>
+
+      <h2>11. Acceptable Use</h2>
       <p>You may not use the platform to:</p>
       <ul>
         <li>Violate laws, infringe rights, or facilitate unsafe or prohibited events.</li>
@@ -72,51 +87,51 @@ export default function TermsPage() {
         <li>Publish misleading, defamatory, or illegal content.</li>
       </ul>
 
-      <h2>10. User Content and License</h2>
+      <h2>12. User Content and License</h2>
       <p>
         You retain ownership of content you submit (for example flyers and event copy). You grant us a worldwide, non-exclusive, royalty-free
         license to host, reproduce, display, distribute, and adapt such content solely to operate, improve, secure, and promote the platform.
       </p>
 
-      <h2>11. Intellectual Property</h2>
+      <h2>13. Intellectual Property</h2>
       <p>
         The platform, branding, software, and non-user content are owned by us or our licensors and protected by applicable intellectual property
         laws. Except as expressly allowed, you may not copy, modify, reverse engineer, or create derivative works.
       </p>
 
-      <h2>12. Third-Party Services</h2>
+      <h2>14. Third-Party Services</h2>
       <p>
         The platform may integrate with third-party services (for example payment processors, analytics, infrastructure providers). Their services
         are governed by their own terms and policies, and we are not responsible for their acts or omissions.
       </p>
 
-      <h2>13. No Warranty</h2>
+      <h2>15. No Warranty</h2>
       <p>
         The platform is provided “as is” and “as available” without warranties of any kind, express or implied, including merchantability, fitness
         for a particular purpose, non-infringement, and uninterrupted availability.
       </p>
 
-      <h2>14. Limitation of Liability</h2>
+      <h2>16. Limitation of Liability</h2>
       <p>
         To the maximum extent permitted by law, we are not liable for indirect, incidental, special, consequential, exemplary, or punitive damages,
         including lost profits, lost revenue, lost data, event losses, reputational harm, or business interruption. Our aggregate liability for any
         claim arising from or relating to the platform will not exceed the greater of (a) amounts you paid us in the prior 12 months or (b) $100.
       </p>
 
-      <h2>15. Indemnification</h2>
+      <h2>17. Indemnification</h2>
       <p>
         You agree to defend, indemnify, and hold harmless RAGE/After9 and its affiliates, officers, employees, and agents from claims, damages,
         liabilities, costs, and expenses (including reasonable attorney fees) arising from your use of the platform, your content, your events, or
         your violation of these terms or law.
       </p>
 
-      <h2>16. Suspension and Termination</h2>
+      <h2>18. Suspension and Termination</h2>
       <p>
         We may suspend, restrict, or terminate access at any time for security, legal, policy, or risk reasons. Certain sections (including payment,
         liability, indemnity, dispute, and IP terms) survive termination.
       </p>
 
-      <h2>17. Dispute Resolution; Arbitration; Class Waiver</h2>
+      <h2>19. Dispute Resolution; Arbitration; Class Waiver</h2>
       <p>
         Except where prohibited by law, disputes will be resolved by binding individual arbitration, not jury trial or class action. You and we each
         waive any right to participate in a class, consolidated, or representative proceeding. You may opt out of arbitration by emailing{" "}
@@ -124,19 +139,19 @@ export default function TermsPage() {
         email.
       </p>
 
-      <h2>18. Governing Law</h2>
+      <h2>20. Governing Law</h2>
       <p>
         These terms are governed by applicable laws of the governing jurisdiction stated by the company, without regard to conflict-of-law rules,
         except where consumer law requires otherwise.
       </p>
 
-      <h2>19. Changes to Terms</h2>
+      <h2>21. Changes to Terms</h2>
       <p>
         We may update these terms from time to time. Updated terms become effective when posted. Continued platform use after effective date means
         acceptance of revised terms.
       </p>
 
-      <h2>20. Contact</h2>
+      <h2>22. Contact</h2>
       <p>
         Legal, compliance, and support requests: <a href="mailto:support@after9.app">support@after9.app</a>
       </p>

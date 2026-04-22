@@ -25,7 +25,14 @@ export default function NewEventClient() {
   const [publishedTitle, setPublishedTitle] = useState<string | null>(null);
   const [publishedImageUrl, setPublishedImageUrl] = useState<string | null>(null);
   const [publishedTicketPriceCents, setPublishedTicketPriceCents] = useState<number | null>(null);
+  const [publishedAgeRestriction, setPublishedAgeRestriction] = useState<"all_ages" | "age_18_plus" | "age_21_plus" | null>(null);
   const platformFeePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
+
+  function formatAgeBadge(age: "all_ages" | "age_18_plus" | "age_21_plus" | null) {
+    if (age === "age_18_plus") return "18+";
+    if (age === "age_21_plus") return "21+";
+    return "All ages";
+  }
 
   useEffect(() => {
     setDraftLoaded(Boolean(readEventDraft()));
@@ -164,6 +171,7 @@ export default function NewEventClient() {
     setPublishedTitle(title);
     setPublishedImageUrl(imageUrl);
     setPublishedTicketPriceCents(Math.round(parsed.data.ticketPrice * 100));
+    setPublishedAgeRestriction(parsed.data.ageRestriction);
   }
 
   if (createdLink) {
@@ -207,6 +215,9 @@ export default function NewEventClient() {
             {publishedImageUrl ? (
               <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-line bg-offwhite">
                 <Image src={publishedImageUrl} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 42rem" unoptimized />
+                <span className="absolute left-3 top-3 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                  {formatAgeBadge(publishedAgeRestriction)}
+                </span>
               </div>
             ) : null}
 

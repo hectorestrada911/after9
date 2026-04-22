@@ -19,3 +19,6 @@ frontend/tsconfig.tsbuildinfo
 # IDE
 .vscode/
 .idea/
+
+# Cursor skills (UI/UX Pro Max ships Python helpers)
+.cursor/skills/**/__pycache__/

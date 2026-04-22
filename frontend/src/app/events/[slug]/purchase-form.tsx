@@ -23,9 +23,17 @@ export default function PurchaseForm({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [buyerEmail, setBuyerEmail] = useState("");
+  const [buyerEmailConfirm, setBuyerEmailConfirm] = useState("");
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const normalizedEmail = buyerEmail.trim().toLowerCase();
+    const normalizedConfirm = buyerEmailConfirm.trim().toLowerCase();
+    if (!normalizedEmail || normalizedEmail !== normalizedConfirm) {
+      setError("Emails must match so we can deliver and recover your ticket.");
+      return;
+    }
     setLoading(true);
     setError(null);
     const form = new FormData(e.currentTarget);
@@ -34,7 +42,7 @@ export default function PurchaseForm({
       title,
       slug,
       buyerName: String(form.get("buyerName")),
-      buyerEmail: String(form.get("buyerEmail")),
+      buyerEmail: normalizedEmail,
       quantity,
     };
     const res = await fetch("/api/checkout/session", {
@@ -57,7 +65,24 @@ export default function PurchaseForm({
   return (
     <form className={cn("space-y-4", theme === "dark" ? "text-zinc-100" : "text-zinc-950")} onSubmit={onSubmit}>
       <Input name="buyerName" placeholder="Full name" required className={fieldClass} />
-      <Input name="buyerEmail" type="email" placeholder="Email" required className={fieldClass} />
+      <Input
+        name="buyerEmail"
+        type="email"
+        placeholder="Email"
+        required
+        className={fieldClass}
+        value={buyerEmail}
+        onChange={(e) => setBuyerEmail(e.target.value)}
+      />
+      <Input
+        name="buyerEmailConfirm"
+        type="email"
+        placeholder="Confirm email"
+        required
+        className={fieldClass}
+        value={buyerEmailConfirm}
+        onChange={(e) => setBuyerEmailConfirm(e.target.value)}
+      />
       <div>
         <p className={cn("mb-2 text-xs font-bold uppercase tracking-[0.14em]", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
           Quantity
@@ -105,7 +130,10 @@ export default function PurchaseForm({
         <span className={cn("font-black", theme === "dark" ? "text-white" : "text-black")}>${((price * quantity) / 100).toFixed(2)}</span>
       </p>
       <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
-        Tickets are sent to your email with a QR code and entry details.
+        Tickets are sent to this email. Use the same email later in My tickets to recover access.
+      </p>
+      <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
+        Buying multiple tickets creates one unique QR code per ticket.
       </p>
       <Button
         className="w-full bg-gradient-to-r from-[#4BFA94] to-emerald-300 text-sm font-black uppercase tracking-wide text-black shadow-[0_12px_40px_-12px_rgba(75,250,148,0.55)] hover:brightness-105 disabled:opacity-50"

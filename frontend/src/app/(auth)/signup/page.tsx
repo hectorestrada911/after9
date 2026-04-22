@@ -41,7 +41,22 @@ function SignupForm() {
     const formData = new FormData(e.currentTarget);
     const formEmail = String(formData.get("email"));
     const password = String(formData.get("password"));
-    const { data, error: signErr } = await supabase.auth.signUp({ email: formEmail, password });
+    const confirmPassword = String(formData.get("confirmPassword"));
+    if (password.length < 8) {
+      setLoading(false);
+      return setError("Use at least 8 characters for your password.");
+    }
+    if (password !== confirmPassword) {
+      setLoading(false);
+      return setError("Passwords do not match.");
+    }
+
+    const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup`;
+    const { data, error: signErr } = await supabase.auth.signUp({
+      email: formEmail,
+      password,
+      options: { emailRedirectTo },
+    });
     if (signErr) {
       setLoading(false);
       return setError(signErr.message);
@@ -185,6 +200,18 @@ function SignupForm() {
                   name="password"
                   type="password"
                   placeholder="Password"
+                  autoComplete="new-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  dir="ltr"
+                  className="h-12 text-left [unicode-bidi:plaintext]"
+                  required
+                />
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
                   autoComplete="new-password"
                   autoCapitalize="none"
                   autoCorrect="off"

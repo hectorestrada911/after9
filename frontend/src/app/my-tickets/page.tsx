@@ -173,7 +173,20 @@ export default async function MyTicketsPage() {
                   <div className="mt-3 grid gap-4 sm:grid-cols-2">
                     {orderTickets.map((ticket) => (
                       <div key={ticket.id} className="rounded-xl border border-white/[0.12] bg-zinc-900/70 p-4">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Entry QR</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Entry QR</p>
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                              ticket.status === "checked_in"
+                                ? "bg-brand-green/30 text-brand-green"
+                                : ticket.status === "cancelled"
+                                  ? "bg-red-500/20 text-red-300"
+                                  : "bg-white/10 text-zinc-300"
+                            }`}
+                          >
+                            {ticket.status === "checked_in" ? "Used" : ticket.status}
+                          </span>
+                        </div>
                         {ticket.qr_code_url ? (
                           <div className="mt-2 inline-block rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5">
                             {/* eslint-disable-next-line @next/next/no-img-element -- data URL from Stripe webhook */}
@@ -189,7 +202,9 @@ export default async function MyTicketsPage() {
                           <p className="mt-2 text-xs text-zinc-500">QR generating after payment…</p>
                         )}
                         <p className="mt-3 font-mono text-xs text-zinc-300">{ticket.ticket_code}</p>
-                        <p className="mt-1 text-xs capitalize text-zinc-500">{ticket.status.replace("_", " ")}</p>
+                        <p className="mt-1 text-xs capitalize text-zinc-500">
+                          {ticket.status === "checked_in" ? "Used at door and saved in your history." : ticket.status.replace("_", " ")}
+                        </p>
                       </div>
                     ))}
                   </div>

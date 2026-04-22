@@ -22,6 +22,14 @@ function mapAuthError(raw: string | null): string | null {
   }
 }
 
+function mapPasswordError(raw: string): string {
+  const msg = raw.toLowerCase();
+  if (msg.includes("invalid login credentials")) return "Incorrect email or password.";
+  if (msg.includes("email not confirmed")) return "Confirm your email first, then log in.";
+  if (msg.includes("too many requests")) return "Too many attempts. Wait a moment and try again.";
+  return raw;
+}
+
 function LoginForm() {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
@@ -30,6 +38,7 @@ function LoginForm() {
   const hasEventDraft = Boolean(readEventDraft());
   const effectiveNext = searchParams.get("next") ? next : hasEventDraft ? "/dashboard/events/new" : next;
   const justSignedUp = searchParams.get("justSignedUp") === "1";
+  const verified = searchParams.get("verified") === "1";
   const urlError = mapAuthError(searchParams.get("error"));
 
   const [authMode, setAuthMode] = useState<AuthMode>("password");
@@ -55,7 +64,7 @@ function LoginForm() {
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: formEmail, password });
     if (signErr) {
       setLoading(false);
-      return setError(signErr.message);
+      return setError(mapPasswordError(signErr.message));
     }
     try {
       const shouldAutoRoute = !searchParams.get("next");
@@ -199,7 +208,9 @@ function LoginForm() {
               <form onSubmit={onPasswordSubmit} className="mt-3.5 space-y-3">
                 {justSignedUp ? (
                   <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
-                    Account created. If confirmation email is required, verify it first, then log in.
+                    {verified
+                      ? "Email confirmed. You can log in now."
+                      : "Account created. If confirmation email is required, verify it first, then log in."}
                   </p>
                 ) : null}
                 <Input

@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
   const next = safeNextPath(url.searchParams.get("next"));
   const postAuthUrl = (() => {
     if (type === "recovery") return new URL("/auth/reset-password", url.origin);
+    if (type === "signup") return new URL("/login?justSignedUp=1&verified=1", url.origin);
     const complete = new URL("/auth/complete", url.origin);
     complete.searchParams.set("next", next);
     return complete;

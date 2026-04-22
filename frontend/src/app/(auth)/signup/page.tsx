@@ -169,7 +169,7 @@ function SignupForm() {
                 <Input
                   name="email"
                   type="email"
-                  placeholder="you@school.edu"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -207,7 +207,7 @@ function SignupForm() {
                 </p>
                 <Input
                   type="email"
-                  placeholder="you@school.edu"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   autoCapitalize="none"
                   autoCorrect="off"

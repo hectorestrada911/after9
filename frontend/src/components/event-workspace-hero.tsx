@@ -99,7 +99,7 @@ export function EventWorkspaceHero({
             <CopyEventLink slug={event.slug} variant="dark" />
             <EventShareActions slug={event.slug} shareTitle={event.title} shareText={`${event.title} — tickets on RAGE`} />
             <Link
-              href={`/dashboard/events/${eventId}/check-in`}
+              href={`/dashboard/events/${eventId}/check-in?focusScanner=1#scanner`}
               className="inline-flex h-11 items-center rounded-full border border-white/25 bg-white/[0.06] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
             >
               Scan QR

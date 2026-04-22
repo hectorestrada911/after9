@@ -15,7 +15,7 @@ export function EventHostNav({ eventId }: { eventId: string }) {
   const items = [
     { href: base, label: "Overview", active: isOverview },
     { href: `${base}/orders`, label: "Orders", active: isOrders },
-    { href: `${base}/check-in`, label: "Scan QR", active: isCheckIn },
+    { href: `${base}/check-in?focusScanner=1#scanner`, label: "Scan QR", active: isCheckIn },
     { href: `${base}/edit`, label: "Details", active: isEdit },
   ];
 

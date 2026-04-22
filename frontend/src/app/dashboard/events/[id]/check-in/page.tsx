@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { IScannerControls } from "@zxing/browser";
+import { useSearchParams } from "next/navigation";
 import { Button, Input } from "@/components/ui";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -21,17 +22,21 @@ type NativeBarcodeDetectorCtor = new (options: { formats: string[] }) => NativeB
 /* eslint-enable no-unused-vars */
 
 export default function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
+  const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [eventId, setEventId] = useState<string>("");
+  const [eventTitle, setEventTitle] = useState<string>("");
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<TicketRow[]>([]);
+  const [scanConfirmed, setScanConfirmed] = useState(false);
   const [scanning, setScanning] = useState(false);
   /** True once the preview stream is attached and playing (or ZXing has taken over the device). */
   const [cameraPreviewReady, setCameraPreviewReady] = useState(false);
   const [cameraSupported, setCameraSupported] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const scannerSectionRef = useRef<HTMLDivElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
   const zxingControlsRef = useRef<IScannerControls | null>(null);
@@ -90,6 +95,15 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }, [params]);
 
   useEffect(() => {
+    async function loadEventTitle() {
+      if (!eventId) return;
+      const { data } = await supabase.from("events").select("title").eq("id", eventId).maybeSingle();
+      setEventTitle(data?.title ?? "");
+    }
+    loadEventTitle();
+  }, [eventId, supabase]);
+
+  useEffect(() => {
     async function loadMatches() {
       if (!eventId) return;
       const query = supabase
@@ -136,6 +150,15 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     };
   }, [stopScanner]);
 
+  useEffect(() => {
+    const shouldFocus = searchParams.get("focusScanner") === "1" || (typeof window !== "undefined" && window.location.hash === "#scanner");
+    if (!shouldFocus) return;
+    const t = window.setTimeout(() => {
+      scannerSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [searchParams]);
+
   async function checkInTicket(ticketCode: string, source: "manual" | "scan") {
     setMessage(null);
     setError(null);
@@ -166,6 +189,10 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }
 
   async function startScanner() {
+    if (!scanConfirmed) {
+      setCameraError("Confirm this is the correct event before starting camera scan.");
+      return;
+    }
     if (!cameraSupported) {
       setCameraError("Camera is not available in this browser. Use HTTPS, or try Safari or Chrome on your phone.");
       return;
@@ -262,10 +289,13 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="mx-auto max-w-lg min-w-0">
+    <div id="scanner" ref={scannerSectionRef} className="mx-auto max-w-lg min-w-0 scroll-mt-24">
       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Scan QR</p>
       <h1 className="mt-2 text-2xl font-black tracking-tight text-white">Door scanner</h1>
       <p className="mt-2 text-sm text-zinc-500">Point camera at guest QR. You can also search by attendee name, email, or ticket code.</p>
+      <div className="mt-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-xs text-zinc-300">
+        Event selected: <span className="font-semibold text-white">{eventTitle || "Loading event..."}</span>
+      </div>
 
       <Input
         className="mt-8 min-h-12 w-full rounded-xl border border-white/[0.12] bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-brand-green/40 focus:ring-2 focus:ring-brand-green/15"
@@ -287,8 +317,17 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       </form>
 
       <div className="mt-4 space-y-2">
+        <label className="flex items-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-xs text-zinc-300">
+          <input
+            type="checkbox"
+            checked={scanConfirmed}
+            onChange={(e) => setScanConfirmed(e.target.checked)}
+            className="h-4 w-4 accent-brand-green"
+          />
+          I confirm this is the correct event to scan at the door.
+        </label>
         <div className="flex gap-2">
-          <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] hover:brightness-110" type="button" onClick={startScanner} disabled={scanning || !cameraSupported}>
+          <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] hover:brightness-110" type="button" onClick={startScanner} disabled={scanning || !cameraSupported || !scanConfirmed}>
             {scanning ? (cameraPreviewReady ? "Scanning…" : "Starting camera…") : "Scan QR with camera"}
           </Button>
           {scanning ? (

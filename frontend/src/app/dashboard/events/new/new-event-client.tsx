@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowUpRight, Calendar, CheckCircle2, Link2, QrCode, ScanLine, Share2 } from "lucide-react";
 import { CreateEventFlow, type CreateEventPublishPayload } from "@/app/create-event/create-event-flow";
 import { clearEventDraft, dataUrlToFile, readEventDraft } from "@/lib/event-draft";
-import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
+import { hostNetFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { centsToDollars } from "@/lib/utils";
@@ -79,6 +79,7 @@ export default function NewEventClient() {
       dressCode: payload.dressCode,
       instructions: payload.instructions,
       locationNote: payload.locationNote,
+      showCapacityPublicly: payload.showCapacityPublicly,
     });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "Invalid event data.");
     if (parsed.data.ticketsAvailable > parsed.data.capacity) {
@@ -136,11 +137,25 @@ export default function NewEventClient() {
       dress_code: parsed.data.dressCode || null,
       instructions: parsed.data.instructions || null,
       location_note: parsed.data.locationNote || null,
+      show_capacity_publicly: parsed.data.showCapacityPublicly ?? false,
       slug,
     };
 
-    const { data: created, error: insertError } = await supabase.from("events").insert(insertPayload).select("id,slug").single();
-    if (insertError) return setError(insertError.message);
+    let created: { id: string; slug: string } | null = null;
+    let insertError: { message: string } | null = null;
+    {
+      const res = await supabase.from("events").insert(insertPayload).select("id,slug").single();
+      created = res.data;
+      insertError = res.error;
+    }
+    if (insertError?.message.toLowerCase().includes("show_capacity_publicly")) {
+      const legacyPayload = { ...insertPayload } as Record<string, unknown>;
+      delete legacyPayload.show_capacity_publicly;
+      const legacy = await supabase.from("events").insert(legacyPayload).select("id,slug").single();
+      created = legacy.data;
+      insertError = legacy.error;
+    }
+    if (insertError || !created) return setError(insertError?.message ?? "Could not publish event.");
     clearEventDraft();
     const link = `${window.location.origin}/events/${created.slug}`;
     setCreatedLink(link);
@@ -155,35 +170,33 @@ export default function NewEventClient() {
     return (
       <main className="container-page min-w-0 py-10 sm:py-14">
         <div className="mx-auto max-w-2xl min-w-0">
-          <div className="space-y-5 rounded-2xl border border-black bg-gradient-to-br from-offwhite to-zinc-100 p-5 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.35)]">
+          <div className="space-y-5 rounded-2xl border border-white/[0.14] bg-gradient-to-br from-zinc-900 to-black p-5 shadow-[0_24px_80px_-40px_rgba(0,0,0,0.85)]">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-black">
                   <CheckCircle2 className="h-3.5 w-3.5" aria-hidden /> Published
                 </p>
-                <h2 className="mt-2 text-xl font-black tracking-tight text-black sm:text-2xl">Your event is live</h2>
+                <h2 className="mt-2 text-xl font-black tracking-tight text-white sm:text-2xl">Your event is live</h2>
                 <p className="mt-1 max-w-md text-sm text-muted">
                   Share the guest page, then watch sales and check-ins from your dashboard. You can always edit details later.
                 </p>
-                {publishedTitle ? <p className="mt-3 text-sm font-semibold text-black">{publishedTitle}</p> : null}
+                {publishedTitle ? <p className="mt-3 text-sm font-semibold text-white">{publishedTitle}</p> : null}
                 {publishedTicketPriceCents !== null ? (
                   <div className="mt-1 space-y-1 text-sm text-muted">
                     <p>
-                      Guest price (public): <span className="font-semibold text-black">${centsToDollars(publishedTicketPriceCents)}</span>
+                      Guest price (public): <span className="font-semibold text-white">${centsToDollars(publishedTicketPriceCents)}</span>
                     </p>
                     <p>
-                      You receive (est. after {platformFeePercent}% platform fee):{" "}
-                      <span className="font-semibold text-black">${centsToDollars(hostNetFromGrossCents(publishedTicketPriceCents, platformFeePercent))}</span>
-                    </p>
-                    <p>
-                      Platform fee:{" "}
-                      <span className="font-semibold text-black">-${centsToDollars(platformFeeFromGrossCents(publishedTicketPriceCents, platformFeePercent))}</span>
+                      You receive (estimate):{" "}
+                      <span className="font-semibold text-white">
+                        ${centsToDollars(hostNetFromGrossCents(publishedTicketPriceCents, platformFeePercent))}
+                      </span>
                     </p>
                   </div>
                 ) : null}
               </div>
               {qrCodeUrl && (
-                <div className="rounded-xl border border-line bg-white p-2.5 shadow-sm">
+                <div className="rounded-xl border border-white/20 bg-zinc-950 p-2.5 shadow-sm">
                   <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-wider text-zinc-500">Share QR</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={qrCodeUrl} alt="QR code for guest event link" className="h-24 w-24 rounded-md sm:h-28 sm:w-28" />
@@ -197,9 +210,9 @@ export default function NewEventClient() {
               </div>
             ) : null}
 
-            <div className="rounded-xl border border-line bg-white/80 p-4">
+            <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-4">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Guest link</p>
-              <p className="mt-2 break-all rounded-lg border border-line bg-white px-3 py-2 font-mono text-[11px] text-black">{createdLink}</p>
+              <p className="mt-2 break-all rounded-lg border border-white/[0.12] bg-black/30 px-3 py-2 font-mono text-[11px] text-zinc-200">{createdLink}</p>
               <p className="mt-2 text-xs text-muted">
                 Share this exact link (or the QR above). Guests buy tickets from this page.
               </p>
@@ -241,13 +254,13 @@ export default function NewEventClient() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-line bg-white/80 p-4">
+              <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-4">
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   <Calendar className="h-3.5 w-3.5" aria-hidden /> Next
                 </p>
                 <p className="mt-2 text-sm text-muted">Step 1: send this guest link/QR so people can buy. Step 2: open check-in at the door.</p>
               </div>
-              <div className="rounded-xl border border-line bg-white/80 p-4">
+              <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] p-4">
                 <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted">
                   <QrCode className="h-3.5 w-3.5" aria-hidden /> QR meaning
                 </p>

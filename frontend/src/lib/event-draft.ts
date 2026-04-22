@@ -18,6 +18,7 @@ export type EventDraftV1 = {
   ticketsAvailable: number;
   visibility: "public" | "private";
   ageRestriction: "all_ages" | "age_18_plus" | "age_21_plus";
+  showCapacityPublicly?: boolean;
   dressCode?: string;
   instructions?: string;
   locationNote?: string;

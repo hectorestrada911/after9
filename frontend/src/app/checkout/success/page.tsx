@@ -73,6 +73,28 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
             BACK TO EVENTS
           </Link>
         </div>
+        <section className="mt-10 rounded-2xl border border-line bg-offwhite p-4 text-left sm:p-5">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted">Help / common questions</h2>
+          <div className="mt-3 space-y-3 text-sm text-muted">
+            <p>
+              <span className="font-semibold text-black">Where are my tickets later?</span> Open{" "}
+              <Link href="/my-tickets" className="underline underline-offset-2">
+                My tickets
+              </Link>{" "}
+              from your account.
+            </p>
+            <p>
+              <span className="font-semibold text-black">Should I save this QR?</span> Yes — screenshot it now for quicker entry.
+            </p>
+            <p>
+              <span className="font-semibold text-black">Need support?</span> Email{" "}
+              <a className="underline underline-offset-2" href="mailto:support@after9.app">
+                support@after9.app
+              </a>{" "}
+              and we usually reply within 24 hours.
+            </p>
+          </div>
+        </section>
       </div>
     </main>
   );

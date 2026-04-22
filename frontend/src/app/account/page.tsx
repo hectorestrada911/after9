@@ -320,6 +320,17 @@ export default async function AccountPage() {
           <UserRound className="h-4 w-4" /> Account
         </p>
         <p className="mt-2 text-sm text-zinc-300">{profile?.full_name ?? user.email}</p>
+        <p className="mt-1 text-xs text-zinc-500">Signed in as {user.email ?? "unknown email"}</p>
+        <div className="mt-4 rounded-xl border border-white/[0.12] bg-black/30 p-3 text-sm text-zinc-300">
+          <p className="font-semibold text-zinc-200">Need help?</p>
+          <p className="mt-1">
+            Email{" "}
+            <a href="mailto:support@after9.app" className="font-semibold text-brand-green underline underline-offset-2">
+              support@after9.app
+            </a>{" "}
+            and we usually respond within 24 hours.
+          </p>
+        </div>
       </section>
     </main>
   );

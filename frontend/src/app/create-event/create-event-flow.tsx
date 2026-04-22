@@ -31,6 +31,7 @@ export type CreateEventPublishPayload = {
   dressCode?: string;
   instructions?: string;
   locationNote?: string;
+  showCapacityPublicly: boolean;
   coverMode: "stock" | "upload";
   uploadDataUrl: string | null;
 };
@@ -231,6 +232,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [dressCode, setDressCode] = useState("");
   const [instructions, setInstructions] = useState("");
   const [locationNote, setLocationNote] = useState("");
+  const [showCapacityPublicly, setShowCapacityPublicly] = useState(false);
   const [hasAuthedSession, setHasAuthedSession] = useState(false);
   const [restoredDraftStep, setRestoredDraftStep] = useState<number | null>(null);
   const hydratedDraftRef = useRef(false);
@@ -292,6 +294,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     setTicketsAvailable(String(draft.ticketsAvailable));
     setVisibility(draft.visibility);
     setAgeRestriction(draft.ageRestriction);
+    setShowCapacityPublicly(draft.showCapacityPublicly ?? false);
     setDressCode(draft.dressCode ?? "");
     setInstructions(draft.instructions ?? "");
     setLocationNote(draft.locationNote ?? "");
@@ -327,6 +330,13 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     const t = window.setTimeout(() => setMicroWin(null), 2200);
     return () => window.clearTimeout(t);
   }, [microWin]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }, [step]);
 
   function flash(msg: string) {
     setMicroWin(msg);
@@ -373,10 +383,6 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   function validateStep1(): boolean {
     if (title.trim().length < 3) {
       setError("Give the night a title (at least 3 characters).");
-      return false;
-    }
-    if (description.trim().length < 10) {
-      setError("Add a few sentences so guests know what they're walking into.");
       return false;
     }
     if (!date || !startTime || !endTime) {
@@ -447,7 +453,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
     const parsed = eventSchema.safeParse({
       title,
-      description,
+      description: description.trim(),
       imageUrl,
       date,
       startTime,
@@ -461,6 +467,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       dressCode: dressCode || undefined,
       instructions: instructions || undefined,
       locationNote: locationNote || undefined,
+      showCapacityPublicly,
     });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Double-check the numbers and try again.");
@@ -483,6 +490,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       ticketsAvailable: parsed.data.ticketsAvailable,
       visibility: parsed.data.visibility,
       ageRestriction: parsed.data.ageRestriction,
+      showCapacityPublicly,
       dressCode: parsed.data.dressCode,
       instructions: parsed.data.instructions,
       locationNote: parsed.data.locationNote,
@@ -517,6 +525,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
           dressCode: parsed.data.dressCode,
           instructions: parsed.data.instructions,
           locationNote: parsed.data.locationNote,
+          showCapacityPublicly,
           coverMode,
           uploadDataUrl: coverMode === "upload" ? uploadDataUrl : null,
         });
@@ -750,7 +759,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   <span className={labelClass}>What happens?</span>
                   <textarea
                     className={`${field} min-h-[120px] resize-y py-2.5 leading-relaxed`}
-                    placeholder="Energy, dress code hints, special guests…"
+                    placeholder="Optional: energy, dress code hints, special guests…"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -779,6 +788,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   <span className={labelClass}>Venue or address</span>
                   <input className={field} placeholder="Guests need to find it" value={location} onChange={(e) => setLocation(e.target.value)} />
                 </div>
+                <p className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-xs text-zinc-400">
+                  Host note: your organizer name appears as <span className="font-semibold text-zinc-200">Hosted by …</span> on the event page.
+                </p>
                 <div>
                   <span className={labelClass}>Location note (optional)</span>
                   <input className={field} placeholder="Door code, floor, landmark…" value={locationNote} onChange={(e) => setLocationNote(e.target.value)} />
@@ -797,7 +809,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   </div>
                   <div>
                     <span className={labelClass}>Ticket price (USD)</span>
-                    <input className={field} type="number" step="0.01" min={0} value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} />
+                    <input className={field} type="number" step="0.01" min={0.5} value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} />
                   </div>
                   <div>
                     <span className={labelClass}>Tickets to sell</span>
@@ -812,7 +824,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                       <p className="mt-1 text-lg font-black text-white">${ticketPriceFloat.toFixed(2)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Platform fee ({platformFeePercent}%)</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Platform fee</p>
                       <p className="mt-1 text-lg font-black text-zinc-300">-${(platformFeeCents / 100).toFixed(2)}</p>
                     </div>
                     <div>
@@ -822,6 +834,18 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">Stripe processing fees are separate and can vary by card/payment method.</p>
                 </div>
+                <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-xs text-zinc-400">
+                  Minimum ticket price is <span className="font-semibold text-zinc-200">$0.50</span>.
+                </div>
+                <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
+                  <span>Show remaining capacity publicly</span>
+                  <input
+                    type="checkbox"
+                    checked={showCapacityPublicly}
+                    onChange={(e) => setShowCapacityPublicly(e.target.checked)}
+                    className="h-4 w-4 accent-brand-green"
+                  />
+                </label>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <span className={labelClass}>Listing</span>

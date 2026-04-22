@@ -205,7 +205,7 @@ function LoginForm() {
                 <Input
                   name="email"
                   type="email"
-                  placeholder="you@school.edu"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -256,7 +256,7 @@ function LoginForm() {
                 </p>
                 <Input
                   type="email"
-                  placeholder="you@school.edu"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   autoCapitalize="none"
                   autoCorrect="off"

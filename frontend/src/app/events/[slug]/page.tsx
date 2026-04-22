@@ -40,6 +40,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const sold = soldCount ?? 0;
   const remaining = Math.max((event.tickets_available ?? 0) - sold, 0);
   const soldPercent = Math.min(Math.round((sold / Math.max(event.tickets_available ?? 1, 1)) * 100), 100);
+  const showCapacityPublicly = Boolean(event.show_capacity_publicly);
   const lowStock = remaining > 0 && remaining <= Math.max(12, Math.ceil((event.tickets_available ?? 0) * 0.15));
   const moving = sold >= 3;
 
@@ -175,28 +176,35 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                   <p className="mt-2 text-balance text-4xl font-black tracking-tighter text-white sm:text-5xl">${centsToDollars(event.ticket_price)}</p>
                   <p className="mt-3 inline-flex flex-wrap items-center gap-2 text-sm font-medium text-zinc-400">
                     <Ticket className="h-4 w-4 text-brand-green" strokeWidth={2} aria-hidden />
-                    <span className="font-bold text-white">{remaining}</span>
-                    <span>spots left</span>
+                    {showCapacityPublicly ? (
+                      <>
+                        <span className="font-bold text-white">{remaining}</span>
+                        <span>spots left</span>
+                      </>
+                    ) : (
+                      <span className="font-bold text-white">Limited spots</span>
+                    )}
                   </p>
 
-                  <div className="mt-6">
-                    <div className="mb-2 flex items-center justify-between text-xs font-semibold text-zinc-500">
-                      <span>Energy</span>
-                      <span className="tabular-nums text-white">{soldPercent}% claimed</span>
+                  {showCapacityPublicly ? (
+                    <div className="mt-6">
+                      <div className="mb-2 flex items-center justify-between text-xs font-semibold text-zinc-500">
+                        <span>Energy</span>
+                        <span className="tabular-nums text-white">{soldPercent}% claimed</span>
+                      </div>
+                      <div className="h-2.5 overflow-hidden rounded-full bg-zinc-800 ring-1 ring-white/5">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300 motion-safe:transition-[width] motion-safe:duration-700"
+                          style={{ width: `${soldPercent}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2.5 overflow-hidden rounded-full bg-zinc-800 ring-1 ring-white/5">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300 motion-safe:transition-[width] motion-safe:duration-700"
-                        style={{ width: `${soldPercent}%` }}
-                      />
-                    </div>
-                  </div>
+                  ) : null}
 
                   <div className="mt-6 flex items-start gap-2.5 rounded-2xl border border-white/[0.08] bg-black/40 px-4 py-3 text-xs leading-relaxed text-zinc-400">
                     <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={2} aria-hidden />
                     <span>
-                      <span className="font-semibold text-zinc-200">Secure checkout.</span> Mobile ticket + QR. Instant email
-                      confirmation.
+                      <span className="font-semibold text-zinc-200">Secure checkout.</span> Mobile ticket + QR appears instantly in-app.
                     </span>
                   </div>
 

@@ -29,7 +29,7 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
           <CheckCircle2 size={14} /> Payment successful
         </div>
         <h1 className="mt-5 heading-display-fluid">You&rsquo;re in.</h1>
-        <p className="mt-4 text-base text-muted">Tickets are ready. Save this screen or check your email.</p>
+        <p className="mt-4 text-base text-muted">Tickets are ready. Save this screen or open My tickets any time.</p>
         <p className="mt-6 inline-block rounded-xl bg-offwhite px-4 py-2 text-sm font-mono">Order: {params.order_id || "Pending"}</p>
         {order && (
           <p className="mt-3 text-sm text-muted">

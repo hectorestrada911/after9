@@ -34,8 +34,20 @@ export async function POST(req: Request) {
     if (order) {
       await supabase.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
 
+      // Idempotency: Stripe may retry this webhook. Only create missing tickets.
+      const { count: existingCount } = await supabase
+        .from("tickets")
+        .select("id", { count: "exact", head: true })
+        .eq("order_id", orderId);
+      const alreadyCreated = existingCount ?? 0;
+      const expected = Math.max(order.quantity ?? 0, 0);
+      const missing = Math.max(expected - alreadyCreated, 0);
+      if (missing === 0) {
+        return NextResponse.json({ received: true, idempotent: true });
+      }
+
       const tickets = await Promise.all(
-        Array.from({ length: order.quantity }).map(async () => {
+        Array.from({ length: missing }).map(async () => {
           const ticketCode = `TK-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
           const qrCodeUrl = await QRCode.toDataURL(ticketCode, TICKET_QR_TO_PNG_OPTIONS);
           return {

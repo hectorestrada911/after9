@@ -25,10 +25,14 @@ export async function GET(request: NextRequest) {
   }
 
   const next = safeNextPath(url.searchParams.get("next"));
-  const complete = new URL("/auth/complete", url.origin);
-  complete.searchParams.set("next", next);
+  const postAuthUrl = (() => {
+    if (type === "recovery") return new URL("/auth/reset-password", url.origin);
+    const complete = new URL("/auth/complete", url.origin);
+    complete.searchParams.set("next", next);
+    return complete;
+  })();
 
-  let response = NextResponse.redirect(complete);
+  let response = NextResponse.redirect(postAuthUrl);
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

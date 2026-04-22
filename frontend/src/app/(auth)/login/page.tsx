@@ -105,6 +105,23 @@ function LoginForm() {
     setResendSecondsLeft(45);
   }
 
+  async function sendPasswordReset() {
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError("Enter your email first so we know where to send reset instructions.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const redirectTo = `${window.location.origin}/auth/callback?type=recovery`;
+    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(trimmed, { redirectTo });
+    setLoading(false);
+    if (resetErr) {
+      return setError(resetErr.message);
+    }
+    setMagicSent(true);
+  }
+
   const signupHref = `/signup?next=${encodeURIComponent(effectiveNext)}`;
 
   return (
@@ -216,6 +233,19 @@ function LoginForm() {
                 <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black hover:brightness-105" disabled={loading}>
                   {loading ? "Logging in…" : "Login"}
                 </Button>
+                <button
+                  type="button"
+                  onClick={() => void sendPasswordReset()}
+                  className="w-full text-center text-xs font-semibold uppercase tracking-wide text-zinc-400 underline-offset-4 transition hover:text-zinc-200 hover:underline"
+                  disabled={loading}
+                >
+                  Forgot password?
+                </button>
+                {magicSent ? (
+                  <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
+                    Reset link sent. Open the email and choose a new password.
+                  </p>
+                ) : null}
               </form>
             ) : (
               <div className="mt-3.5 space-y-3">

@@ -281,8 +281,21 @@ export function DemoCheckoutFlow() {
                   In
                 </span>
               </div>
-              <div className="mt-3 h-8 overflow-hidden rounded-md border border-white/20 bg-black/30 px-2 py-1">
-                <div className="h-full w-full bg-[repeating-linear-gradient(90deg,#fff_0,#fff_2px,transparent_2px,transparent_4px)] opacity-80" />
+              <div className="relative mt-3 overflow-hidden rounded-md border border-white/20 bg-black/35 p-2">
+                <div className="absolute inset-x-2 top-0 h-0.5 animate-[qrSweep_1.1s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-brand-green to-transparent" />
+                <svg
+                  viewBox={`0 0 ${QR_SIZE} ${QR_SIZE}`}
+                  className="mx-auto h-24 w-24 rounded-sm bg-white p-1.5"
+                  role="img"
+                  aria-label="QR code scan preview"
+                >
+                  {Array.from({ length: QR_SIZE * QR_SIZE }).map((_, i) => {
+                    const x = i % QR_SIZE;
+                    const y = Math.floor(i / QR_SIZE);
+                    if (!qrModules.has(`${x}-${y}`)) return null;
+                    return <rect key={`scan-${x}-${y}`} x={x} y={y} width="1" height="1" fill="#000" />;
+                  })}
+                </svg>
               </div>
             </div>
           </div>
@@ -335,6 +348,20 @@ export function DemoCheckoutFlow() {
           100% {
             opacity: 0;
             transform: scale(1.018);
+          }
+        }
+        @keyframes qrSweep {
+          0% {
+            transform: translateY(0);
+            opacity: 0.35;
+          }
+          50% {
+            transform: translateY(92px);
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 0.35;
           }
         }
       `}</style>

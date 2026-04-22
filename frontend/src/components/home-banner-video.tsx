@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 
-/** Lighter poster so first paint is not blocked by a huge remote image. */
-const POSTER =
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&w=960&q=70&fit=crop";
+/** Same-origin poster: avoids extra DNS + competes less with hero text for bandwidth. */
+const POSTER = "/host-review-scene.jpg";
 
 type Props = {
   className?: string;
@@ -23,11 +22,10 @@ function getNetworkHints() {
 }
 
 /**
- * Banner video: `public/a9-banner.mp4` is large (~10MB); main cost after first paint.
- * - Waits until near viewport, then defers `src` until the browser is idle (or timeout) so JS/CSS/fonts win the race.
- * - On save-data, reduced motion, or slow network: poster only until the user taps Play.
- *
- * Long-term: re-encode to ≤3MB (720p H.264 + `faststart`) or host WebM; see comment in repo / deploy docs.
+ * Banner video: `public/a9-banner.mp4` is large (~10MB) — biggest win is re-encoding (720p H.264 + `faststart`, target ≤3MB) and/or a short WebM.
+ * - Below `lg` (1024px): tap-to-play only so phones/tablets never download the file until the user asks.
+ * - Wide desktop: in-view + idle (or timeout) before setting `src` so critical JS/CSS/fonts go first.
+ * - Save-data, reduced motion, or slow network: same tap gate as mobile.
  */
 export function HomeBannerVideo({ className }: Props) {
   const root = useRef<HTMLDivElement>(null);
@@ -39,7 +37,9 @@ export function HomeBannerVideo({ className }: Props) {
   useEffect(() => {
     queueMicrotask(() => {
       const { saveData, slow, reduceMotion } = getNetworkHints();
-      setNeedsTap(saveData || slow || reduceMotion);
+      const compactViewport =
+        typeof window.matchMedia === "function" && window.matchMedia("(max-width: 1023px)").matches;
+      setNeedsTap(saveData || slow || reduceMotion || compactViewport);
     });
   }, []);
 
@@ -68,13 +68,13 @@ export function HomeBannerVideo({ className }: Props) {
     };
 
     if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(start, { timeout: 1600 });
+      const id = window.requestIdleCallback(start, { timeout: 2800 });
       return () => {
         cancelled = true;
         window.cancelIdleCallback(id);
       };
     }
-    const t = window.setTimeout(start, 700);
+    const t = window.setTimeout(start, 1100);
     return () => {
       cancelled = true;
       window.clearTimeout(t);

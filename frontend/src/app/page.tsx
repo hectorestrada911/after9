@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Heart, Play } from "lucide-react";
-import { HomeBannerVideo } from "@/components/home-banner-video";
+import { HomeBannerVideoLoader } from "@/components/home-banner-video-loader";
 import { HomeScrollSplitVisual } from "@/components/home-scroll-split-visual";
 import { HomeSocialProof } from "@/components/home-social-proof";
 import { HostProductSnapshot } from "@/components/host-product-snapshot";
@@ -80,7 +80,7 @@ export default async function HomePage() {
 
           {/* Mobile: video directly under headline. Desktop: full-width row under title + image. */}
           <div className="relative -mx-4 w-[calc(100%+2rem)] overflow-hidden rounded-2xl border border-white/[0.06] bg-black sm:mx-0 sm:w-full lg:col-span-2 lg:col-start-1 lg:row-start-2">
-            <HomeBannerVideo className="relative aspect-[3/4] min-h-[min(88vw,440px)] w-full sm:aspect-[16/9] sm:min-h-[280px] lg:aspect-[21/9] lg:min-h-[min(40vw,460px)]" />
+            <HomeBannerVideoLoader />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
             <div className="absolute bottom-5 left-5 right-5 max-w-lg sm:bottom-8 sm:left-8">
               <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>

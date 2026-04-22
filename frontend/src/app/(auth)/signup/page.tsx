@@ -250,6 +250,17 @@ function SignupForm() {
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             One account unlocks buyer tickets and host tools.
           </p>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+            By continuing, you agree to our{" "}
+            <Link href="/terms" className="underline underline-offset-2 hover:text-zinc-300">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline underline-offset-2 hover:text-zinc-300">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </main>

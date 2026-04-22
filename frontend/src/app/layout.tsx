@@ -80,9 +80,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </div>
               <div>
                 <p className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-500">Company</p>
-                <ul className="space-y-2 text-sm text-zinc-500">
-                  <li>Get help</li>
-                  <li>Work with us</li>
+                <ul className="space-y-2 text-sm text-zinc-300">
+                  <li>
+                    <a href="mailto:support@after9.app" className="transition hover:text-white">
+                      Get help
+                    </a>
+                  </li>
+                  <li>
+                    <Link href="/terms" className="transition hover:text-white">
+                      Terms of Service
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privacy" className="transition hover:text-white">
+                      Privacy Policy
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>

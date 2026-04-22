@@ -17,12 +17,56 @@ function uniqueByFullText(items: LocationSuggestion[]) {
   });
 }
 
-async function searchWithMapbox(query: string, token: string): Promise<LocationSuggestion[]> {
+type MapboxSearchParams = {
+  types: string;
+  limit: string;
+};
+
+function mapboxFeaturesToSuggestions(
+  json: {
+    features?: Array<{
+      id: string;
+      text?: string;
+      place_name?: string;
+      center?: [number, number];
+      context?: Array<{ text?: string }>;
+      place_type?: string[];
+    }>;
+  },
+  preferAddress: boolean,
+): LocationSuggestion[] {
+  const raw =
+    json.features?.map((f) => {
+      const primary = f.text?.trim() || f.place_name?.split(",")[0]?.trim() || "Location";
+      const fullText = f.place_name?.trim() || primary;
+      const context = f.context?.map((c) => c.text).filter(Boolean).join(", ");
+      const isAddress = Boolean(f.place_type?.includes("address"));
+      return {
+        id: f.id,
+        primary,
+        secondary: context || undefined,
+        fullText,
+        lat: f.center?.[1],
+        lng: f.center?.[0],
+        _isAddress: isAddress,
+      };
+    }) ?? [];
+
+  if (preferAddress) {
+    raw.sort((a, b) => Number(b._isAddress) - Number(a._isAddress));
+  }
+
+  return raw.map(({ _isAddress, ...rest }): LocationSuggestion => rest);
+}
+
+async function searchWithMapbox(query: string, token: string, params: MapboxSearchParams): Promise<LocationSuggestion[]> {
   const url = new URL(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json`);
   url.searchParams.set("autocomplete", "true");
-  url.searchParams.set("types", "place,address,poi,neighborhood,locality");
-  url.searchParams.set("limit", "6");
+  url.searchParams.set("types", params.types);
+  url.searchParams.set("limit", params.limit);
   url.searchParams.set("access_token", token);
+  const country = process.env.NEXT_PUBLIC_MAPBOX_GEOCODING_COUNTRY?.trim();
+  if (country) url.searchParams.set("country", country.toLowerCase());
 
   const res = await fetch(url.toString(), { cache: "no-store" });
   if (!res.ok) throw new Error("Location search unavailable right now.");
@@ -34,25 +78,28 @@ async function searchWithMapbox(query: string, token: string): Promise<LocationS
       place_name?: string;
       center?: [number, number];
       context?: Array<{ text?: string }>;
+      place_type?: string[];
     }>;
   };
 
-  const suggestions =
-    json.features?.map((f) => {
-      const primary = f.text?.trim() || f.place_name?.split(",")[0]?.trim() || "Location";
-      const fullText = f.place_name?.trim() || primary;
-      const context = f.context?.map((c) => c.text).filter(Boolean).join(", ");
-      return {
-        id: f.id,
-        primary,
-        secondary: context || undefined,
-        fullText,
-        lat: f.center?.[1],
-        lng: f.center?.[0],
-      } satisfies LocationSuggestion;
-    }) ?? [];
+  return uniqueByFullText(mapboxFeaturesToSuggestions(json, params.types.includes("address")));
+}
 
-  return uniqueByFullText(suggestions);
+/**
+ * Queries that look like street addresses (contain a digit): merge `address`-typed results first,
+ * then broader types, so rooftop-level hits are not buried under same-name roads in other regions.
+ */
+async function searchWithMapboxSmart(query: string, token: string): Promise<LocationSuggestion[]> {
+  const hasDigit = /\d/.test(query);
+  if (!hasDigit) {
+    return searchWithMapbox(query, token, { types: "place,address,poi,neighborhood,locality", limit: "8" });
+  }
+
+  const [addressHits, broad] = await Promise.all([
+    searchWithMapbox(query, token, { types: "address", limit: "10" }),
+    searchWithMapbox(query, token, { types: "place,address,poi,neighborhood,locality", limit: "8" }),
+  ]);
+  return uniqueByFullText([...addressHits, ...broad]).slice(0, 8);
 }
 
 async function searchWithNominatim(query: string, userAgent: string): Promise<LocationSuggestion[]> {
@@ -106,7 +153,7 @@ export async function runLocationSearch(query: string): Promise<LocationSuggesti
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
   if (mapboxToken) {
     try {
-      return await searchWithMapbox(cleaned, mapboxToken);
+      return await searchWithMapboxSmart(cleaned, mapboxToken);
     } catch {
       // Fall through to Nominatim.
     }

@@ -30,11 +30,21 @@ function formatAge(a: string | undefined) {
   return a.replaceAll("_", " ");
 }
 
+function mapLinksForAddress(address: string) {
+  const q = encodeURIComponent(address.trim());
+  return {
+    google: `https://www.google.com/maps/search/?api=1&query=${q}`,
+    apple: `https://maps.apple.com/?q=${q}`,
+  };
+}
+
 export default async function PublicEventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await getSupabaseServerClient();
   const { data: event } = await supabase.from("events").select("*, profiles(organizer_name)").eq("slug", slug).single();
   if (!event) return notFound();
+
+  const mapUrls = mapLinksForAddress(event.location);
 
   const { count: soldCount } = await supabase.from("tickets").select("id", { count: "exact", head: true }).eq("event_id", event.id);
   const sold = soldCount ?? 0;
@@ -132,6 +142,27 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                   <div className="min-w-0">
                     <dt className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Location</dt>
                     <dd className="mt-1 text-base font-semibold text-white sm:text-lg">{event.location}</dd>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                      <a
+                        href={mapUrls.google}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-brand-green underline decoration-brand-green/40 underline-offset-4 transition hover:decoration-brand-green"
+                      >
+                        Google Maps
+                      </a>
+                      <a
+                        href={mapUrls.apple}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-brand-green underline decoration-brand-green/40 underline-offset-4 transition hover:decoration-brand-green"
+                      >
+                        Apple Maps
+                      </a>
+                    </div>
+                    <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+                      Opens in your browser; on your phone it can hand off to your installed maps app.
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-4 rounded-2xl border border-white/[0.1] bg-white/[0.04] p-4 backdrop-blur-md sm:p-5">

@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import type { IScannerControls } from "@zxing/browser";
 import { Button, Input } from "@/components/ui";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -11,6 +12,14 @@ type TicketRow = {
   orders: { buyer_name: string; buyer_email: string }[] | null;
 };
 
+/* eslint-disable no-unused-vars -- names document the browser BarcodeDetector call shape */
+/** Minimal typing for the experimental BarcodeDetector API (no stable TS lib types). */
+type NativeBarcodeDetectorInstance = {
+  detect(image: HTMLVideoElement): Promise<{ rawValue?: string }[]>;
+};
+type NativeBarcodeDetectorCtor = new (options: { formats: string[] }) => NativeBarcodeDetectorInstance;
+/* eslint-enable no-unused-vars */
+
 export default function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -18,15 +27,28 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<TicketRow[]>([]);
   const [scanning, setScanning] = useState(false);
-  const [scanSupported, setScanSupported] = useState(false);
+  const [cameraSupported, setCameraSupported] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
+  const zxingControlsRef = useRef<IScannerControls | null>(null);
   const scanLockRef = useRef(false);
   const supabase = getSupabaseBrowserClient();
 
-  function stopScanner() {
+  const stopScanner = useCallback(() => {
+    const controls = zxingControlsRef.current;
+    zxingControlsRef.current = null;
+    if (controls) {
+      try {
+        const maybePromise = controls.stop() as unknown;
+        if (maybePromise && typeof (maybePromise as Promise<void>).then === "function") {
+          void (maybePromise as Promise<void>).catch(() => undefined);
+        }
+      } catch {
+        // ignore
+      }
+    }
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
@@ -40,7 +62,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     }
     setScanning(false);
     scanLockRef.current = false;
-  }
+  }, []);
 
   function extractTicketCode(raw: string) {
     const trimmed = raw.trim();
@@ -90,14 +112,14 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    queueMicrotask(() => setScanSupported("BarcodeDetector" in window));
+    queueMicrotask(() => setCameraSupported(Boolean(navigator.mediaDevices?.getUserMedia)));
   }, []);
 
   useEffect(() => {
     return () => {
       stopScanner();
     };
-  }, []);
+  }, [stopScanner]);
 
   async function checkInTicket(ticketCode: string, source: "manual" | "scan") {
     setMessage(null);
@@ -129,8 +151,8 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   }
 
   async function startScanner() {
-    if (!scanSupported) {
-      setCameraError("Camera scan is not supported in this browser.");
+    if (!cameraSupported) {
+      setCameraError("Camera is not available in this browser. Use HTTPS, or try Safari or Chrome on your phone.");
       return;
     }
     if (scanning) return;
@@ -138,49 +160,76 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     setMessage(null);
     setError(null);
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      setScanning(true);
+    const nativeBarcodeDetector =
+      typeof window !== "undefined" &&
+      "BarcodeDetector" in window &&
+      typeof (window as unknown as { BarcodeDetector?: unknown }).BarcodeDetector === "function";
 
-      // BarcodeDetector is experimental; DOM typings vary by browser / TS version.
-      const Detector = (window as any).BarcodeDetector;
-      if (!Detector) {
-        setCameraError("QR scan unavailable in this browser.");
+    try {
+      setScanning(true);
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+      const video = videoRef.current;
+      if (!video) {
+        setCameraError("Camera preview not ready. Try again.");
         stopScanner();
         return;
       }
-      const detector = new Detector({ formats: ["qr_code"] });
 
-      const tick = async () => {
-        if (!videoRef.current || scanLockRef.current) {
-          rafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-        try {
-          const barcodes = await detector.detect(videoRef.current);
-          const raw = barcodes[0]?.rawValue;
-          if (raw) {
-            scanLockRef.current = true;
-            const code = extractTicketCode(raw);
-            stopScanner();
-            await checkInTicket(code, "scan");
+      if (nativeBarcodeDetector) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        });
+        streamRef.current = stream;
+        video.srcObject = stream;
+        await video.play();
+
+        const Detector = (window as unknown as { BarcodeDetector: NativeBarcodeDetectorCtor }).BarcodeDetector;
+        const detector = new Detector({ formats: ["qr_code"] });
+
+        const tick = async () => {
+          if (!videoRef.current || scanLockRef.current) {
+            rafRef.current = requestAnimationFrame(tick);
             return;
           }
-        } catch {
-          // Ignore occasional detect errors from camera frames.
-        }
-        rafRef.current = requestAnimationFrame(tick);
-      };
+          try {
+            const barcodes = await detector.detect(videoRef.current);
+            const raw = barcodes[0]?.rawValue;
+            if (raw) {
+              scanLockRef.current = true;
+              const code = extractTicketCode(raw);
+              stopScanner();
+              await checkInTicket(code, "scan");
+              return;
+            }
+          } catch {
+            // Ignore occasional detect errors from camera frames.
+          }
+          rafRef.current = requestAnimationFrame(tick);
+        };
 
-      rafRef.current = requestAnimationFrame(tick);
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      // iOS Safari and many browsers: no BarcodeDetector — ZXing reads frames in JS.
+      video.srcObject = null;
+
+      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      const reader = new BrowserQRCodeReader();
+      const controls = await reader.decodeFromVideoDevice(undefined, video, (result) => {
+        if (scanLockRef.current) return;
+        const text = result?.getText()?.trim();
+        if (!text) return;
+        scanLockRef.current = true;
+        const code = extractTicketCode(text);
+        queueMicrotask(() => {
+          stopScanner();
+          void checkInTicket(code, "scan");
+        });
+      });
+      zxingControlsRef.current = controls;
     } catch {
       setCameraError("Could not access camera. Allow camera permission and retry.");
       stopScanner();
@@ -214,7 +263,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
       <div className="mt-4 space-y-2">
         <div className="flex gap-2">
-          <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] hover:brightness-110" type="button" onClick={startScanner} disabled={scanning || !scanSupported}>
+          <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] hover:brightness-110" type="button" onClick={startScanner} disabled={scanning || !cameraSupported}>
             {scanning ? "Scanning..." : "Scan QR with camera"}
           </Button>
           {scanning ? (
@@ -223,14 +272,14 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
             </Button>
           ) : null}
         </div>
-        {!scanSupported ? <p className="text-xs text-zinc-500">QR scanning requires a modern browser with BarcodeDetector support.</p> : null}
-        <p className="text-xs text-zinc-500">Tip: best on mobile Safari/Chrome with camera permission enabled.</p>
-        {cameraError ? <p className="text-xs font-medium text-red-400">{cameraError}</p> : null}
-        {scanning ? (
-          <div className="overflow-hidden rounded-2xl border border-white/[0.12] bg-black">
-            <video ref={videoRef} className="aspect-video w-full object-cover" playsInline muted autoPlay />
-          </div>
+        {!cameraSupported ? (
+          <p className="text-xs text-zinc-500">Camera scanning needs a secure context (HTTPS) and a browser that supports camera access.</p>
         ) : null}
+        <p className="text-xs text-zinc-500">Tip: grant camera access when prompted. Works on iPhone Safari and common mobile browsers.</p>
+        {cameraError ? <p className="text-xs font-medium text-red-400">{cameraError}</p> : null}
+        <div className={`overflow-hidden rounded-2xl border border-white/[0.12] bg-black ${scanning ? "" : "hidden"}`} aria-hidden={!scanning}>
+          <video ref={videoRef} className="aspect-video w-full object-cover" playsInline muted autoPlay />
+        </div>
       </div>
 
       <div className="mt-8 space-y-3">

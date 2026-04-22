@@ -281,21 +281,28 @@ export function DemoCheckoutFlow() {
                   In
                 </span>
               </div>
-              <div className="relative mt-3 overflow-hidden rounded-md border border-white/20 bg-black/35 p-2">
-                <div className="absolute inset-x-2 top-0 h-0.5 animate-[qrSweep_1.1s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-brand-green to-transparent" />
-                <svg
-                  viewBox={`0 0 ${QR_SIZE} ${QR_SIZE}`}
-                  className="mx-auto h-24 w-24 rounded-sm bg-white p-1.5"
-                  role="img"
-                  aria-label="QR code scan preview"
-                >
-                  {Array.from({ length: QR_SIZE * QR_SIZE }).map((_, i) => {
-                    const x = i % QR_SIZE;
-                    const y = Math.floor(i / QR_SIZE);
-                    if (!qrModules.has(`${x}-${y}`)) return null;
-                    return <rect key={`scan-${x}-${y}`} x={x} y={y} width="1" height="1" fill="#000" />;
-                  })}
-                </svg>
+              <div className="relative mt-3 overflow-hidden rounded-md border border-white/20 bg-black/35 p-2.5">
+                <div className="mb-1.5 text-center text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-400">QR scan</div>
+                <div className="relative mx-auto w-fit rounded-md bg-white p-2 shadow-[0_0_0_1px_rgba(0,0,0,0.06)]">
+                  <div className="pointer-events-none absolute left-1 top-1 h-3 w-3 border-l-2 border-t-2 border-brand-green" />
+                  <div className="pointer-events-none absolute right-1 top-1 h-3 w-3 border-r-2 border-t-2 border-brand-green" />
+                  <div className="pointer-events-none absolute bottom-1 left-1 h-3 w-3 border-b-2 border-l-2 border-brand-green" />
+                  <div className="pointer-events-none absolute bottom-1 right-1 h-3 w-3 border-b-2 border-r-2 border-brand-green" />
+                  <div className="pointer-events-none absolute inset-x-1 top-0 h-0.5 animate-[qrSweep_1.1s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-brand-green to-transparent" />
+                  <svg
+                    viewBox={`0 0 ${QR_SIZE} ${QR_SIZE}`}
+                    className="h-28 w-28 rounded-sm"
+                    role="img"
+                    aria-label="QR code scan preview"
+                  >
+                    {Array.from({ length: QR_SIZE * QR_SIZE }).map((_, i) => {
+                      const x = i % QR_SIZE;
+                      const y = Math.floor(i / QR_SIZE);
+                      if (!qrModules.has(`${x}-${y}`)) return null;
+                      return <rect key={`scan-${x}-${y}`} x={x} y={y} width="1" height="1" fill="#000" />;
+                    })}
+                  </svg>
+                </div>
               </div>
             </div>
           </div>

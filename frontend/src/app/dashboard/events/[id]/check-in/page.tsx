@@ -27,6 +27,8 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<TicketRow[]>([]);
   const [scanning, setScanning] = useState(false);
+  /** True once the preview stream is attached and playing (or ZXing has taken over the device). */
+  const [cameraPreviewReady, setCameraPreviewReady] = useState(false);
   const [cameraSupported, setCameraSupported] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -60,6 +62,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setCameraPreviewReady(false);
     setScanning(false);
     scanLockRef.current = false;
   }, []);
@@ -115,6 +118,18 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
     queueMicrotask(() => setCameraSupported(Boolean(navigator.mediaDevices?.getUserMedia)));
   }, []);
 
+  /** Warm the ZXing chunk on this screen so the first camera tap is faster on iOS-style paths. */
+  useEffect(() => {
+    if (typeof window === "undefined" || !cameraSupported) return;
+    const hasNativeBarcode =
+      "BarcodeDetector" in window && typeof (window as unknown as { BarcodeDetector?: unknown }).BarcodeDetector === "function";
+    if (hasNativeBarcode) return;
+
+    const run = () => void import("@zxing/browser");
+    const t = window.setTimeout(run, 400);
+    return () => window.clearTimeout(t);
+  }, [cameraSupported]);
+
   useEffect(() => {
     return () => {
       stopScanner();
@@ -167,6 +182,9 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
 
     try {
       setScanning(true);
+      setCameraPreviewReady(false);
+      const zxingModulePromise = !nativeBarcodeDetector ? import("@zxing/browser") : null;
+
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
       const video = videoRef.current;
@@ -184,6 +202,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         streamRef.current = stream;
         video.srcObject = stream;
         await video.play();
+        setCameraPreviewReady(true);
 
         const Detector = (window as unknown as { BarcodeDetector: NativeBarcodeDetectorCtor }).BarcodeDetector;
         const detector = new Detector({ formats: ["qr_code"] });
@@ -216,7 +235,12 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       // iOS Safari and many browsers: no BarcodeDetector — ZXing reads frames in JS.
       video.srcObject = null;
 
-      const { BrowserQRCodeReader } = await import("@zxing/browser");
+      if (!zxingModulePromise) {
+        setCameraError("QR scanner could not start. Try again or use manual check-in.");
+        stopScanner();
+        return;
+      }
+      const { BrowserQRCodeReader } = await zxingModulePromise;
       const reader = new BrowserQRCodeReader();
       const controls = await reader.decodeFromVideoDevice(undefined, video, (result) => {
         if (scanLockRef.current) return;
@@ -230,6 +254,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         });
       });
       zxingControlsRef.current = controls;
+      setCameraPreviewReady(true);
     } catch {
       setCameraError("Could not access camera. Allow camera permission and retry.");
       stopScanner();
@@ -264,7 +289,7 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
       <div className="mt-4 space-y-2">
         <div className="flex gap-2">
           <Button className="w-full bg-gradient-to-r from-brand-green to-emerald-300 text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] hover:brightness-110" type="button" onClick={startScanner} disabled={scanning || !cameraSupported}>
-            {scanning ? "Scanning..." : "Scan QR with camera"}
+            {scanning ? (cameraPreviewReady ? "Scanning…" : "Starting camera…") : "Scan QR with camera"}
           </Button>
           {scanning ? (
             <Button className="w-full border border-white/25 bg-transparent text-white hover:bg-white/10" type="button" onClick={stopScanner}>
@@ -277,8 +302,27 @@ export default function CheckInPage({ params }: { params: Promise<{ id: string }
         ) : null}
         <p className="text-xs text-zinc-500">Tip: grant camera access when prompted. Works on iPhone Safari and common mobile browsers.</p>
         {cameraError ? <p className="text-xs font-medium text-red-400">{cameraError}</p> : null}
-        <div className={`overflow-hidden rounded-2xl border border-white/[0.12] bg-black ${scanning ? "" : "hidden"}`} aria-hidden={!scanning}>
-          <video ref={videoRef} className="aspect-video w-full object-cover" playsInline muted autoPlay />
+        <div
+          className={`relative overflow-hidden rounded-2xl border border-white/[0.12] bg-zinc-950 ${scanning ? "" : "hidden"}`}
+          aria-hidden={!scanning}
+        >
+          <video
+            ref={videoRef}
+            className={`aspect-video w-full object-cover bg-black transition-opacity duration-300 ${cameraPreviewReady ? "opacity-100" : "opacity-0"}`}
+            playsInline
+            muted
+            autoPlay
+          />
+          {scanning && !cameraPreviewReady ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 px-4 text-center">
+              <span
+                className="h-9 w-9 shrink-0 rounded-full border-2 border-white/20 border-t-white animate-spin"
+                aria-hidden
+              />
+              <p className="text-xs font-medium text-zinc-300">Starting camera…</p>
+              <p className="max-w-[16rem] text-[11px] leading-snug text-zinc-500">Preview appears here as soon as the stream is ready. You can stop anytime.</p>
+            </div>
+          ) : null}
         </div>
       </div>
 

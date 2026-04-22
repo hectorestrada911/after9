@@ -257,7 +257,6 @@ export function DemoCheckoutFlow() {
 
         {step === 3 ? (
           <div className="animate-[demoIn_320ms_ease-out] relative overflow-hidden rounded-2xl border border-brand-green/30 bg-gradient-to-br from-brand-green/[0.16] via-emerald-400/[0.08] to-cyan-300/[0.12] p-4">
-            <div className="absolute inset-x-0 top-0 h-1.5 animate-[scanLine_1.1s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/80 to-transparent" />
             <div className="pointer-events-none absolute -right-4 -top-6 h-20 w-20 rounded-full bg-brand-green/30 blur-2xl" />
             <div className="pointer-events-none absolute -left-6 bottom-0 h-16 w-16 rounded-full bg-cyan-300/30 blur-2xl" />
             <div className="pointer-events-none absolute inset-0 animate-[successPulse_1.6s_ease-out_infinite] rounded-2xl border border-brand-green/40" />
@@ -288,7 +287,7 @@ export function DemoCheckoutFlow() {
                   <div className="pointer-events-none absolute right-1 top-1 h-3 w-3 border-r-2 border-t-2 border-brand-green" />
                   <div className="pointer-events-none absolute bottom-1 left-1 h-3 w-3 border-b-2 border-l-2 border-brand-green" />
                   <div className="pointer-events-none absolute bottom-1 right-1 h-3 w-3 border-b-2 border-r-2 border-brand-green" />
-                  <div className="pointer-events-none absolute inset-x-1 top-0 h-0.5 animate-[qrSweep_1.1s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-brand-green to-transparent" />
+                  <div className="pointer-events-none absolute -left-8 -right-8 top-0 h-3 animate-[qrSweep_1.1s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_16px_rgba(239,68,68,0.95)]" />
                   <svg
                     viewBox={`0 0 ${QR_SIZE} ${QR_SIZE}`}
                     className="h-28 w-28 rounded-sm"
@@ -310,20 +309,6 @@ export function DemoCheckoutFlow() {
       </div>
 
       <style jsx>{`
-        @keyframes scanLine {
-          0% {
-            transform: translateY(0);
-            opacity: 0.2;
-          }
-          50% {
-            transform: translateY(78px);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(0);
-            opacity: 0.2;
-          }
-        }
         @keyframes demoIn {
           0% {
             opacity: 0;

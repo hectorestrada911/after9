@@ -10,12 +10,14 @@ export function EventHostNav({ eventId }: { eventId: string }) {
   const isOrders = pathname.includes(`${base}/orders`);
   const isCheckIn = pathname.includes(`${base}/check-in`);
   const isEdit = pathname.includes(`${base}/edit`);
-  const isOverview = pathname.startsWith(base) && !isOrders && !isCheckIn && !isEdit;
+  const isTeam = pathname.includes(`${base}/team`);
+  const isOverview = pathname.startsWith(base) && !isOrders && !isCheckIn && !isEdit && !isTeam;
 
   const items = [
     { href: base, label: "Overview", active: isOverview },
     { href: `${base}/orders`, label: "Orders", active: isOrders },
     { href: `${base}/check-in?focusScanner=1#scanner`, label: "Scan QR", active: isCheckIn },
+    { href: `${base}/team`, label: "Team", active: isTeam },
     { href: `${base}/edit`, label: "Details", active: isEdit },
   ];
 

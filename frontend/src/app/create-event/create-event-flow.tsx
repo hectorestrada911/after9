@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Loader2, Search, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, Search, Sparkles, Upload, X } from "lucide-react";
 import { eventSchema } from "@/lib/validations";
 import { MAX_DRAFT_IMAGE_BYTES, placeholderCoverUrl, readEventDraft, writeEventDraft, type EventDraftV1 } from "@/lib/event-draft";
 import { FLYER_CATEGORIES, FLYER_STOCK, filterFlyerStock, type FlyerCategory } from "@/lib/flyer-stock";
@@ -149,14 +149,13 @@ function inferResumeStepFromDraft(draft: EventDraftV1): 0 | 1 | 2 {
 
   const hasStory =
     draft.title.trim().length >= 3 &&
-    draft.description.trim().length >= 10 &&
     draft.location.trim().length >= 3 &&
     Boolean(draft.date) &&
     Boolean(draft.startTime) &&
     Boolean(draft.endTime);
   if (!hasStory) return 1;
 
-  const hasTickets = draft.capacity >= 1 && draft.ticketsAvailable >= 1 && draft.ticketPrice >= 0;
+  const hasTickets = draft.capacity >= 1 && draft.ticketsAvailable >= 1 && draft.ticketPrice >= 0.5;
   return hasTickets ? 2 : 1;
 }
 
@@ -216,6 +215,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [uploadDataUrl, setUploadDataUrl] = useState<string | null>(null);
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [flyerPickerOpen, setFlyerPickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
@@ -240,6 +240,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
   const resolvedMode: "guestDraft" | "hostPublish" =
     flowMode === "hostPublish" ? "hostPublish" : flowMode === "guestDraft" ? "guestDraft" : hasAuthedSession ? "hostPublish" : "guestDraft";
+  const showAllInOne = resolvedMode === "hostPublish";
 
   const filteredStock = useMemo(() => filterFlyerStock(search, flyCategory), [search, flyCategory]);
   const selectedStock = FLYER_STOCK.find((i) => i.id === selectedStockId) ?? FLYER_STOCK[0]!;
@@ -332,6 +333,15 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   }, [microWin]);
 
   useEffect(() => {
+    if (!flyerPickerOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [flyerPickerOpen]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -365,6 +375,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       setUploadDataUrl(data);
       setUploadName(f.name);
       flash("Upload locked in");
+      if (showAllInOne) setFlyerPickerOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not process that image.");
     } finally {
@@ -446,8 +457,10 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
   async function finalizeWizard(e: FormEvent) {
     e.preventDefault();
-    if (step !== 2) return;
+    if (!showAllInOne && step !== 2) return;
     setError(null);
+    if (!validateStep0()) return;
+    if (!validateStep1()) return;
 
     const imageUrl = coverMode === "upload" ? placeholderCoverUrl() : selectedStock.url;
 
@@ -551,7 +564,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E";
 
   const pctRaw = STEPS.length <= 1 ? 100 : (step / (STEPS.length - 1)) * 100;
-  const pct = Math.min(100, Math.max(step === 0 ? 8 : 2, pctRaw));
+  const pct = showAllInOne ? 100 : Math.min(100, Math.max(step === 0 ? 8 : 2, pctRaw));
   const ticketPriceFloat = Number(ticketPrice) || 0;
   const ticketPriceCents = Math.max(0, Math.round(ticketPriceFloat * 100));
   const platformFeeCents = platformFeeFromGrossCents(ticketPriceCents, platformFeePercent);
@@ -596,14 +609,25 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
         <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-2 sm:max-w-lg sm:px-6 sm:pb-28 sm:pt-4">
           <div className="mb-8">
-            <StepDots step={step} />
-            <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">
-              Step {step + 1} of {STEPS.length} · {STEPS[step]?.label}
-            </p>
-            <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">{STEPS[step]?.hint}</h1>
+            {showAllInOne ? (
+              <>
+                <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">Single-step builder</p>
+                <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">
+                  Set flyer, details, and tickets in one flow
+                </h1>
+              </>
+            ) : (
+              <>
+                <StepDots step={step} />
+                <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">
+                  Step {step + 1} of {STEPS.length} · {STEPS[step]?.label}
+                </p>
+                <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">{STEPS[step]?.hint}</h1>
+              </>
+            )}
           </div>
 
-          {restoredDraftStep !== null ? (
+          {restoredDraftStep !== null && !showAllInOne ? (
             <div className="mb-5 rounded-2xl border border-brand-green/30 bg-brand-green/12 px-4 py-3 text-sm text-zinc-100">
               <p className="font-semibold">
                 Draft restored from before login. You are back on Step {restoredDraftStep + 1}: {STEPS[restoredDraftStep]?.label}.
@@ -645,24 +669,43 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             )}
 
             {/* Step 0: Flyer */}
-            {step === 0 && (
+            {(step === 0 || showAllInOne) && (
               <div key="s0" className="animate-fadeUp space-y-5">
-                <button
-                  type="button"
-                  disabled={uploadBusy}
-                  onClick={() => fileRef.current?.click()}
-                  className="group flex w-full items-center gap-3.5 rounded-xl border border-dashed border-white/22 bg-white/[0.05] px-4 py-4 text-left transition hover:border-brand-green/45 hover:bg-white/[0.08] disabled:pointer-events-none disabled:opacity-60"
-                >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition group-hover:border-brand-green/30 group-hover:text-brand-green">
-                    {uploadBusy ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} /> : <Upload className="h-4 w-4" strokeWidth={1.75} />}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-medium text-white">{uploadBusy ? "Optimizing for draft…" : "Upload your flyer"}</p>
-                    <p className="mt-0.5 truncate text-[12px] text-zinc-500">
-                      {uploadBusy ? "Large phone photos get shrunk automatically." : uploadName ?? "JPG, PNG, WebP, or choose a look below"}
-                    </p>
+                {showAllInOne ? (
+                  <div className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-3">
+                    <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-zinc-900">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
+                      <img src={coverThumbSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <p className="text-xs text-zinc-500">Tap to change flyer, upload, or browse styles.</p>
+                      <button
+                        type="button"
+                        onClick={() => setFlyerPickerOpen(true)}
+                        className="inline-flex h-10 shrink-0 items-center rounded-full border border-white/20 bg-white/[0.05] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40"
+                      >
+                        Choose flyer
+                      </button>
+                    </div>
                   </div>
-                </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={uploadBusy}
+                    onClick={() => fileRef.current?.click()}
+                    className="group flex w-full items-center gap-3.5 rounded-xl border border-dashed border-white/22 bg-white/[0.05] px-4 py-4 text-left transition hover:border-brand-green/45 hover:bg-white/[0.08] disabled:pointer-events-none disabled:opacity-60"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition group-hover:border-brand-green/30 group-hover:text-brand-green">
+                      {uploadBusy ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} /> : <Upload className="h-4 w-4" strokeWidth={1.75} />}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-medium text-white">{uploadBusy ? "Optimizing for draft…" : "Upload your flyer"}</p>
+                      <p className="mt-0.5 truncate text-[12px] text-zinc-500">
+                        {uploadBusy ? "Large phone photos get shrunk automatically." : uploadName ?? "JPG, PNG, WebP, or choose a look below"}
+                      </p>
+                    </div>
+                  </button>
+                )}
                 <input
                   ref={fileRef}
                   type="file"
@@ -677,80 +720,84 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   }}
                 />
 
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" strokeWidth={1.75} />
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Filter looks…"
-                    className={`${field} pl-9`}
-                  />
-                </div>
+                {!showAllInOne ? (
+                  <>
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" strokeWidth={1.75} />
+                      <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Filter looks…"
+                        className={`${field} pl-9`}
+                      />
+                    </div>
 
-                <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto pb-1 pt-0.5 [scrollbar-width:none] sm:mx-0 [&::-webkit-scrollbar]:hidden">
-                  {FLYER_CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => {
-                        setFlyCategory(cat.id);
-                        flash(cat.id === "all" ? "Full gallery" : `${cat.label} vibes`);
-                      }}
-                      className={cn(
-                        "snap-start shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition",
-                        flyCategory === cat.id
-                          ? "border-brand-green/55 bg-brand-green/22 text-brand-green shadow-[0_0_20px_-8px_rgba(75,250,148,0.5)]"
-                          : "border-white/14 bg-white/[0.05] text-zinc-400 hover:border-white/25 hover:text-zinc-200",
-                      )}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
+                    <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto pb-1 pt-0.5 [scrollbar-width:none] sm:mx-0 [&::-webkit-scrollbar]:hidden">
+                      {FLYER_CATEGORIES.map((cat) => (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            setFlyCategory(cat.id);
+                            flash(cat.id === "all" ? "Full gallery" : `${cat.label} vibes`);
+                          }}
+                          className={cn(
+                            "snap-start shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition",
+                            flyCategory === cat.id
+                              ? "border-brand-green/55 bg-brand-green/22 text-brand-green shadow-[0_0_20px_-8px_rgba(75,250,148,0.5)]"
+                              : "border-white/14 bg-white/[0.05] text-zinc-400 hover:border-white/25 hover:text-zinc-200",
+                          )}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-2">
-                  {filteredStock.map((img) => {
-                    const active = coverMode === "stock" && selectedStockId === img.id;
-                    return (
-                      <button
-                        key={img.id}
-                        type="button"
-                        onClick={() => {
-                          pickStock(img.id);
-                          flash("Great eye");
-                        }}
-                        className={cn(
-                          "relative aspect-[4/5] w-full min-h-0 overflow-hidden rounded-xl bg-zinc-800/90 transition duration-300",
-                          active
-                            ? "z-[1] scale-[1.02] ring-2 ring-brand-green ring-offset-2 ring-offset-[#030303] shadow-[0_0_24px_-4px_rgba(75,250,148,0.45)]"
-                            : "opacity-95 hover:opacity-100 hover:ring-1 hover:ring-white/25",
-                        )}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element -- external Unsplash; reliable on Vercel */}
-                        <img
-                          src={img.thumb}
-                          alt={img.alt}
-                          className="absolute inset-0 h-full w-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                        {active && (
-                          <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-black shadow-lg">
-                            <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                {filteredStock.length === 0 && <p className="text-center text-[12px] text-zinc-600">Nothing matched. Try another word.</p>}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-2">
+                      {filteredStock.map((img) => {
+                        const active = coverMode === "stock" && selectedStockId === img.id;
+                        return (
+                          <button
+                            key={img.id}
+                            type="button"
+                            onClick={() => {
+                              pickStock(img.id);
+                              flash("Great eye");
+                            }}
+                            className={cn(
+                              "relative aspect-[4/5] w-full min-h-0 overflow-hidden rounded-xl bg-zinc-800/90 transition duration-300",
+                              active
+                                ? "z-[1] scale-[1.02] ring-2 ring-brand-green ring-offset-2 ring-offset-[#030303] shadow-[0_0_24px_-4px_rgba(75,250,148,0.45)]"
+                                : "opacity-95 hover:opacity-100 hover:ring-1 hover:ring-white/25",
+                            )}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element -- external Unsplash; reliable on Vercel */}
+                            <img
+                              src={img.thumb}
+                              alt={img.alt}
+                              className="absolute inset-0 h-full w-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                            {active && (
+                              <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-black shadow-lg">
+                                <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {filteredStock.length === 0 && <p className="text-center text-[12px] text-zinc-600">Nothing matched. Try another word.</p>}
+                  </>
+                ) : null}
               </div>
             )}
 
             {/* Step 1: Story */}
-            {step === 1 && (
+            {(step === 1 || showAllInOne) && (
               <div key="s1" className="animate-fadeUp space-y-5">
-                <FlyerAnchor />
+                {!showAllInOne ? <FlyerAnchor /> : null}
                 <div>
                   <span className={labelClass}>Event title</span>
                   <input className={field} placeholder="e.g. Rooftop sunset social" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -799,9 +846,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             )}
 
             {/* Step 2: Tickets */}
-            {step === 2 && (
+            {(step === 2 || showAllInOne) && (
               <div key="s2" className="animate-fadeUp space-y-5">
-                <FlyerAnchor />
+                {!showAllInOne ? <FlyerAnchor /> : null}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>
                     <span className={labelClass}>Room capacity</span>
@@ -886,7 +933,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
             <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/[0.06] bg-[#030303]/90 px-4 py-3.5 backdrop-blur-2xl supports-[backdrop-filter]:bg-[#030303]/75 sm:static sm:mt-10 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
               <div className="mx-auto flex max-w-md items-center gap-2 sm:max-w-lg">
-                {step > 0 && (
+                {step > 0 && !showAllInOne && (
                   <button
                     type="button"
                     onClick={goBack}
@@ -897,6 +944,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   </button>
                 )}
                 {step < 2 ? (
+                  !showAllInOne ? (
                   <button
                     type="button"
                     onClick={goNext}
@@ -905,6 +953,15 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     Next
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" strokeWidth={2} />
                   </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="group flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 text-[12px] font-bold uppercase tracking-[0.12em] text-black shadow-[0_0_36px_-6px_rgba(75,250,148,0.55)] transition hover:brightness-110"
+                    >
+                      {resolvedMode === "hostPublish" ? (onPublish ? "Publish event" : "Continue in dashboard") : "Continue to login"}
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" strokeWidth={2} />
+                    </button>
+                  )
                 ) : (
                   <button
                     type="submit"
@@ -917,7 +974,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
               </div>
               <p className="mx-auto mt-2.5 max-w-sm text-center text-[11px] leading-relaxed text-zinc-600">
                 {step < 2
-                  ? "Small wins add up. You're almost publish-ready."
+                  ? showAllInOne
+                    ? "You're in single-step mode — review all sections, then publish."
+                    : "Small wins add up. You're almost publish-ready."
                   : resolvedMode === "hostPublish"
                     ? onPublish
                       ? "You’re signed in — publish straight from here when you’re ready."
@@ -926,6 +985,111 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
               </p>
             </div>
           </form>
+
+          {showAllInOne && flyerPickerOpen ? (
+            <div className="fixed inset-0 z-40 bg-black/70 p-4 backdrop-blur-sm sm:p-6">
+              <div className="mx-auto flex h-full w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-white/[0.12] bg-[#070707]">
+                <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3 sm:px-5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Upload event flyer</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-100">Tap upload or choose from looks</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFlyerPickerOpen(false)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition hover:border-white/35 hover:text-white"
+                    aria-label="Close flyer picker"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+                  <button
+                    type="button"
+                    disabled={uploadBusy}
+                    onClick={() => fileRef.current?.click()}
+                    className="group flex w-full items-center gap-3.5 rounded-xl border border-dashed border-white/22 bg-white/[0.05] px-4 py-4 text-left transition hover:border-brand-green/45 hover:bg-white/[0.08] disabled:pointer-events-none disabled:opacity-60"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-400 transition group-hover:border-brand-green/30 group-hover:text-brand-green">
+                      {uploadBusy ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} /> : <Upload className="h-4 w-4" strokeWidth={1.75} />}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-medium text-white">{uploadBusy ? "Optimizing for draft..." : "Tap here to upload flyer"}</p>
+                      <p className="mt-0.5 text-[12px] text-zinc-500">4:5 works best (1080 x 1350). Other sizes auto-crop.</p>
+                    </div>
+                  </button>
+
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" strokeWidth={1.75} />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search for images..."
+                      className={`${field} pl-9`}
+                    />
+                  </div>
+
+                  <div className="-mx-1 flex snap-x snap-mandatory gap-1.5 overflow-x-auto pb-1 pt-0.5 [scrollbar-width:none] sm:mx-0 [&::-webkit-scrollbar]:hidden">
+                    {FLYER_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          setFlyCategory(cat.id);
+                          flash(cat.id === "all" ? "Full gallery" : `${cat.label} vibes`);
+                        }}
+                        className={cn(
+                          "snap-start shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition",
+                          flyCategory === cat.id
+                            ? "border-brand-green/55 bg-brand-green/22 text-brand-green shadow-[0_0_20px_-8px_rgba(75,250,148,0.5)]"
+                            : "border-white/14 bg-white/[0.05] text-zinc-400 hover:border-white/25 hover:text-zinc-200",
+                        )}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-2">
+                    {filteredStock.map((img) => {
+                      const active = coverMode === "stock" && selectedStockId === img.id;
+                      return (
+                        <button
+                          key={img.id}
+                          type="button"
+                          onClick={() => {
+                            pickStock(img.id);
+                            flash("Great eye");
+                            setFlyerPickerOpen(false);
+                          }}
+                          className={cn(
+                            "relative aspect-[4/5] w-full min-h-0 overflow-hidden rounded-xl bg-zinc-800/90 transition duration-300",
+                            active
+                              ? "z-[1] scale-[1.02] ring-2 ring-brand-green ring-offset-2 ring-offset-[#030303] shadow-[0_0_24px_-4px_rgba(75,250,148,0.45)]"
+                              : "opacity-95 hover:opacity-100 hover:ring-1 hover:ring-white/25",
+                          )}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element -- external Unsplash; reliable on Vercel */}
+                          <img
+                            src={img.thumb}
+                            alt={img.alt}
+                            className="absolute inset-0 h-full w-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                          {active && (
+                            <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-black shadow-lg">
+                              <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </main>

@@ -1,0 +1,56 @@
+import { NextResponse } from "next/server";
+import { getStripe } from "@/lib/stripe";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
+
+export async function POST() {
+  const supabase = await getSupabaseServerClient();
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const service = getSupabaseServiceRoleClient();
+  const { data: profile } = await service
+    .from("profiles")
+    .select("organizer_name,stripe_connect_account_id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const stripe = getStripe();
+  let accountId = profile?.stripe_connect_account_id ?? null;
+  if (!accountId) {
+    const account = await stripe.accounts.create({
+      type: "express",
+      country: "US",
+      email: user.email ?? undefined,
+      business_type: "individual",
+      metadata: { hostUserId: user.id },
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+      business_profile: {
+        name: profile?.organizer_name ?? "RAGE host",
+      },
+    });
+    accountId = account.id;
+    await service.from("profiles").update({ stripe_connect_account_id: account.id }).eq("id", user.id);
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const account = await stripe.accounts.retrieve(accountId);
+  const onboarded = Boolean(account.details_submitted && account.charges_enabled);
+
+  if (onboarded) {
+    const loginLink = await stripe.accounts.createLoginLink(accountId);
+    return NextResponse.json({ mode: "dashboard", url: loginLink.url });
+  }
+
+  const accountLink = await stripe.accountLinks.create({
+    account: accountId,
+    type: "account_onboarding",
+    refresh_url: `${appUrl}/account?payout=refresh`,
+    return_url: `${appUrl}/account?payout=return`,
+  });
+  return NextResponse.json({ mode: "onboarding", url: accountLink.url });
+}

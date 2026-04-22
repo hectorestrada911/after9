@@ -6,6 +6,7 @@ import { getSupabaseServerClient } from "@/lib/supabase-server";
 import CopyEventLink from "@/components/copy-event-link";
 import SalesChart from "@/components/sales-chart";
 import DashboardAuthFallback from "@/components/dashboard-auth-fallback";
+import HostPayoutCta from "@/components/host-payout-cta";
 
 function formatEventDate(isoDate: string) {
   const d = new Date(`${isoDate}T12:00:00`);
@@ -101,6 +102,8 @@ export default async function DashboardPage() {
           </div>
         </div>
       </section>
+
+      <HostPayoutCta />
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

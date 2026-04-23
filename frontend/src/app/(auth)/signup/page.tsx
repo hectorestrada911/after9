@@ -18,6 +18,7 @@ import {
   badgeItem,
   useAuthMotion,
 } from "@/components/auth-shell";
+import { mapAuthActionError, mapAuthCallbackError } from "@/lib/auth-errors";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { readEventDraft, safeNextPath } from "@/lib/event-draft";
 import { Input } from "@/components/ui";
@@ -34,7 +35,7 @@ function SignupForm() {
   const hasEventDraft = Boolean(readEventDraft());
   const hostIntent = next.startsWith("/dashboard") || hasEventDraft;
   const hostNext = next.startsWith("/dashboard") ? next : "/dashboard/events/new";
-  const urlError = searchParams.get("error");
+  const urlError = mapAuthCallbackError(searchParams.get("error"));
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,7 +64,7 @@ function SignupForm() {
         options: { emailRedirectTo },
       });
       if (signErr) {
-        setError(signErr.message);
+        setError(mapAuthActionError(signErr.message, "signup"));
         return;
       }
       if (!data.session) {

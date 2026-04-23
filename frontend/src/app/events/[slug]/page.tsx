@@ -245,7 +245,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                     </div>
                   )}
 
-                  <div className="mt-6">
+                  <div id="buy-tickets" className="mt-6 scroll-mt-28">
                     <PurchaseForm
                       eventId={event.id}
                       price={event.ticket_price}
@@ -260,6 +260,14 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
             </aside>
           </div>
         </div>
+      </div>
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] lg:hidden">
+        <a
+          href="#buy-tickets"
+          className="pointer-events-auto inline-flex h-14 w-full items-center justify-center rounded-full bg-gradient-to-r from-zinc-100 to-zinc-300 text-base font-black text-zinc-900 shadow-[0_18px_38px_-22px_rgba(0,0,0,0.8)] transition active:scale-[0.995]"
+        >
+          {remaining <= 0 ? "Sold out" : `Buy tickets from $${centsToDollars(event.ticket_price)}`}
+        </a>
       </div>
     </main>
   );

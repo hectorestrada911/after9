@@ -18,31 +18,12 @@ import {
   badgeItem,
   useAuthMotion,
 } from "@/components/auth-shell";
+import { mapAuthActionError, mapAuthCallbackError } from "@/lib/auth-errors";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { readEventDraft, safeNextPath } from "@/lib/event-draft";
 import { Input } from "@/components/ui";
 import { flushUi } from "@/lib/flush-ui";
 import { cn } from "@/lib/utils";
-
-function mapAuthError(raw: string | null): string | null {
-  if (!raw) return null;
-  if (raw === "session") return "Your sign-in link expired or was already used. Try logging in with your password.";
-  if (raw === "missing_token") return "That link is incomplete. Try logging in with your password.";
-  if (raw === "config") return "Login is not configured. Check environment variables.";
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
-}
-
-function mapPasswordError(raw: string): string {
-  const msg = raw.toLowerCase();
-  if (msg.includes("invalid login credentials")) return "Incorrect email or password.";
-  if (msg.includes("email not confirmed")) return "Confirm your email first, then log in.";
-  if (msg.includes("too many requests")) return "Too many attempts. Wait a moment and try again.";
-  return raw;
-}
 
 function LoginForm() {
   const { reduceMotion, panelTransition } = useAuthMotion();
@@ -54,7 +35,7 @@ function LoginForm() {
   const effectiveNext = searchParams.get("next") ? next : hasEventDraft ? "/dashboard/events/new" : next;
   const justSignedUp = searchParams.get("justSignedUp") === "1";
   const verified = searchParams.get("verified") === "1";
-  const urlError = mapAuthError(searchParams.get("error"));
+  const urlError = mapAuthCallbackError(searchParams.get("error"));
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -73,7 +54,7 @@ function LoginForm() {
     const { error: signErr } = await supabase.auth.signInWithPassword({ email: formEmail, password });
     if (signErr) {
       setLoading(false);
-      return setError(mapPasswordError(signErr.message));
+      return setError(mapAuthActionError(signErr.message, "login"));
     }
     try {
       const shouldAutoRoute = !searchParams.get("next");
@@ -111,8 +92,35 @@ function LoginForm() {
     const { error: resetErr } = await supabase.auth.resetPasswordForEmail(trimmed, { redirectTo });
     setLoading(false);
     if (resetErr) {
-      return setError(resetErr.message);
+      return setError(mapAuthActionError(resetErr.message, "reset"));
     }
+    setPasswordResetSent(true);
+  }
+
+  async function resendVerificationEmail() {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed) {
+      setError("Enter your email first, then resend verification.");
+      return;
+    }
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
+    const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup`;
+    const { error: resendErr } = await supabase.auth.resend({
+      type: "signup",
+      email: trimmed,
+      options: { emailRedirectTo },
+    });
+    setLoading(false);
+    if (resendErr) {
+      setError(mapAuthActionError(resendErr.message, "signup"));
+      return;
+    }
+    setPasswordResetSent(false);
+    setError(null);
+    // Reuse the success area style; this is intentionally explicit.
     setPasswordResetSent(true);
   }
 
@@ -236,6 +244,16 @@ function LoginForm() {
                 </motion.p>
               ) : null}
             </AnimatePresence>
+            {error?.includes("Email not verified yet") ? (
+              <button
+                type="button"
+                onClick={() => void resendVerificationEmail()}
+                className="w-full rounded-full border border-brand-green/35 bg-brand-green/10 py-2 text-center text-xs font-semibold uppercase tracking-wide text-brand-green transition hover:bg-brand-green/20"
+                disabled={loading}
+              >
+                Resend verification email
+              </button>
+            ) : null}
             <AuthPrimaryButton type="submit" loading={loading} disabled={loading}>
               {loading ? "Logging in…" : "Login"}
             </AuthPrimaryButton>
@@ -249,7 +267,7 @@ function LoginForm() {
             </button>
             {passwordResetSent ? (
               <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
-                Reset link sent. Open the email and choose a new password.
+                Email sent. Check your inbox for the next step.
               </p>
             ) : null}
           </motion.form>

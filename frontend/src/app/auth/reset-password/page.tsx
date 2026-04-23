@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components/ui";
+import { mapAuthActionError } from "@/lib/auth-errors";
 import { flushUi } from "@/lib/flush-ui";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -37,7 +38,7 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (updateErr) {
-      setError(updateErr.message);
+      setError(mapAuthActionError(updateErr.message, "reset"));
       return;
     }
 

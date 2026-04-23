@@ -12,6 +12,26 @@ import { eventSchema } from "@/lib/validations";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { centsToDollars } from "@/lib/utils";
 
+function mapPublishError(raw: string, attemptedVisibility: "public" | "unlisted" | "private") {
+  const msg = raw.toLowerCase();
+  if (msg.includes("invalid input value for enum event_visibility") && attemptedVisibility === "unlisted") {
+    return "Unlisted is not enabled in this database yet. Run the latest Supabase migrations, then try again.";
+  }
+  if (msg.includes("violates check constraint") && msg.includes("tickets_available")) {
+    return "Tickets to sell cannot exceed capacity.";
+  }
+  if (msg.includes("duplicate key value") && msg.includes("slug")) {
+    return "This slug is already taken. Change the title and publish again.";
+  }
+  if (msg.includes("row-level security") || msg.includes("permission denied")) {
+    return "You do not have permission to publish this event. Log in as the event host and try again.";
+  }
+  if (msg.includes("show_capacity_publicly")) {
+    return "Your database is missing a recent migration. Run migrations and publish again.";
+  }
+  return raw;
+}
+
 export default function NewEventClient() {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
@@ -123,7 +143,7 @@ export default function NewEventClient() {
       const extension = fileToUpload.name.split(".").pop() || "jpg";
       const path = `${authedUser.id}/${slug}-${Date.now()}.${extension}`;
       const upload = await supabase.storage.from("event-images").upload(path, fileToUpload, { upsert: true });
-      if (upload.error) return setError(upload.error.message);
+      if (upload.error) return setError(mapPublishError(upload.error.message, parsed.data.visibility));
       imageUrl = supabase.storage.from("event-images").getPublicUrl(path).data.publicUrl;
     }
 
@@ -162,7 +182,7 @@ export default function NewEventClient() {
       created = legacy.data;
       insertError = legacy.error;
     }
-    if (insertError || !created) return setError(insertError?.message ?? "Could not publish event.");
+    if (insertError || !created) return setError(insertError ? mapPublishError(insertError.message, parsed.data.visibility) : "Could not publish event.");
     clearEventDraft();
     const link = `${window.location.origin}/events/${created.slug}`;
     setCreatedLink(link);

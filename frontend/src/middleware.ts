@@ -23,12 +23,17 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // Keep SSR auth state fresh for server-rendered routes.
-  // Network/DNS issues should not break page rendering.
-  try {
-    await supabase.auth.getUser();
-  } catch {
-    // Ignore refresh failures; downstream routes can still read existing cookies/session.
+  // Only refresh the JWT on routes that need server auth. Calling `getUser()` on every navigation
+  // (marketing pages, event detail, etc.) adds a round-trip before RSC can render and feels slow.
+  const pathname = request.nextUrl.pathname;
+  const authRefreshPrefixes = ["/dashboard", "/account", "/my-tickets", "/onboarding", "/create-event", "/checkout", "/auth"];
+  const shouldRefreshAuth = authRefreshPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  if (shouldRefreshAuth) {
+    try {
+      await supabase.auth.getUser();
+    } catch {
+      // Ignore refresh failures; downstream routes can still read existing cookies/session.
+    }
   }
 
   return response;

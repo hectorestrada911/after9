@@ -49,11 +49,17 @@ export default async function DashboardPage() {
     .eq("host_id", userId)
     .order("date", { ascending: true });
   const eventIds = (events ?? []).map((e) => e.id);
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("id,event_id,buyer_name,buyer_email,total_amount,quantity,created_at")
-    .in("event_id", eventIds);
-  const { count: checkedIn } = await supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", (events ?? []).map((e) => e.id));
+
+  const [ordersRes, checkInsRes] = await Promise.all([
+    eventIds.length > 0
+      ? supabase.from("orders").select("id,event_id,buyer_name,buyer_email,total_amount,quantity,created_at").in("event_id", eventIds)
+      : Promise.resolve({ data: [] as { id: string; event_id: string; buyer_name: string; buyer_email: string; total_amount: number; quantity: number; created_at: string }[], error: null }),
+    eventIds.length > 0
+      ? supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", eventIds)
+      : Promise.resolve({ count: 0, error: null }),
+  ]);
+  const orders = ordersRes.data;
+  const checkedIn = checkInsRes.count;
 
   const revenue = (orders ?? []).reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
   const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);

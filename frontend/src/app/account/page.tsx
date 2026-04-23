@@ -30,14 +30,12 @@ export default async function AccountPage() {
     );
   }
 
-  const { data: profile } = await supabase.from("profiles").select("id,full_name").eq("id", user.id).maybeSingle();
+  const [{ data: profile }, { data: hostedEvents }] = await Promise.all([
+    supabase.from("profiles").select("id,full_name").eq("id", user.id).maybeSingle(),
+    supabase.from("events").select("id,slug,title,date,image_url,visibility,tickets_available").eq("host_id", user.id).order("date", { ascending: true }),
+  ]);
   const hasHostProfile = Boolean(profile);
 
-  const { data: hostedEvents } = await supabase
-    .from("events")
-    .select("id,slug,title,date,image_url,visibility,tickets_available")
-    .eq("host_id", user.id)
-    .order("date", { ascending: true });
   const eventRows = hostedEvents ?? [];
   const eventIds = eventRows.map((e) => e.id);
   const eventCount = eventIds.length;
@@ -47,19 +45,18 @@ export default async function AccountPage() {
   let hostTicketsSold = 0;
   let hostCheckIns = 0;
   if (eventIds.length > 0) {
-    const { data: hostOrders } = await supabase
-      .from("orders")
-      .select("event_id,total_amount,quantity")
-      .in("event_id", eventIds);
-    for (const o of hostOrders ?? []) {
+    const [hostOrdersRes, checkInsRes] = await Promise.all([
+      supabase.from("orders").select("event_id,total_amount,quantity").in("event_id", eventIds),
+      supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", eventIds),
+    ]);
+    for (const o of hostOrdersRes.data ?? []) {
       const q = o.quantity ?? 0;
       hostGrossCents += o.total_amount ?? 0;
       hostTicketsSold += q;
       const eid = o.event_id as string;
       soldByEvent.set(eid, (soldByEvent.get(eid) ?? 0) + q);
     }
-    const { count } = await supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", eventIds);
-    hostCheckIns = count ?? 0;
+    hostCheckIns = checkInsRes.count ?? 0;
   }
 
   const showHostAnalytics = hasHostProfile || eventCount > 0;

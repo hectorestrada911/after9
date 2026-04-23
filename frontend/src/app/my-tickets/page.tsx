@@ -24,6 +24,7 @@ type TicketRow = {
   ticket_code: string;
   qr_code_url: string | null;
   status: "active" | "checked_in" | "cancelled";
+  created_at?: string;
 };
 
 function formatDate(dateLike: string) {
@@ -55,6 +56,12 @@ function normalizeEventRelation(value: unknown) {
     return firstValid ?? null;
   }
   return isEventSummary(value) ? value : null;
+}
+
+function normalizeTickets(value: unknown): TicketRow[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value as TicketRow[];
+  return [value as TicketRow];
 }
 
 export default async function MyTicketsPage() {
@@ -92,22 +99,26 @@ export default async function MyTicketsPage() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: orders } = await service
+  // One round-trip: orders + nested tickets (avoids sequential queries).
+  const { data: rawOrders } = await service
     .from("orders")
-    .select("id,event_id,buyer_name,buyer_email,quantity,total_amount,payment_status,created_at,events(title,date,location,slug,image_url)")
+    .select(
+      "id,event_id,buyer_name,buyer_email,quantity,total_amount,payment_status,created_at,events(title,date,location,slug,image_url),tickets(id,order_id,event_id,ticket_code,qr_code_url,status,created_at)",
+    )
     .ilike("buyer_email", user.email ?? "")
     .order("created_at", { ascending: false });
 
-  const orderIds = (orders ?? []).map((o) => o.id);
-  let tickets: TicketRow[] = [];
-  if (orderIds.length > 0) {
-    const { data } = await service
-      .from("tickets")
-      .select("id,order_id,event_id,ticket_code,qr_code_url,status")
-      .in("order_id", orderIds)
-      .order("created_at", { ascending: false });
-    tickets = (data ?? []) as TicketRow[];
-  }
+  const orders = (rawOrders ?? []).map((raw) => {
+    const row = raw as Record<string, unknown>;
+    const tickets = normalizeTickets(row.tickets).sort((a, b) =>
+      (b.created_at ?? "").localeCompare(a.created_at ?? ""),
+    );
+    return {
+      ...(raw as Omit<OrderRow, "events">),
+      events: normalizeEventRelation(row.events),
+      tickets,
+    };
+  });
 
   return (
     <main className="container-page py-10 sm:py-14">
@@ -121,7 +132,7 @@ export default async function MyTicketsPage() {
         </Link>
       </div>
 
-      {(orders ?? []).length === 0 ? (
+      {orders.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/20 bg-zinc-950 p-10 text-center">
           <Ticket className="mx-auto h-10 w-10 text-zinc-500" />
           <p className="mt-4 text-lg font-bold text-white">No tickets yet</p>
@@ -132,12 +143,8 @@ export default async function MyTicketsPage() {
         </div>
       ) : (
         <div className="space-y-5">
-          {(orders ?? []).map((rawOrder) => {
-            const order = {
-              ...(rawOrder as Omit<OrderRow, "events">),
-              events: normalizeEventRelation((rawOrder as { events?: unknown }).events),
-            } as OrderRow;
-            const orderTickets = tickets.filter((t) => t.order_id === order.id);
+          {orders.map((order) => {
+            const orderTickets = order.tickets;
             return (
               <div key={order.id} className="overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-950">
                 <div className="grid gap-4 p-4 sm:grid-cols-[120px,1fr] sm:p-5">

@@ -203,7 +203,10 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
             </div>
 
             <aside className="motion-safe:animate-fadeUp min-w-0 lg:sticky lg:top-24 lg:self-start">
-              <div className="relative overflow-hidden rounded-3xl border border-brand-green/25 bg-zinc-950/85 p-6 shadow-[0_0_0_1px_rgba(75,250,148,0.12),0_40px_100px_-36px_rgba(0,0,0,0.9)] backdrop-blur-xl motion-safe:animate-ctaGlow sm:p-8 motion-reduce:animate-none motion-reduce:shadow-[0_40px_100px_-36px_rgba(0,0,0,0.9)]">
+              <div
+                id="buy-tickets"
+                className="relative scroll-mt-40 overflow-hidden rounded-3xl border border-brand-green/25 bg-zinc-950/85 p-6 shadow-[0_0_0_1px_rgba(75,250,148,0.12),0_40px_100px_-36px_rgba(0,0,0,0.9)] backdrop-blur-xl motion-safe:animate-ctaGlow sm:scroll-mt-28 sm:p-8 motion-reduce:animate-none motion-reduce:shadow-[0_40px_100px_-36px_rgba(0,0,0,0.9)]"
+              >
                 <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-brand-green/30 blur-3xl" aria-hidden />
                 <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-emerald-400/15 blur-3xl" aria-hidden />
                 <div className="relative">
@@ -250,7 +253,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                     </div>
                   )}
 
-                  <div id="buy-tickets" className="mt-6 scroll-mt-28">
+                  <div className="mt-6">
                     <PurchaseForm
                       eventId={event.id}
                       price={event.ticket_price}

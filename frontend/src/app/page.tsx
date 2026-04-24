@@ -18,10 +18,12 @@ export default async function HomePage() {
   let events: HomeTrendingEvent[] = fallbackEvents;
   try {
     const supabase = await getSupabaseServerClient();
+    const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase
       .from("events")
       .select("slug,title,date,location,ticket_price,image_url")
       .eq("visibility", "public")
+      .gte("date", today)
       .order("date", { ascending: true })
       .limit(12);
     if (data && data.length > 0) {

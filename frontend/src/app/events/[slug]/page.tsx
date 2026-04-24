@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, Clock3, Flame, MapPin, ShieldCheck, Sparkles, Ticket, Users, Zap } from "lucide-react";
+import { Calendar, Clock3, Flame, MapPin, ShieldCheck, Sparkles, Ticket, TimerOff, Users, Zap } from "lucide-react";
 import { EventShareActions } from "@/components/event-share-actions";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
@@ -30,6 +30,12 @@ function formatAge(a: string | undefined) {
   return a.replaceAll("_", " ");
 }
 
+function isEventEnded(date: string, endTime: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hours, minutes] = endTime.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes) < new Date();
+}
+
 function mapLinksForAddress(address: string) {
   const q = encodeURIComponent(address.trim());
   return {
@@ -54,6 +60,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const lowStock = remaining > 0 && remaining <= Math.max(12, Math.ceil((event.tickets_available ?? 0) * 0.15));
   const moving = sold >= 3;
 
+  const ended = isEventEnded(event.date, event.end_time);
   const organizer = event.profiles?.organizer_name ?? "Host";
   const imageSrc = event.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30";
 
@@ -73,25 +80,34 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
 
           <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-5 px-5 pb-8 pt-20 sm:px-10 sm:pb-10">
             <div className="flex flex-wrap items-center gap-2">
-              {moving ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/35 bg-brand-green/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-green backdrop-blur-md">
-                  <Zap className="h-3 w-3" aria-hidden />
-                  {sold} {sold === 1 ? "person" : "people"} in
+              {ended ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-500/50 bg-zinc-800/70 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-300 backdrop-blur-md">
+                  <TimerOff className="h-3 w-3" aria-hidden />
+                  Event Ended
                 </span>
-              ) : null}
-              {lowStock ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-100 backdrop-blur-md">
-                  <Flame className="h-3 w-3" aria-hidden />
-                  Only {remaining} left
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur-md sm:text-[11px]">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-60 motion-safe:animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-green" />
-                </span>
-                Live on RAGE
-              </span>
+              ) : (
+                <>
+                  {moving ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/35 bg-brand-green/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-green backdrop-blur-md">
+                      <Zap className="h-3 w-3" aria-hidden />
+                      {sold} {sold === 1 ? "person" : "people"} in
+                    </span>
+                  ) : null}
+                  {lowStock ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-100 backdrop-blur-md">
+                      <Flame className="h-3 w-3" aria-hidden />
+                      Only {remaining} left
+                    </span>
+                  ) : null}
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 backdrop-blur-md sm:text-[11px]">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-60 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-green" />
+                    </span>
+                    Live on RAGE
+                  </span>
+                </>
+              )}
             </div>
 
             <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 backdrop-blur-md sm:text-[11px]">
@@ -199,76 +215,94 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
             </div>
 
             <aside className="motion-safe:animate-fadeUp min-w-0 lg:sticky lg:top-24 lg:self-start">
-              <div className="relative overflow-hidden rounded-3xl border border-brand-green/25 bg-zinc-950/85 p-6 shadow-[0_0_0_1px_rgba(75,250,148,0.12),0_40px_100px_-36px_rgba(0,0,0,0.9)] backdrop-blur-xl motion-safe:animate-ctaGlow sm:p-8 motion-reduce:animate-none motion-reduce:shadow-[0_40px_100px_-36px_rgba(0,0,0,0.9)]">
-                <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-brand-green/30 blur-3xl" aria-hidden />
-                <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-emerald-400/15 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Lock yours in</p>
-                  <p className="mt-2 text-balance text-4xl font-black tracking-tighter text-white sm:text-5xl">${centsToDollars(event.ticket_price)}</p>
-                  <p className="mt-3 inline-flex flex-wrap items-center gap-2 text-sm font-medium text-zinc-400">
-                    <Ticket className="h-4 w-4 text-brand-green" strokeWidth={2} aria-hidden />
-                    {showCapacityPublicly ? (
-                      <>
-                        <span className="font-bold text-white">{remaining}</span>
-                        <span>spots left</span>
-                      </>
-                    ) : (
-                      <span className="font-bold text-white">Limited spots</span>
-                    )}
-                  </p>
-
-                  {showCapacityPublicly ? (
-                    <div className="mt-6">
-                      <div className="mb-2 flex items-center justify-between text-xs font-semibold text-zinc-500">
-                        <span>Energy</span>
-                        <span className="tabular-nums text-white">{soldPercent}% claimed</span>
-                      </div>
-                      <div className="h-2.5 overflow-hidden rounded-full bg-zinc-800 ring-1 ring-white/5">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300 motion-safe:transition-[width] motion-safe:duration-700"
-                          style={{ width: `${soldPercent}%` }}
-                        />
-                      </div>
+              {ended ? (
+                <div className="relative overflow-hidden rounded-3xl border border-zinc-700/50 bg-zinc-950/85 p-6 shadow-[0_40px_100px_-36px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-8">
+                  <div className="relative flex flex-col items-center gap-4 py-4 text-center">
+                    <TimerOff className="h-10 w-10 text-zinc-500" strokeWidth={1.5} aria-hidden />
+                    <div>
+                      <p className="text-lg font-black tracking-tight text-white">This event has ended</p>
+                      <p className="mt-1 text-sm text-zinc-400">Tickets are no longer available. Keep an eye out for future events from this host.</p>
                     </div>
-                  ) : null}
-
-                  <div className="mt-6 flex items-start gap-2.5 rounded-2xl border border-white/[0.08] bg-black/40 px-4 py-3 text-xs leading-relaxed text-zinc-400">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={2} aria-hidden />
-                    <span>
-                      <span className="font-semibold text-zinc-200">Secure checkout.</span> Mobile ticket + QR appears instantly in-app.
-                    </span>
-                  </div>
-
-                  {remaining <= 0 && (
-                    <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-bold text-white">
-                      Sold out. Contact the host for a waitlist.
+                    <div className="flex items-center gap-2 rounded-2xl border border-white/[0.07] bg-black/40 px-4 py-3 text-xs text-zinc-500">
+                      <ShieldCheck className="h-4 w-4 shrink-0 text-zinc-600" strokeWidth={2} aria-hidden />
+                      <span>{sold} {sold === 1 ? "person" : "people"} attended this event</span>
                     </div>
-                  )}
-
-                  <div id="buy-tickets" className="mt-6 scroll-mt-28">
-                    <PurchaseForm
-                      eventId={event.id}
-                      price={event.ticket_price}
-                      title={event.title}
-                      slug={slug}
-                      soldOut={remaining <= 0}
-                      theme="dark"
-                    />
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="relative overflow-hidden rounded-3xl border border-brand-green/25 bg-zinc-950/85 p-6 shadow-[0_0_0_1px_rgba(75,250,148,0.12),0_40px_100px_-36px_rgba(0,0,0,0.9)] backdrop-blur-xl motion-safe:animate-ctaGlow sm:p-8 motion-reduce:animate-none motion-reduce:shadow-[0_40px_100px_-36px_rgba(0,0,0,0.9)]">
+                  <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-brand-green/30 blur-3xl" aria-hidden />
+                  <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-emerald-400/15 blur-3xl" aria-hidden />
+                  <div className="relative">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Lock yours in</p>
+                    <p className="mt-2 text-balance text-4xl font-black tracking-tighter text-white sm:text-5xl">${centsToDollars(event.ticket_price)}</p>
+                    <p className="mt-3 inline-flex flex-wrap items-center gap-2 text-sm font-medium text-zinc-400">
+                      <Ticket className="h-4 w-4 text-brand-green" strokeWidth={2} aria-hidden />
+                      {showCapacityPublicly ? (
+                        <>
+                          <span className="font-bold text-white">{remaining}</span>
+                          <span>spots left</span>
+                        </>
+                      ) : (
+                        <span className="font-bold text-white">Limited spots</span>
+                      )}
+                    </p>
+
+                    {showCapacityPublicly ? (
+                      <div className="mt-6">
+                        <div className="mb-2 flex items-center justify-between text-xs font-semibold text-zinc-500">
+                          <span>Energy</span>
+                          <span className="tabular-nums text-white">{soldPercent}% claimed</span>
+                        </div>
+                        <div className="h-2.5 overflow-hidden rounded-full bg-zinc-800 ring-1 ring-white/5">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300 motion-safe:transition-[width] motion-safe:duration-700"
+                            style={{ width: `${soldPercent}%` }}
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="mt-6 flex items-start gap-2.5 rounded-2xl border border-white/[0.08] bg-black/40 px-4 py-3 text-xs leading-relaxed text-zinc-400">
+                      <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={2} aria-hidden />
+                      <span>
+                        <span className="font-semibold text-zinc-200">Secure checkout.</span> Mobile ticket + QR appears instantly in-app.
+                      </span>
+                    </div>
+
+                    {remaining <= 0 && (
+                      <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-bold text-white">
+                        Sold out. Contact the host for a waitlist.
+                      </div>
+                    )}
+
+                    <div id="buy-tickets" className="mt-6 scroll-mt-28">
+                      <PurchaseForm
+                        eventId={event.id}
+                        price={event.ticket_price}
+                        title={event.title}
+                        slug={slug}
+                        soldOut={remaining <= 0}
+                        theme="dark"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </aside>
           </div>
         </div>
       </div>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] lg:hidden">
-        <a
-          href="#buy-tickets"
-          className="pointer-events-auto inline-flex h-14 w-full items-center justify-center rounded-full bg-gradient-to-r from-zinc-100 to-zinc-300 text-base font-black text-zinc-900 shadow-[0_18px_38px_-22px_rgba(0,0,0,0.8)] transition active:scale-[0.995]"
-        >
-          {remaining <= 0 ? "Sold out" : `Buy tickets from $${centsToDollars(event.ticket_price)}`}
-        </a>
-      </div>
+      {!ended && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] lg:hidden">
+          <a
+            href="#buy-tickets"
+            className="pointer-events-auto inline-flex h-14 w-full items-center justify-center rounded-full bg-gradient-to-r from-zinc-100 to-zinc-300 text-base font-black text-zinc-900 shadow-[0_18px_38px_-22px_rgba(0,0,0,0.8)] transition active:scale-[0.995]"
+          >
+            {remaining <= 0 ? "Sold out" : `Buy tickets from $${centsToDollars(event.ticket_price)}`}
+          </a>
+        </div>
+      )}
     </main>
   );
 }

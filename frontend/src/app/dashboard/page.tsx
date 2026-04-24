@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { ArrowUpRight, Download, ShoppingBag } from "lucide-react";
-import { Card, EmptyState, StatCard } from "@/components/ui";
+import { Card, StatCard } from "@/components/ui";
 import { centsToDollars } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
-import CopyEventLink from "@/components/copy-event-link";
 import SalesChart from "@/components/sales-chart";
 import DashboardAuthFallback from "@/components/dashboard-auth-fallback";
 import HostPayoutCta from "@/components/host-payout-cta";
+import { DashboardEventTabs } from "./event-tabs";
 
-function formatEventDate(isoDate: string) {
-  const d = new Date(`${isoDate}T12:00:00`);
-  if (Number.isNaN(d.getTime())) return isoDate;
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
-}
 
 export default async function DashboardPage() {
   const supabase = await getSupabaseServerClient();
@@ -65,11 +60,20 @@ export default async function DashboardPage() {
   const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);
   const attendeeRows = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
   const recentOrders = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 12);
-  const salesData = (events ?? []).map((event) => ({
+  const today = new Date().toISOString().split("T")[0];
+  const allEnriched = (events ?? []).map((event) => {
+    const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
+    const pct = Math.min(Math.round((sold / Math.max(event.tickets_available, 1)) * 100), 100);
+    return { ...event, sold, pct };
+  });
+  const upcomingEvents = allEnriched.filter((e) => e.date >= today);
+  const pastEvents = allEnriched.filter((e) => e.date < today).sort((a, b) => b.date.localeCompare(a.date));
+
+  const salesData = allEnriched.map((event) => ({
     name: event.title.length > 16 ? `${event.title.slice(0, 16)}…` : event.title,
-    sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
+    sold: event.sold,
   }));
-  const scannerHref = events?.[0] ? `/dashboard/events/${events[0].id}/check-in` : "/dashboard/events/new";
+  const scannerHref = upcomingEvents[0] ? `/dashboard/events/${upcomingEvents[0].id}/check-in` : "/dashboard/events/new";
 
   return (
     <main className="container-page min-w-0 py-10 sm:py-14">
@@ -126,7 +130,7 @@ export default async function DashboardPage() {
         />
         <StatCard
           label="Upcoming events"
-          value={events?.length ?? 0}
+          value={upcomingEvents.length}
           className="border-white/[0.1] bg-zinc-950/60"
           valueClassName="text-white"
         />
@@ -172,65 +176,7 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <section id="my-events" className="mt-10 space-y-3 scroll-mt-28">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-muted">Your events</h2>
-        {(events ?? []).length === 0 ? (
-          <EmptyState
-            title="No events yet"
-            subtitle="Create your first event to start selling tickets."
-            className="border-white/[0.16] bg-zinc-950/50"
-            titleClassName="text-white"
-            subtitleClassName="text-zinc-400"
-          />
-        ) : (
-          (events ?? []).map((event) => {
-            const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
-            const pct = Math.min(Math.round((sold / Math.max(event.tickets_available, 1)) * 100), 100);
-            return (
-              <Card key={event.id} className="border-white/[0.1] bg-zinc-950/60 text-white transition hover:border-white/25">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
-                      {event.title}
-                    </Link>
-                    <p className="text-sm text-zinc-400">{formatEventDate(event.date)}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] transition hover:brightness-110"
-                      href={`/dashboard/events/${event.id}`}
-                    >
-                      Event hub
-                    </Link>
-                    <Link
-                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
-                      href={`/events/${event.slug}`}
-                    >
-                      View
-                    </Link>
-                    <Link
-                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
-                      href={`/dashboard/events/${event.id}/check-in`}
-                    >
-                      Scan QR
-                    </Link>
-                    <CopyEventLink slug={event.slug} variant="dark" />
-                  </div>
-                </div>
-                <div className="mt-5">
-                  <div className="mb-1.5 flex justify-between text-xs font-medium text-zinc-400">
-                    <span>Sales progress</span>
-                    <span>{pct}%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                    <div className="h-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              </Card>
-            );
-          })
-        )}
-      </section>
+      <DashboardEventTabs upcoming={upcomingEvents} past={pastEvents} />
 
       <section className="mt-12 space-y-4">
         <Card className="border-white/[0.1] bg-zinc-950/60 text-white">

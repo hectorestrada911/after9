@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     );
   }
   if (!result.ok && result.reason === "send") {
-    return NextResponse.json({ error: result.detail }, { status: 502 });
+    return NextResponse.json({ error: "Could not send your message right now. Please try again in a minute." }, { status: 502 });
   }
 
   return NextResponse.json({ ok: true });

@@ -7,10 +7,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Eye, EyeOff, KeyRound, LayoutGrid, ShieldCheck, Sparkles, Ticket } from "lucide-react";
 import {
   AuthAmbient,
+  AuthDivider,
   AuthFormPanel,
   AuthGradientFrame,
   AuthPageSkeleton,
   AuthPrimaryButton,
+  GoogleAuthButton,
   authFieldClass,
   authHeroContainer,
   authHeroItem,
@@ -42,6 +44,17 @@ function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  async function signInWithGoogle() {
+    setError(null);
+    flushUi(() => setLoading(true));
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(hostIntent ? hostNext : next)}`;
+    const { error: oauthErr } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+    if (oauthErr) {
+      flushUi(() => setLoading(false));
+      setError(mapAuthActionError(oauthErr.message, "signup"));
+    }
+  }
 
   async function onPasswordSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -149,6 +162,11 @@ function SignupForm() {
 
         <AuthFormPanel>
           {urlError ? <p className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{urlError}</p> : null}
+
+          <GoogleAuthButton onClick={() => void signInWithGoogle()} loading={loading} />
+          <div className="my-3">
+            <AuthDivider />
+          </div>
 
           <motion.form
             initial={reduceMotion ? undefined : { opacity: 0, y: 10 }}

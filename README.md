@@ -1,4 +1,4 @@
-# After9 Monorepo
+# Rage Monorepo
 
 This repository is organized by concern:
 

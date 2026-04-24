@@ -116,6 +116,15 @@ export default async function EventOverviewPage({ params }: { params: Promise<{ 
                   >
                     {order.payment_status}
                   </span>
+                  {order.payment_status === "paid" ? (
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        order.confirmation_email_sent_at ? "bg-brand-green/25 text-brand-green" : "bg-amber-500/20 text-amber-200"
+                      }`}
+                    >
+                      {order.confirmation_email_sent_at ? "Email sent" : "Email pending"}
+                    </span>
+                  ) : null}
                   <span className="text-sm text-zinc-400">{order.quantity} ticket{order.quantity === 1 ? "" : "s"}</span>
                   <span className="text-sm font-bold text-white">${centsToDollars(order.total_amount)}</span>
                 </div>

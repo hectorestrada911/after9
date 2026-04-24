@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { flushUi } from "@/lib/flush-ui";
+import { platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { cn } from "@/lib/utils";
 
 export default function PurchaseForm({
@@ -26,9 +27,14 @@ export default function PurchaseForm({
   const [quantity, setQuantity] = useState(1);
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerEmailConfirm, setBuyerEmailConfirm] = useState("");
+  const platformFeePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
+  const feePerTicket = platformFeeFromGrossCents(price, platformFeePercent);
+  const total = ((price * quantity) / 100).toFixed(2);
+  const totalFee = ((feePerTicket * quantity) / 100).toFixed(2);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
     const normalizedEmail = buyerEmail.trim().toLowerCase();
     const normalizedConfirm = buyerEmailConfirm.trim().toLowerCase();
     if (!normalizedEmail || normalizedEmail !== normalizedConfirm) {
@@ -130,7 +136,10 @@ export default function PurchaseForm({
       {error && <p className="text-sm font-semibold text-red-400">{error}</p>}
       <p className={cn("text-sm", theme === "dark" ? "text-zinc-400" : "text-zinc-800")}>
         Total:{" "}
-        <span className={cn("font-black", theme === "dark" ? "text-white" : "text-black")}>${((price * quantity) / 100).toFixed(2)}</span>
+        <span className={cn("font-black", theme === "dark" ? "text-white" : "text-black")}>${total}</span>
+      </p>
+      <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
+        Displayed price includes a platform fee of ${totalFee}.
       </p>
       <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
         Tickets are sent to this email. Use the same email later in My tickets to recover access.
@@ -138,12 +147,18 @@ export default function PurchaseForm({
       <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
         Buying multiple tickets creates one unique QR code per ticket.
       </p>
-      <Button
-        className="w-full bg-gradient-to-r from-[#4BFA94] to-emerald-300 text-sm font-black uppercase tracking-wide text-black shadow-[0_12px_40px_-12px_rgba(75,250,148,0.55)] hover:brightness-105 disabled:opacity-50"
-        disabled={loading || soldOut}
-      >
-        {soldOut ? "Sold out" : loading ? "Redirecting…" : "Get tickets"}
-      </Button>
+      {loading ? (
+        <p className={cn("rounded-xl border px-4 py-3 text-center text-sm font-semibold", theme === "dark" ? "border-white/15 bg-white/[0.05] text-zinc-100" : "border-zinc-300 bg-zinc-50 text-zinc-800")}>
+          Redirecting to secure checkout…
+        </p>
+      ) : (
+        <Button
+          className="w-full bg-gradient-to-r from-[#4BFA94] to-emerald-300 text-sm font-black uppercase tracking-wide text-black shadow-[0_12px_40px_-12px_rgba(75,250,148,0.55)] hover:brightness-105 disabled:opacity-50"
+          disabled={soldOut}
+        >
+          {soldOut ? "Sold out" : "Get tickets"}
+        </Button>
+      )}
     </form>
   );
 }

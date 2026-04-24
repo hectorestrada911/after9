@@ -1,7 +1,9 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Calendar, Clock3, Flame, MapPin, ShieldCheck, Sparkles, Ticket, Users, Zap } from "lucide-react";
+import { MobileBuyCta } from "@/components/mobile-buy-cta";
 import { EventShareActions } from "@/components/event-share-actions";
+import { platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 import PurchaseForm from "./purchase-form";
@@ -51,6 +53,8 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const remaining = Math.max((event.tickets_available ?? 0) - sold, 0);
   const soldPercent = Math.min(Math.round((sold / Math.max(event.tickets_available ?? 1, 1)) * 100), 100);
   const showCapacityPublicly = Boolean(event.show_capacity_publicly);
+  const platformFeePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
+  const feeDisplay = centsToDollars(platformFeeFromGrossCents(event.ticket_price, platformFeePercent));
   const lowStock = remaining > 0 && remaining <= Math.max(12, Math.ceil((event.tickets_available ?? 0) * 0.15));
   const moving = sold >= 3;
 
@@ -216,6 +220,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                       <span className="font-bold text-white">Limited spots</span>
                     )}
                   </p>
+                  <p className="mt-1 text-xs text-zinc-500">Displayed price includes platform fee (${feeDisplay}).</p>
 
                   {showCapacityPublicly ? (
                     <div className="mt-6">
@@ -261,14 +266,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
           </div>
         </div>
       </div>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] lg:hidden">
-        <a
-          href="#buy-tickets"
-          className="pointer-events-auto inline-flex h-14 w-full items-center justify-center rounded-full bg-gradient-to-r from-zinc-100 to-zinc-300 text-base font-black text-zinc-900 shadow-[0_18px_38px_-22px_rgba(0,0,0,0.8)] transition active:scale-[0.995]"
-        >
-          {remaining <= 0 ? "Sold out" : `Buy tickets from $${centsToDollars(event.ticket_price)}`}
-        </a>
-      </div>
+      <MobileBuyCta soldOut={remaining <= 0} targetId="buy-tickets" label={`Buy tickets from $${centsToDollars(event.ticket_price)}`} />
     </main>
   );
 }

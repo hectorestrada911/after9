@@ -44,6 +44,7 @@ export function EventOrdersClient({ orders }: { orders: OrderRow[] }) {
                 <th className="px-4 py-3">Qty</th>
                 <th className="px-4 py-3">Total</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Date</th>
               </tr>
             </thead>
@@ -64,6 +65,21 @@ export function EventOrdersClient({ orders }: { orders: OrderRow[] }) {
                     >
                       {order.payment_status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {order.payment_status !== "paid" ? (
+                      <span className="inline-flex rounded-full bg-zinc-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                        Not applicable
+                      </span>
+                    ) : order.confirmation_email_sent_at ? (
+                      <span className="inline-flex rounded-full bg-brand-green/25 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-green">
+                        Sent
+                      </span>
+                    ) : (
+                      <span className="inline-flex rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-200">
+                        Pending
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-xs text-zinc-500">{new Date(order.created_at).toLocaleString()}</td>
                 </tr>

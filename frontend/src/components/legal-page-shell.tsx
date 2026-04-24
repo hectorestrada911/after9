@@ -24,12 +24,12 @@ export function LegalPageShell({ title, subtitle, effectiveDate, children }: Leg
             <Link href="/privacy" className="rounded-full border border-white/20 px-3 py-1 text-zinc-300 transition hover:border-white/40 hover:text-white">
               Privacy
             </Link>
-            <a
-              href="mailto:ragesupportpage@gmail.com"
+            <Link
+              href="/contact"
               className="rounded-full border border-white/20 px-3 py-1 text-zinc-300 transition hover:border-white/40 hover:text-white"
             >
               Contact
-            </a>
+            </Link>
           </div>
         </div>
         <article className="prose prose-invert mt-6 max-w-none rounded-3xl border border-white/[0.08] bg-zinc-950/70 p-5 prose-headings:font-bold prose-headings:text-white prose-p:text-zinc-300 prose-li:text-zinc-300 prose-strong:text-white sm:p-8">

@@ -28,7 +28,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
   const [{ data: orders }, { count: ticketsTotal }, { count: ticketsCheckedIn }] = await Promise.all([
     supabase
       .from("orders")
-      .select("id,buyer_name,buyer_email,quantity,total_amount,payment_status,created_at")
+      .select("id,buyer_name,buyer_email,quantity,total_amount,payment_status,confirmation_email_sent_at,created_at")
       .eq("event_id", eventId)
       .order("created_at", { ascending: false }),
     supabase.from("tickets").select("id", { count: "exact", head: true }).eq("event_id", eventId),

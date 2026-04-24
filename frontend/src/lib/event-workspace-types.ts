@@ -27,6 +27,7 @@ export type OrderRow = {
   quantity: number;
   total_amount: number;
   payment_status: string;
+  confirmation_email_sent_at?: string | null;
   created_at: string;
 };
 

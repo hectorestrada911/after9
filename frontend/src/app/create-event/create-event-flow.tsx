@@ -153,6 +153,17 @@ type CreateEventFlowProps = {
   onPublish?(payload: CreateEventPublishPayload): void | Promise<void>;
 };
 
+type PublishConfirmDraft = {
+  payload: CreateEventPublishPayload;
+  title: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  ticketPrice: number;
+  ticketsAvailable: number;
+};
+
 export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlowProps) {
   const router = useRouter();
   const supabase = getSupabaseBrowserClient();
@@ -167,6 +178,8 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [flyerPickerOpen, setFlyerPickerOpen] = useState(false);
   const [publishBusy, setPublishBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDraft, setConfirmDraft] = useState<PublishConfirmDraft | null>(null);
+  const [hostDisplayName, setHostDisplayName] = useState("Host");
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -174,7 +187,6 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
-  const [capacity, setCapacity] = useState("120");
   const [ticketPrice, setTicketPrice] = useState("15");
   const [ticketsAvailable, setTicketsAvailable] = useState("120");
   const [visibility, setVisibility] = useState<Visibility>("unlisted");
@@ -236,7 +248,6 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     setStartTime(draft.startTime);
     setEndTime(draft.endTime);
     setLocation(draft.location);
-    setCapacity(String(draft.capacity));
     setTicketPrice(String(draft.ticketPrice));
     setTicketsAvailable(String(draft.ticketsAvailable));
     setVisibility(coerceEventVisibility(draft.visibility));
@@ -257,6 +268,30 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       if (fileRef.current) fileRef.current.value = "";
     }
   }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    if (!hasAuthedSession) {
+      setHostDisplayName("Host");
+      return;
+    }
+    supabase.auth
+      .getUser()
+      .then(async ({ data }) => {
+        const userId = data.user?.id;
+        if (!userId || ignore) return;
+        const { data: profile } = await supabase.from("profiles").select("organizer_name").eq("id", userId).maybeSingle();
+        if (!ignore && profile?.organizer_name?.trim()) {
+          setHostDisplayName(profile.organizer_name.trim());
+        }
+      })
+      .catch(() => {
+        if (!ignore) setHostDisplayName("Host");
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [hasAuthedSession, supabase]);
 
   useEffect(() => {
     if (filteredStock.some((i) => i.id === selectedStockId)) return;
@@ -349,6 +384,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
     const imageUrl = coverMode === "upload" ? placeholderCoverUrl() : selectedStock.url;
 
+    const capacity = Number(ticketsAvailable) || 0;
     const parsed = eventSchema.safeParse({
       title,
       description: description.trim(),
@@ -407,9 +443,15 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
         return;
       }
       if (onPublish) {
-        flushUi(() => setPublishBusy(true));
-        try {
-          await onPublish({
+        setConfirmDraft({
+          title: parsed.data.title,
+          date: parsed.data.date,
+          startTime: parsed.data.startTime,
+          endTime: parsed.data.endTime,
+          location: parsed.data.location,
+          ticketPrice: parsed.data.ticketPrice,
+          ticketsAvailable: parsed.data.ticketsAvailable,
+          payload: {
             title: parsed.data.title,
             description: parsed.data.description,
             imageUrl: parsed.data.imageUrl,
@@ -428,10 +470,8 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             showCapacityPublicly,
             coverMode,
             uploadDataUrl: coverMode === "upload" ? uploadDataUrl : null,
-          });
-        } finally {
-          flushUi(() => setPublishBusy(false));
-        }
+          },
+        });
         return;
       }
 
@@ -458,6 +498,17 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const ticketPriceCents = Math.max(0, Math.round(ticketPriceFloat * 100));
   const platformFeeCents = platformFeeFromGrossCents(ticketPriceCents, platformFeePercent);
   const hostNetCents = hostNetFromGrossCents(ticketPriceCents, platformFeePercent);
+
+  async function publishConfirmedEvent() {
+    if (!confirmDraft || !onPublish) return;
+    flushUi(() => setPublishBusy(true));
+    try {
+      await onPublish(confirmDraft.payload);
+      setConfirmDraft(null);
+    } finally {
+      flushUi(() => setPublishBusy(false));
+    }
+  }
 
   return (
     <main className="relative min-h-dvh bg-[#030303] text-zinc-300 antialiased">
@@ -540,9 +591,12 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-zinc-900">
                       {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
                       <img src={coverThumbSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
-                      <span className="absolute left-2.5 top-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                  <span className="absolute left-2.5 top-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                         {formatAgeBadge(ageRestriction)}
                       </span>
+                  <span className="absolute bottom-2.5 left-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                    Hosted by {hostDisplayName}
+                  </span>
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <p className="text-xs text-zinc-500">Tap to change flyer, upload, or browse styles.</p>
@@ -625,11 +679,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
             {/* Tickets */}
             <div key="s2" className="animate-fadeUp mt-10 space-y-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div>
-                    <span className={labelClass}>Room capacity</span>
-                    <input className={field} type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
-                  </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <span className={labelClass}>Ticket price (USD)</span>
                     <input className={field} type="number" step="0.01" min={0.5} value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} />
@@ -661,7 +711,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   Minimum ticket price is <span className="font-semibold text-zinc-200">$0.50</span>.
                 </div>
                 <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
-                  <span>Show remaining capacity publicly</span>
+                  <span>Show tickets left publicly</span>
                   <input
                     type="checkbox"
                     checked={showCapacityPublicly}
@@ -731,6 +781,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   )}
                 </button>
               </div>
+              {error ? <p className="mx-auto mt-2 max-w-sm text-center text-xs font-medium text-red-300">{error}</p> : null}
               <p className="mx-auto mt-2.5 max-w-sm text-center text-[11px] leading-relaxed text-zinc-600">
                 {resolvedMode === "hostPublish"
                   ? onPublish
@@ -841,6 +892,47 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                       );
                     })}
                   </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {confirmDraft ? (
+            <div className="fixed inset-0 z-50 bg-black/75 p-4 backdrop-blur-sm sm:p-6">
+              <div className="mx-auto mt-10 w-full max-w-md rounded-3xl border border-white/[0.14] bg-[#070707] p-5 shadow-2xl">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Confirm details</p>
+                <h3 className="mt-2 text-lg font-semibold text-zinc-100">{confirmDraft.title}</h3>
+                <div className="mt-4 space-y-2 rounded-2xl border border-white/[0.1] bg-white/[0.03] p-3 text-sm text-zinc-300">
+                  <p>
+                    <span className="text-zinc-500">When:</span> {confirmDraft.date} {confirmDraft.startTime}–{confirmDraft.endTime}
+                  </p>
+                  <p>
+                    <span className="text-zinc-500">Where:</span> {confirmDraft.location}
+                  </p>
+                  <p>
+                    <span className="text-zinc-500">Price:</span> ${confirmDraft.ticketPrice.toFixed(2)}
+                  </p>
+                  <p>
+                    <span className="text-zinc-500">Tickets:</span> {confirmDraft.ticketsAvailable}
+                  </p>
+                </div>
+                <p className="mt-3 text-xs text-zinc-500">You can still edit after publishing from the event hub.</p>
+                <div className="mt-5 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={publishBusy}
+                    onClick={() => setConfirmDraft(null)}
+                    className="h-11 rounded-full border border-white/20 text-xs font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-white/40 disabled:opacity-60"
+                  >
+                    Keep editing
+                  </button>
+                  <button
+                    type="button"
+                    disabled={publishBusy}
+                    onClick={() => void publishConfirmedEvent()}
+                    className="h-11 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-105 disabled:opacity-60"
+                  >
+                    {publishBusy ? "Publishing…" : "Confirm publish"}
+                  </button>
                 </div>
               </div>
             </div>

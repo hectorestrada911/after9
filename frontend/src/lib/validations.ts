@@ -24,3 +24,11 @@ export const purchaseSchema = z.object({
   buyerEmail: z.string().email(),
   quantity: z.coerce.number().min(1).max(10),
 });
+
+/** Public contact form (+ honeypot `company`, must stay empty). */
+export const contactFormSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(254),
+  message: z.string().trim().min(10).max(8000),
+  company: z.string().optional(),
+});

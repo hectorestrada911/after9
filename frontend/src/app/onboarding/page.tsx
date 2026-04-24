@@ -63,6 +63,12 @@ function OnboardingForm() {
       );
     }
 
+    try {
+      await fetch("/api/auth/welcome-email", { method: "POST", credentials: "include" });
+    } catch {
+      // Welcome email is best-effort; onboarding should still complete.
+    }
+
     // Ensure server-rendered routes (dashboard) read the updated session/profile immediately.
     router.refresh();
     router.replace(next);
@@ -113,6 +119,7 @@ function OnboardingForm() {
           <Input name="legalName" placeholder="Legal / account name (optional)" />
           <p className="text-xs leading-relaxed text-muted">
             <span className="font-semibold text-black">Shown on events</span> is what buyers see as “Hosted by …”.{" "}
+            It also appears on your create-event preview so you know exactly what guests will see.{" "}
             <span className="font-semibold text-black">Legal / account name</span> is only for your records; leave it blank
             to reuse the public name.
           </p>

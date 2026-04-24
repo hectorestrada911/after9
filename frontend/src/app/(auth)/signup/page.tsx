@@ -4,7 +4,7 @@ import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { KeyRound, LayoutGrid, ShieldCheck, Sparkles, Ticket } from "lucide-react";
+import { Eye, EyeOff, KeyRound, LayoutGrid, ShieldCheck, Sparkles, Ticket } from "lucide-react";
 import {
   AuthAmbient,
   AuthFormPanel,
@@ -40,6 +40,8 @@ function SignupForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   async function onPasswordSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -174,30 +176,50 @@ function SignupForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password (8+ characters)"
-              autoComplete="new-password"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              dir="ltr"
-              className={cn(authFieldClass, "text-left [unicode-bidi:plaintext]")}
-              required
-            />
-            <Input
-              name="confirmPassword"
-              type="password"
-              placeholder="Confirm password"
-              autoComplete="new-password"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              dir="ltr"
-              className={cn(authFieldClass, "text-left [unicode-bidi:plaintext]")}
-              required
-            />
+            <div className="relative">
+              <Input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password (8+ characters)"
+                autoComplete="new-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                dir="ltr"
+                className={cn(authFieldClass, "pr-10 text-left [unicode-bidi:plaintext]")}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-200 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm password"
+                autoComplete="new-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                dir="ltr"
+                className={cn(authFieldClass, "pr-10 text-left [unicode-bidi:plaintext]")}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-200 focus:outline-none"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             <AnimatePresence>
               {error ? (
                 <motion.p

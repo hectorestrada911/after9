@@ -4,7 +4,7 @@ import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Fingerprint, Mic2, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Fingerprint, Mic2, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
 import {
   AuthAmbient,
   AuthFormPanel,
@@ -41,6 +41,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onPasswordSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -218,18 +219,28 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              dir="ltr"
-              className={cn(authFieldClass, "text-left [unicode-bidi:plaintext]")}
-              required
-            />
+            <div className="relative">
+              <Input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                autoComplete="current-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                dir="ltr"
+                className={cn(authFieldClass, "pr-10 text-left [unicode-bidi:plaintext]")}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-zinc-200 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             <AnimatePresence>
               {error ? (
                 <motion.p

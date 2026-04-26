@@ -31,24 +31,37 @@ export function HomeTrendingRail({ events }: { events: HomeTrendingEvent[] }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section id="browse-events" className="border-t border-white/[0.08] py-16 sm:py-24">
-      <div className="container-page">
+    <section id="browse-events" className="relative overflow-hidden border-t border-white/[0.06] bg-black py-20 sm:py-28">
+      {/* glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[420px]"
+        style={{ background: "radial-gradient(ellipse 60% 60% at 50% 0%, rgba(75,250,148,0.06), transparent 70%)" }}
+      />
+      <div className="container-page relative z-10">
         <motion.div
-          className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 18 }}
+          className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+          initial={reduceMotion ? undefined : { opacity: 0, y: 22 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.45, ease: authEase }}
+          transition={{ duration: 0.5, ease: authEase }}
         >
           <div className="min-w-0">
-            <h2 className="text-2xl font-black tracking-tighter text-white sm:text-3xl">Trending now</h2>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#4BFA94]">Live now</p>
+            <h2 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+              Trending<br />
+              <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">tonight.</span>
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-400">
               Fresh drops from rooms we love: club nights, live sets, comedy, and the kind of nights people actually talk about.
             </p>
           </div>
           <motion.div whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }}>
-            <Link href="/#browse-events" className="pill-dark inline-flex h-11 items-center self-start px-6 text-xs sm:self-end">
-              BROWSE EVENTS
+            <Link
+              href="/#browse-events"
+              className="inline-flex h-12 items-center self-start rounded-full border border-white/[0.18] px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40 sm:self-end"
+            >
+              Browse all →
             </Link>
           </motion.div>
         </motion.div>

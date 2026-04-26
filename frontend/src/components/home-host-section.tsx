@@ -24,51 +24,63 @@ export function HomeHostSection() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="border-t border-white/[0.08] bg-black py-20 text-white sm:py-28">
-      <div className="container-page">
+    <section className="relative overflow-hidden border-t border-white/[0.06] bg-black py-24 text-white sm:py-32">
+      {/* ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[480px]"
+        style={{ background: "radial-gradient(ellipse 70% 70% at 50% 0%, rgba(75,250,148,0.07), transparent 70%)" }}
+      />
+
+      <div className="container-page relative z-10">
+        {/* ── hero: Turn your event into income ── */}
         <motion.div
-          className="grid min-w-0 gap-10 lg:grid-cols-[1.2fr,0.8fr] lg:items-center"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+          className="grid min-w-0 gap-12 lg:grid-cols-[1.2fr,0.8fr] lg:items-center"
+          initial={reduceMotion ? undefined : { opacity: 0, y: 24 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: authEase }}
+          transition={{ duration: 0.55, ease: authEase }}
         >
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/60">For hosts</p>
-            <h3 className="mt-4 display-section-fluid">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#4BFA94]">For hosts</p>
+            <h3 className="mt-4 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
               Turn your event
               <br />
-              <span className="bg-gradient-to-r from-brand-green via-emerald-200 to-teal-200 bg-clip-text text-transparent">into income.</span>
+              <span className="bg-gradient-to-r from-[#4BFA94] via-emerald-200 to-teal-200 bg-clip-text text-transparent">
+                into income.
+              </span>
             </h3>
-            <p className="mt-5 max-w-2xl text-lg text-white/70">One platform to create, sell, and operate event nights with confidence.</p>
-            <div className="mt-7 flex flex-wrap gap-3">
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
+              One platform to create, sell, and operate event nights with confidence. No paperwork, no spreadsheets, no surprises at the door.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
               <motion.div whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }}>
                 <Link
                   href="/create-event"
-                  className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-950 shadow-[0_14px_40px_-16px_rgba(255,255,255,0.35)] transition hover:bg-neutral-200 sm:h-12"
+                  className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200"
                 >
-                  Create event <ArrowRight size={14} strokeWidth={2} />
+                  Create event <ArrowRight size={14} strokeWidth={2.5} />
                 </Link>
               </motion.div>
               <motion.div whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }}>
                 <Link
                   href="/login"
-                  className="inline-flex h-11 items-center rounded-full border border-white/25 px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/50 sm:h-12"
+                  className="inline-flex h-12 items-center rounded-full border border-white/[0.18] px-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40"
                 >
-                  Login
+                  Host login
                 </Link>
               </motion.div>
             </div>
           </div>
           <motion.div
-            className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3"
+            className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4"
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-40px" }}
             variants={{
               hidden: {},
               show: {
-                transition: { staggerChildren: reduceMotion ? 0 : 0.07, delayChildren: reduceMotion ? 0 : 0.05 },
+                transition: { staggerChildren: reduceMotion ? 0 : 0.08, delayChildren: reduceMotion ? 0 : 0.05 },
               },
             }}
           >
@@ -76,31 +88,35 @@ export function HomeHostSection() {
               <motion.div
                 key={l}
                 variants={tile}
-                whileHover={reduceMotion ? undefined : { scale: 1.02 }}
+                whileHover={reduceMotion ? undefined : { y: -3, borderColor: "rgba(75,250,148,0.4)" }}
                 transition={{ type: "spring", stiffness: 400, damping: 26 }}
                 className={cn(
-                  "rounded-2xl border border-white/15 bg-white/[0.02] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:p-5",
-                  "transition-colors hover:border-brand-green/35",
+                  "rounded-2xl border border-white/[0.08] bg-white/[0.015] p-5 backdrop-blur sm:p-6",
+                  "transition-colors",
                 )}
               >
-                <p className="text-2xl font-black tracking-tighter sm:text-3xl">{v}</p>
-                <p className="mt-1 text-[10px] uppercase leading-snug tracking-wider text-white/60 sm:text-xs">{l}</p>
+                <p className="text-3xl font-black tracking-[-0.03em] text-white sm:text-4xl">{v}</p>
+                <p className="mt-2 text-[10px] font-semibold uppercase leading-snug tracking-[0.16em] text-zinc-500">{l}</p>
               </motion.div>
             ))}
           </motion.div>
         </motion.div>
 
+        {/* ── A page that looks worth the ticket ── */}
         <motion.div
-          className="mt-14 flex flex-col gap-8 border-t border-white/[0.08] pt-14 lg:mt-16 lg:flex-row lg:items-start lg:gap-14 lg:pt-16"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 24 }}
+          className="mt-24 flex flex-col gap-10 border-t border-white/[0.05] pt-16 lg:flex-row lg:items-start lg:gap-16 lg:pt-20"
+          initial={reduceMotion ? undefined : { opacity: 0, y: 28 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5, ease: authEase }}
+          transition={{ duration: 0.55, ease: authEase }}
         >
-          <div className="min-w-0 shrink-0 lg:max-w-[14rem] lg:pt-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/50">What guests open</p>
-            <p className="mt-3 text-lg font-bold leading-snug text-white sm:text-xl">A page that looks worth the ticket.</p>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-500">
+          <div className="min-w-0 shrink-0 lg:max-w-[18rem] lg:pt-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#4BFA94]">What guests open</p>
+            <h3 className="mt-4 text-3xl font-black uppercase leading-[0.92] tracking-[-0.035em] text-white sm:text-4xl">
+              A page<br />that looks<br />
+              <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">worth the ticket.</span>
+            </h3>
+            <p className="mt-5 text-sm leading-relaxed text-zinc-500">
               Cover, details, price, checkout: the same bones every public event uses. Below is a static mock, not a live event.
             </p>
           </div>
@@ -109,19 +125,24 @@ export function HomeHostSection() {
           </div>
         </motion.div>
 
+        {/* ── Launch, collect, and scan in one clean flow ── */}
         <motion.div
-          className="mt-14 border-t border-white/[0.08] pt-14 sm:mt-20 sm:pt-20"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 20 }}
+          className="mt-24 border-t border-white/[0.05] pt-16 sm:mt-28 sm:pt-20"
+          initial={reduceMotion ? undefined : { opacity: 0, y: 24 }}
           whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.45, ease: authEase }}
+          transition={{ duration: 0.5, ease: authEase }}
         >
-          <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/45 sm:text-left">How it feels to host</p>
-          <h3 className="mt-3 text-balance text-center text-2xl font-black tracking-tight text-white sm:text-left sm:text-3xl">
-            Launch, collect, and scan in one clean flow.
+          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#4BFA94]">How it feels to host</p>
+          <h3 className="mt-4 max-w-3xl text-balance text-4xl font-black uppercase leading-[0.92] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+            Launch, collect,<br />
+            and scan in{" "}
+            <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">one clean flow.</span>
           </h3>
-          <p className="mt-3 max-w-2xl text-center text-sm text-zinc-400 sm:text-left">Three steps: publish, get paid, scan at door.</p>
-          <div className="mt-6">
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-400">
+            Three steps: publish, get paid, scan at door. Nothing else to learn.
+          </p>
+          <div className="mt-10">
             <HostWorkflowHighlight />
           </div>
         </motion.div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export function SiteFooter() {
@@ -8,69 +9,63 @@ export function SiteFooter() {
   if (pathname === "/create-event") return null;
 
   return (
-    <footer className="mt-24 border-t border-black/[0.06] bg-white">
-      <div className="container-page py-12">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="relative overflow-hidden border-t border-white/[0.06] bg-black text-zinc-300">
+      {/* glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[300px]"
+        style={{ background: "radial-gradient(ellipse 60% 60% at 50% 0%, rgba(75,250,148,0.05), transparent 70%)" }}
+      />
+      <div className="container-page relative z-10 py-16">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr,1fr,1fr,1fr]">
           <div>
-            <img src="/rage-logo.svg" alt="RAGE" className="h-9 w-auto object-contain" />
-            <p className="mt-3 text-sm leading-relaxed text-neutral-500">Student events, upfront pricing, mobile tickets.</p>
+            <Image src="/rage-logo.png" alt="RAGE" width={140} height={42} className="h-7 w-auto" />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-500">
+              Student events, upfront pricing, mobile tickets. Built for college nights.
+            </p>
+            <div className="mt-6 flex gap-2">
+              <Link
+                href="/signup"
+                className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200"
+              >
+                Get the app
+              </Link>
+              <Link
+                href="/create-event"
+                className="inline-flex h-10 items-center rounded-full border border-white/[0.14] px-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40"
+              >
+                Create event
+              </Link>
+            </div>
           </div>
           <div>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Discover</p>
-            <ul className="space-y-2 text-sm text-neutral-600">
-              <li>
-                <Link href="/" className="transition hover:text-neutral-950">
-                  Browse events
-                </Link>
-              </li>
-              <li>
-                <Link href="/demo" className="transition hover:text-neutral-950">
-                  Sample event
-                </Link>
-              </li>
-              <li>
-                <Link href="/test" className="transition hover:text-neutral-950">
-                  Test flow
-                </Link>
-              </li>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Discover</p>
+            <ul className="space-y-3 text-sm text-zinc-400">
+              <li><Link href="/" className="transition hover:text-white">Browse events</Link></li>
+              <li><Link href="/demo" className="transition hover:text-white">Sample event</Link></li>
+              <li><Link href="/test" className="transition hover:text-white">Test flow</Link></li>
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Hosts</p>
-            <ul className="space-y-2 text-sm text-neutral-600">
-              <li>
-                <Link href="/my-tickets" className="transition hover:text-neutral-950">
-                  My tickets
-                </Link>
-              </li>
-              <li>
-                <Link href="/create-event" className="transition hover:text-neutral-950">
-                  Create event
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" className="transition hover:text-neutral-950">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="transition hover:text-neutral-950">
-                  Dashboard
-                </Link>
-              </li>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Hosts</p>
+            <ul className="space-y-3 text-sm text-zinc-400">
+              <li><Link href="/create-event" className="transition hover:text-white">Create event</Link></li>
+              <li><Link href="/dashboard" className="transition hover:text-white">Dashboard</Link></li>
+              <li><Link href="/login" className="transition hover:text-white">Login</Link></li>
+              <li><Link href="/my-tickets" className="transition hover:text-white">My tickets</Link></li>
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-400">Company</p>
-            <ul className="space-y-2 text-sm text-neutral-500">
-              <li>Get help</li>
-              <li>Work with us</li>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Company</p>
+            <ul className="space-y-3 text-sm text-zinc-400">
+              <li><Link href="/contact" className="transition hover:text-white">Get help</Link></li>
+              <li><Link href="/contact" className="transition hover:text-white">Work with us</Link></li>
             </ul>
           </div>
         </div>
-        <div className="mt-10 flex flex-col justify-between gap-2 border-t border-black/[0.06] pt-6 text-xs text-neutral-400 sm:flex-row">
+        <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 text-[11px] text-zinc-600 sm:flex-row">
           <p>© {new Date().getFullYear()} After9. All rights reserved.</p>
-          <p>Secure checkout · Mobile tickets · Fast door entry</p>
+          <p className="uppercase tracking-[0.18em]">Secure checkout · Mobile tickets · Fast door entry</p>
         </div>
       </div>
     </footer>

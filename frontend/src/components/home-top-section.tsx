@@ -7,7 +7,6 @@ import {
   useScroll,
   useTransform,
   useReducedMotion,
-  useMotionTemplate,
   type MotionValue,
 } from "framer-motion";
 
@@ -17,25 +16,28 @@ const scenes = [
     eyebrow: "Discover",
     line1: "Your campus.",
     line2: "Your night.",
-    body: "Every party, show, and event near you — curated by students, for students. Honest pricing, no surprises.",
+    body: "Every party, show, and event near you — curated by students, for students.",
+    leftTag: "BUILT FOR\nCOLLEGE NIGHTS",
+    rightTag: "TRUSTED AT\n500+ CAMPUSES",
     cta: { label: "Get the app", href: "/signup" },
-    cta2: { label: "Browse events", href: "/#browse-events" },
   },
   {
     eyebrow: ".edu verified",
     line1: "School email",
     line2: "only.",
-    body: "Only verified students can see private events and buy tickets. Real community — no randos, no bots.",
+    body: "Only verified students see private events and buy tickets. Real community — no randos.",
+    leftTag: "BOTS\nNOT WELCOME",
+    rightTag: ".EDU GATED\nBY DEFAULT",
     cta: { label: "Verify your .edu", href: "/signup" },
-    cta2: null,
   },
   {
     eyebrow: "Door flow",
     line1: "Crowd in.",
     line2: "Friction out.",
-    body: "QR tickets on your phone, scanned at the door in seconds. Zero paper, zero lines, zero stress.",
+    body: "QR tickets on your phone, scanned at the door in seconds. Zero paper, zero lines.",
+    leftTag: "SCAN.\nGO. DONE.",
+    rightTag: "OFFLINE\nREADY",
     cta: { label: "Download RAGE", href: "/signup" },
-    cta2: { label: "Host an event", href: "/create-event" },
   },
 ];
 
@@ -200,19 +202,16 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
   );
 }
 
-/* ─── titanium phone shell w/ volume notches, camera glares, white home bar ──── */
-function PhoneShell({ children }: { children: React.ReactNode }) {
-  const W = 320, H = 660;
+/* ─── titanium phone shell ──────────────────────────────────────── */
+export function PhoneShell({ children, w = 320, h = 660 }: { children: React.ReactNode; w?: number; h?: number }) {
   const frameW = 6;
   const innerR = 48;
   const frameR = 54;
 
-  // Raised metallic button gradient
   const buttonGrad = "linear-gradient(to bottom, #2c2c2e 0%, #4d4d50 40%, #4d4d50 60%, #2c2c2e 100%)";
 
   return (
-    <div style={{ position: "relative", width: W, height: H, flexShrink: 0 }}>
-      {/* Outer frame — pure black with subtle highlight */}
+    <div style={{ position: "relative", width: w, height: h, flexShrink: 0 }}>
       <div style={{
         position: "absolute", inset: 0, borderRadius: frameR,
         background: "#0b0b0d",
@@ -227,23 +226,17 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
         ].join(", "),
       }} />
 
-      {/* Subtle metallic side highlight */}
       <div aria-hidden style={{
         position: "absolute", inset: 0, borderRadius: frameR, pointerEvents: "none",
         background: "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 6%, rgba(255,255,255,0) 94%, rgba(255,255,255,0.07) 100%)",
       }} />
 
-      {/* ── volume notches: clearly raised metallic pills ── */}
-      {/* mute switch (small) */}
+      {/* volume notches */}
       <div style={{ position: "absolute", left: -3, top: 88, width: 4, height: 24, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
-      {/* volume up */}
       <div style={{ position: "absolute", left: -3, top: 124, width: 4, height: 38, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
-      {/* volume down */}
       <div style={{ position: "absolute", left: -3, top: 170, width: 4, height: 38, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
-      {/* power */}
       <div style={{ position: "absolute", right: -3, top: 145, width: 4, height: 64, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 1px 0 1.5px rgba(0,0,0,0.6)" }} />
 
-      {/* Inner screen */}
       <div style={{
         position: "absolute",
         top: frameW, left: frameW,
@@ -253,7 +246,6 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
         background: "#000",
         boxShadow: "inset 0 0 0 1.5px #000, inset 0 0 22px rgba(0,0,0,0.6)",
       }}>
-        {/* Status bar */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 52, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px 0" }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>9:41</span>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -263,17 +255,14 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
 
         {/* Dynamic island with camera glares */}
         <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 116, height: 32, borderRadius: 20, background: "#000", zIndex: 30, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
-          {/* Front camera lens */}
           <div style={{
             position: "relative",
             width: 8, height: 8, borderRadius: "50%",
             background: "radial-gradient(circle at 30% 30%, #1a4a6e 0%, #0a1828 55%, #000 100%)",
             boxShadow: "inset 0 0 1px rgba(120,180,220,0.45)",
           }}>
-            {/* lens glare */}
             <div style={{ position: "absolute", top: 1, left: 1, width: 2.5, height: 2.5, borderRadius: "50%", background: "rgba(180,220,255,0.65)", filter: "blur(0.3px)" }} />
           </div>
-          {/* Sensor / proximity */}
           <div style={{
             width: 6, height: 6, borderRadius: "50%",
             background: "radial-gradient(circle at 35% 35%, #2a2a2c 0%, #050505 70%)",
@@ -313,15 +302,10 @@ export function HomeTopSection() {
 
   const progress = useTransform(scrollY, [top, top + range], [0, 1], { clamp: true });
 
-  /* scene text fades */
+  /* scene fades */
   const s1 = useTransform(progress, [0, 0.26, 0.36], [1, 1, 0]);
   const s2 = useTransform(progress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
   const s3 = useTransform(progress, [0.60, 0.70, 1], [0, 1, 1]);
-
-  /* scene text vertical lift */
-  const s1y = useTransform(progress, [0, 0.36], [0, -30]);
-  const s2y = useTransform(progress, [0.30, 0.66], [30, -30]);
-  const s3y = useTransform(progress, [0.60, 1], [30, 0]);
 
   /* phone screens */
   const p1 = useTransform(progress, [0, 0.28, 0.38], [1, 1, 0]);
@@ -329,28 +313,29 @@ export function HomeTopSection() {
   const p3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
 
   /*
-   * phone X: starts shifted RIGHT (covering text on the right),
-   * slides LEFT to its natural left-anchor position.
-   * Using vw so it scales across viewport widths.
+   * Phone stays centered. Scale starts BIG (zoomed in, frame partially clipped),
+   * settles to 1.0 in the middle scene, and pulls back slightly at the end.
    */
-  const phoneXVw = useTransform(progress, [0, 1], [34, 0]);
-  const phoneX   = useMotionTemplate`${phoneXVw}vw`;
+  const phoneScale   = useTransform(progress, [0, 0.18, 0.55, 1],  [1.45, 1.00, 0.95, 0.82]);
+  const phoneY       = useTransform(progress, [0, 0.25, 0.6, 1],   [-20, 0, 10, 30]);
+  const phoneRotateY = useTransform(progress, [0, 0.5, 1],         [0, -3, -8]);
+  const phoneRotateZ = useTransform(progress, [0, 0.5, 1],         [0, 1, 4]);
+  const phoneRotateX = useTransform(progress, [0, 0.5, 1],         [-2, 0, 3]);
 
-  /* secondary motion */
-  const phoneY       = useTransform(progress, [0, 0.3, 0.7, 1], [50, -10, -20, 25]);
-  const phoneScale   = useTransform(progress, [0, 0.18, 0.85, 1], [0.86, 1.04, 1, 0.94]);
-  const phoneRotateZ = useTransform(progress, [0, 0.5, 1], [-4, 1, 4]);
-  const phoneRotateY = useTransform(progress, [0, 0.5, 1], [3, -2, -5]);
-  const phoneRotateX = useTransform(progress, [0, 0.5, 1], [-3, 0, 2]);
+  /*
+   * Side text fades in only as the phone shrinks (after scene 1).
+   * Eyebrow + headline ABOVE phone follow scene transitions.
+   */
+  const sideTextOpacity = useTransform(progress, [0.05, 0.22], [0, 1]);
+  const headerOpacity   = useTransform(progress, [0, 0.04], [0, 1]);
 
-  /* glow follows phone */
-  const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.45, 0.85, 0.55]);
+  /* ambient glow follows phone */
+  const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.6, 0.85, 0.5]);
 
   /* scroll hint */
-  const hintOpacity = useTransform(progress, [0, 0.06], [1, 0]);
+  const hintOpacity = useTransform(progress, [0, 0.05], [1, 0]);
 
   const sceneOps = [s1, s2, s3];
-  const sceneYs  = [s1y, s2y, s3y];
   const phoneOps = [p1, p2, p3];
 
   return (
@@ -359,98 +344,63 @@ export function HomeTopSection() {
 
         {/* ambient glows */}
         <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", top: "20%", left: "5%",  width: 480, height: 480, borderRadius: "50%", background: "rgba(75,250,148,0.07)", filter: "blur(130px)" }} />
-          <div style={{ position: "absolute", top: "30%", right: "5%", width: 300, height: 300, borderRadius: "50%", background: "rgba(0,0,254,0.07)",  filter: "blur(100px)" }} />
+          <div style={{ position: "absolute", top: "20%", left: "10%", width: 480, height: 480, borderRadius: "50%", background: "rgba(75,250,148,0.06)", filter: "blur(140px)" }} />
+          <div style={{ position: "absolute", bottom: "10%", right: "10%", width: 360, height: 360, borderRadius: "50%", background: "rgba(0,0,254,0.06)", filter: "blur(120px)" }} />
         </div>
 
-        {/* ─── desktop layout: text on right (z=1), phone on top (z=2) ─── */}
-
-        {/* TEXT — right column, behind phone */}
-        <div className="hidden lg:flex" style={{
-          position: "absolute",
-          top: 0, bottom: 0,
-          right: "5vw",
-          width: "min(560px, 44vw)",
-          alignItems: "center",
-          zIndex: 1,
-        }}>
+        {/* TOP HEADLINE — eyebrow + scene title above phone */}
+        <motion.div
+          style={{ opacity: headerOpacity }}
+          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center pt-[7vh]"
+        >
           {scenes.map((scene, i) => (
             <motion.div
               key={i}
               style={{
                 opacity: sceneOps[i],
-                y: sceneYs[i],
-                position: "absolute", inset: 0,
-                display: "flex", flexDirection: "column", justifyContent: "center",
-                willChange: "transform, opacity",
+                position: i === 0 ? "relative" : "absolute",
+                top: i === 0 ? "auto" : "7vh",
+                textAlign: "center",
               }}
             >
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "#4BFA94", margin: 0 }}>
+              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#4BFA94]">
                 {scene.eyebrow}
               </p>
-              <h1 style={{ margin: "10px 0 0", fontSize: "clamp(2.8rem, 5.5vw, 5rem)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.88, color: "#fff" }}>
-                {scene.line1}<br />
-                <span style={{ backgroundImage: "linear-gradient(90deg, #4BFA94, #a7f3d0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <h1 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+                {scene.line1}{" "}
+                <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">
                   {scene.line2}
                 </span>
               </h1>
-              <p style={{ margin: "20px 0 0", fontSize: 15, lineHeight: 1.65, color: "#a1a1aa", maxWidth: 440 }}>
-                {scene.body}
-              </p>
-              <div style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 10 }}>
-                <Link
-                  href={scene.cta.href}
-                  style={{ display: "inline-flex", alignItems: "center", height: 48, borderRadius: 999, background: "#4BFA94", padding: "0 28px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.16em", color: "#000", boxShadow: "0 0 30px -6px rgba(75,250,148,0.55)", textDecoration: "none" }}
-                >
-                  {scene.cta.label}
-                </Link>
-                {scene.cta2 && (
-                  <Link
-                    href={scene.cta2.href}
-                    style={{ display: "inline-flex", alignItems: "center", height: 48, borderRadius: 999, border: "1px solid rgba(255,255,255,0.18)", padding: "0 28px", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.16em", color: "#fff", textDecoration: "none" }}
-                  >
-                    {scene.cta2.label}
-                  </Link>
-                )}
-              </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* PHONE — anchored left, animates from +34vw → 0 (covers text initially) */}
-        <div className="hidden lg:flex" style={{
-          position: "absolute",
-          top: "50%", left: "5vw",
-          transform: "translateY(-50%)",
-          zIndex: 2,
-          alignItems: "center",
-        }}>
+        {/* CENTER: phone */}
+        <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 5 }}>
           {/* tracking glow */}
           <motion.div
             aria-hidden
             style={{
               opacity: glowOpacity,
-              x: phoneX,
               position: "absolute",
-              left: "calc(50% - 260px)", top: "calc(50% - 260px)",
-              width: 520, height: 520, borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(75,250,148,0.25), transparent 60%)",
-              filter: "blur(40px)",
+              width: 560, height: 560, borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(75,250,148,0.28), transparent 60%)",
+              filter: "blur(50px)",
               pointerEvents: "none",
             }}
           />
-          <div style={{ perspective: "1400px" }}>
+          <div style={{ perspective: "1500px" }}>
             <motion.div
               style={
                 reduceMotion
-                  ? {}
+                  ? { scale: 1 }
                   : {
-                      x: phoneX,
-                      y: phoneY,
                       scale: phoneScale,
-                      rotateX: phoneRotateX,
+                      y: phoneY,
                       rotateY: phoneRotateY,
                       rotateZ: phoneRotateZ,
+                      rotateX: phoneRotateX,
                       willChange: "transform",
                     }
               }
@@ -470,64 +420,95 @@ export function HomeTopSection() {
           </div>
         </div>
 
-        {/* ─── mobile layout: text only, centered ─── */}
-        <div className="flex lg:hidden" style={{
-          position: "absolute", inset: 0,
-          alignItems: "center", justifyContent: "center",
-          padding: "0 6vw",
-        }}>
+        {/* LEFT side tag */}
+        <motion.div
+          style={{ opacity: sideTextOpacity }}
+          className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 pl-[5vw] lg:block"
+        >
+          {scenes.map((scene, i) => (
+            <motion.p
+              key={i}
+              style={{
+                opacity: sceneOps[i],
+                position: i === 0 ? "relative" : "absolute",
+                top: i === 0 ? "auto" : 0,
+                left: 0,
+                paddingLeft: "5vw",
+              }}
+              className="whitespace-pre text-[10px] font-bold uppercase leading-[1.5] tracking-[0.22em] text-zinc-500"
+            >
+              {scene.leftTag}
+            </motion.p>
+          ))}
+        </motion.div>
+
+        {/* RIGHT side tag */}
+        <motion.div
+          style={{ opacity: sideTextOpacity }}
+          className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 pr-[5vw] text-right lg:block"
+        >
+          {scenes.map((scene, i) => (
+            <motion.p
+              key={i}
+              style={{
+                opacity: sceneOps[i],
+                position: i === 0 ? "relative" : "absolute",
+                top: i === 0 ? "auto" : 0,
+                right: 0,
+                paddingRight: "5vw",
+              }}
+              className="whitespace-pre text-right text-[10px] font-bold uppercase leading-[1.5] tracking-[0.22em] text-zinc-500"
+            >
+              {scene.rightTag}
+            </motion.p>
+          ))}
+        </motion.div>
+
+        {/* BOTTOM: body + CTA */}
+        <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center pb-[7vh]">
           {scenes.map((scene, i) => (
             <motion.div
               key={i}
               style={{
                 opacity: sceneOps[i],
-                y: sceneYs[i],
-                position: "absolute", inset: "0 6vw",
-                display: "flex", flexDirection: "column", justifyContent: "center",
+                position: i === 0 ? "relative" : "absolute",
+                bottom: i === 0 ? "auto" : "7vh",
               }}
+              className="flex flex-col items-center text-center"
             >
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "#4BFA94", margin: 0 }}>
-                {scene.eyebrow}
-              </p>
-              <h1 style={{ margin: "10px 0 0", fontSize: "clamp(2.4rem, 11vw, 4rem)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.88, color: "#fff" }}>
-                {scene.line1}<br />
-                <span style={{ backgroundImage: "linear-gradient(90deg, #4BFA94, #a7f3d0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  {scene.line2}
-                </span>
-              </h1>
-              <p style={{ margin: "18px 0 0", fontSize: 14, lineHeight: 1.6, color: "#a1a1aa" }}>
+              <p className="max-w-md px-6 text-sm leading-relaxed text-zinc-400 sm:text-base">
                 {scene.body}
               </p>
-              <div style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 10 }}>
-                <Link
-                  href={scene.cta.href}
-                  style={{ display: "inline-flex", alignItems: "center", height: 46, borderRadius: 999, background: "#4BFA94", padding: "0 24px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.16em", color: "#000", textDecoration: "none" }}
-                >
-                  {scene.cta.label}
-                </Link>
-              </div>
+              <Link
+                href={scene.cta.href}
+                className="mt-5 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
+                style={{ boxShadow: "0 0 30px -6px rgba(75,250,148,0.55)" }}
+              >
+                {scene.cta.label}
+              </Link>
             </motion.div>
           ))}
         </div>
 
         {/* progress dots */}
-        <div style={{ position: "absolute", bottom: 40, right: 40, display: "flex", flexDirection: "column", gap: 7, zIndex: 3 }}>
+        <div className="absolute bottom-10 right-10 z-20 flex flex-col gap-2">
           {phoneOps.map((op, i) => (
-            <motion.div key={i} style={{ opacity: op, width: 6, height: 6, borderRadius: "50%", background: "#4BFA94" }} />
+            <motion.div key={i} style={{ opacity: op }} className="h-1.5 w-1.5 rounded-full bg-[#4BFA94]" />
           ))}
         </div>
 
         {/* scroll hint */}
         <motion.div
-          style={{ opacity: hintOpacity, position: "absolute", bottom: 32, left: "50%", x: "-50%", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, zIndex: 3 }}
+          style={{ opacity: hintOpacity }}
+          className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2"
         >
-          <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: "#52525b" }}>
-            Scroll to explore
+          <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-zinc-600">
+            Scroll
           </span>
           <motion.div
             animate={reduceMotion ? undefined : { y: [0, 7, 0] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-            style={{ width: 1, height: 22, borderRadius: 1, background: "#52525b" }}
+            className="h-5 w-px rounded-full bg-zinc-600"
           />
         </motion.div>
 

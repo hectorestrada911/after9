@@ -1,3 +1,4 @@
+import { HomeAppShowcase } from "@/components/home-app-showcase";
 import { HomeHostSection } from "@/components/home-host-section";
 import { HomeHowSection } from "@/components/home-how-section";
 import { HomeSchoolsCta } from "@/components/home-schools-cta";
@@ -40,6 +41,7 @@ export default async function HomePage() {
       <HomeTrendingRail events={events} />
       <HomeHowSection />
       <HomeHostSection />
+      <HomeAppShowcase />
     </main>
   );
 }

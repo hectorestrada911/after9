@@ -1,131 +1,452 @@
 "use client";
 
-import Image from "next/image";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
-import { authEase } from "@/components/auth-shell";
-import { HomeBannerVideoLoader } from "@/components/home-banner-video-loader";
-import { cn } from "@/lib/utils";
+import { motion, useScroll, useTransform, useReducedMotion, type MotionValue } from "framer-motion";
 
-const heroLine = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: authEase } },
-};
+/* ─── scene data ─────────────────────────────────────────────────── */
+const scenes = [
+  {
+    eyebrow: "Discover",
+    line1: "Your campus.",
+    line2: "Your night.",
+    body: "Every party, show, and event near you — curated by students, for students. Honest pricing, no surprises.",
+    cta: { label: "Get the app", href: "/signup" },
+    cta2: { label: "Browse events", href: "/#browse-events" },
+  },
+  {
+    eyebrow: ".edu verified",
+    line1: "School email",
+    line2: "only.",
+    body: "Only verified students can see private events and buy tickets. Real community — no randos, no bots.",
+    cta: { label: "Verify your .edu", href: "/signup" },
+    cta2: null,
+  },
+  {
+    eyebrow: "Door flow",
+    line1: "Crowd in.",
+    line2: "Friction out.",
+    body: "QR tickets on your phone, scanned at the door in seconds. Zero paper, zero lines, zero stress.",
+    cta: { label: "Download RAGE", href: "/signup" },
+    cta2: { label: "Host an event", href: "/create-event" },
+  },
+];
 
-const heroContainer = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1, delayChildren: 0.06 } },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: authEase } },
-};
-
-export function HomeTopSection() {
-  const reduceMotion = useReducedMotion();
+/* ─── phone screen 1: event feed ────────────────────────────────── */
+function FeedScreen({ progress }: { progress: MotionValue<number> }) {
+  const items = [
+    { tag: "EVENT", tc: "#4BFA94",  title: "Campus Lights Fest",  meta: "Tonight · Main Stage",   votes: 156 },
+    { tag: "PARTY", tc: "#f2ef1d",  title: "Pre-game @ Theta 🏠", meta: "9PM · 2.3 mi away",      votes: 47  },
+    { tag: "RAVE",  tc: "#a855f7",  title: "Rooftop DJ Set ✦",    meta: "Fri · Riverside Deck",   votes: 89  },
+    { tag: ".EDU",  tc: "#4BFA94",  title: "Sophomore Mixer",     meta: "Sat · Student Union",    votes: 34  },
+  ];
+  // each card slides up at a slightly different time inside scene 1
+  const cardYs = items.map((_, i) =>
+    useTransform(progress, [0.02 + i * 0.025, 0.12 + i * 0.025], [22, 0]),
+  );
+  const cardOpacities = items.map((_, i) =>
+    useTransform(progress, [0.02 + i * 0.025, 0.12 + i * 0.025], [0, 1]),
+  );
 
   return (
-    <section className="container-page relative pb-12 pt-12 sm:pb-16 sm:pt-16">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[min(70vh,520px)] opacity-90"
-        style={{
-          background:
-            "radial-gradient(ellipse 90% 60% at 20% -10%, rgba(75,250,148,0.16), transparent 55%), radial-gradient(circle at 90% 20%, rgba(255,255,255,0.06), transparent 42%)",
-        }}
-      />
-      {!reduceMotion ? (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 top-24 -z-10 h-72 w-72 rounded-full bg-brand-green/15 blur-[100px]"
-          animate={{ opacity: [0.45, 0.75, 0.45], scale: [1, 1.08, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ) : null}
-
-      <div className="flex min-w-0 flex-col gap-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-14 lg:gap-y-12">
-        <motion.div
-          className="min-w-0 max-w-full lg:col-start-1 lg:row-start-1 lg:min-w-0 lg:overflow-hidden lg:pr-2"
-          variants={heroContainer}
-          initial={reduceMotion ? "show" : "hidden"}
-          animate="show"
-        >
-          <motion.h1
-            variants={heroLine}
-            className="display-hero-fluid display-hero-contained min-w-0 text-balance text-white"
-          >
-            <span className="block">The alternative</span>
-            <span className="block bg-gradient-to-r from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">you can trust.</span>
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mt-7 max-w-sm text-[15px] leading-relaxed text-zinc-400 sm:max-w-md sm:text-base">
-            Honest pricing on every page, tickets on the phone, and a door flow that stays human when the room peaks.
-          </motion.p>
-          <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-3">
-            <motion.div whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }}>
-              <Link
-                href="/create-event"
-                className={cn(
-                  "inline-flex h-11 items-center rounded-full bg-white px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-black shadow-[0_14px_40px_-18px_rgba(255,255,255,0.35)] transition hover:bg-zinc-200 sm:h-12 sm:px-8",
-                )}
-              >
-                Create event
-              </Link>
-            </motion.div>
-            <motion.div whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }}>
-              <Link href="/#browse-events" className="pill-light inline-flex h-11 items-center px-7 text-[11px] sm:h-12 sm:px-8">
-                Browse events
-              </Link>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          className="relative -mx-4 w-[calc(100%+2rem)] overflow-hidden rounded-2xl border border-white/[0.08] bg-black shadow-[0_40px_100px_-50px_rgba(75,250,148,0.25)] sm:mx-0 sm:w-full lg:col-span-2 lg:col-start-1 lg:row-start-2"
-          initial={reduceMotion ? undefined : { opacity: 0, y: 28 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.55, ease: authEase }}
-        >
-          <HomeBannerVideoLoader />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-          <div className="absolute bottom-5 left-5 right-5 max-w-lg sm:bottom-8 sm:left-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>
-            <p className="mt-2 text-balance text-2xl font-black leading-[0.95] tracking-tighter text-white sm:text-3xl lg:text-4xl">
-              Crowd in.
-              <br />
-              Friction out.
-            </p>
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="relative mx-auto aspect-square w-full max-w-md min-w-0 overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-900 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.85)] sm:max-w-lg lg:mx-0 lg:max-w-none lg:col-start-2 lg:row-start-1"
-          initial={reduceMotion ? undefined : { opacity: 0, scale: 0.97 }}
-          whileInView={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.55, ease: authEase, delay: reduceMotion ? 0 : 0.08 }}
-        >
-          <Image
-            src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80"
-            alt="RAGE, live energy"
-            fill
-            loading="lazy"
-            unoptimized
-            sizes="(max-width: 1023px) min(100vw, 32rem), min(50vw, 560px)"
-            className="object-cover opacity-85"
-          />
-          <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/30 to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70">RAGE</p>
-            <p className="mt-1 text-3xl font-black leading-none tracking-tighter text-white sm:text-4xl">
-              Where the
-              <br />
-              build hits.
-            </p>
-          </div>
-        </motion.div>
+    <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", paddingTop: 56 }}>
+      <div style={{ padding: "0 12px 8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#1a1a1a", borderRadius: 20, padding: "8px 12px" }}>
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#71717a" strokeWidth={2.5}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+          <span style={{ fontSize: 11, color: "#71717a" }}>Search events near you...</span>
+        </div>
       </div>
-    </section>
+      <div style={{ display: "flex", gap: 16, padding: "0 12px 8px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        {["Trending", "Near Me", ".edu Only"].map((t, i) => (
+          <span key={t} style={{ fontSize: 11, fontWeight: i === 0 ? 700 : 400, color: i === 0 ? "#4BFA94" : "#52525b", borderBottom: i === 0 ? "2px solid #4BFA94" : "2px solid transparent", paddingBottom: 4 }}>
+            {t}
+          </span>
+        ))}
+      </div>
+      <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
+        {items.map((item, i) => (
+          <motion.div
+            key={i}
+            style={{
+              y: cardYs[i],
+              opacity: cardOpacities[i],
+              background: "#141414",
+              borderRadius: 14,
+              padding: "10px 12px",
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 8,
+            }}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: "inline-block", background: item.tc + "22", color: item.tc, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", borderRadius: 4, padding: "2px 5px" }}>
+                {item.tag}
+              </span>
+              <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 600, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
+              <p style={{ fontSize: 10, color: "#52525b" }}>{item.meta}</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
+              <span style={{ fontSize: 8, color: "#3f3f46", lineHeight: 1 }}>▲</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#4BFA94" }}>{item.votes}</span>
+              <span style={{ fontSize: 8, color: "#3f3f46", lineHeight: 1 }}>▼</span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── phone screen 2: .edu verify ───────────────────────────────── */
+function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
+  const badgeScale = useTransform(progress, [0.32, 0.46], [0.6, 1]);
+  const badgeOpacity = useTransform(progress, [0.32, 0.42], [0, 1]);
+  const titleY = useTransform(progress, [0.36, 0.48], [16, 0]);
+  const titleOpacity = useTransform(progress, [0.36, 0.46], [0, 1]);
+  const formY = useTransform(progress, [0.42, 0.54], [20, 0]);
+  const formOpacity = useTransform(progress, [0.42, 0.52], [0, 1]);
+
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "56px 24px 24px" }}>
+      <motion.div
+        style={{
+          scale: badgeScale,
+          opacity: badgeOpacity,
+          width: 64, height: 64, borderRadius: 20,
+          border: "1px solid rgba(75,250,148,0.3)",
+          background: "rgba(75,250,148,0.08)",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28,
+        }}
+      >
+        🎓
+      </motion.div>
+      <motion.p style={{ opacity: titleOpacity, y: titleY, marginTop: 16, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em", color: "#4BFA94", textAlign: "center" }}>
+        .edu required
+      </motion.p>
+      <motion.p style={{ opacity: titleOpacity, y: titleY, marginTop: 8, fontSize: 18, fontWeight: 900, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>
+        Verify your<br />school email
+      </motion.p>
+      <motion.p style={{ opacity: titleOpacity, y: titleY, marginTop: 10, fontSize: 11, color: "#52525b", textAlign: "center", lineHeight: 1.5 }}>
+        Only verified students can access<br />private events and buy tickets.
+      </motion.p>
+      <motion.div style={{ opacity: formOpacity, y: formY, marginTop: 20, width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "#141414", border: "1px solid #262626", borderRadius: 16, padding: "12px 16px" }}>
+          <span style={{ fontSize: 11, color: "#3f3f46" }}>you@university.edu</span>
+        </div>
+        <div style={{ background: "#4BFA94", borderRadius: 16, padding: "12px 16px", textAlign: "center" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#000" }}>VERIFY &amp; GET IN</span>
+        </div>
+      </motion.div>
+      <p style={{ marginTop: 14, fontSize: 10, color: "#3f3f46", textAlign: "center" }}>Any accredited .edu address works</p>
+    </div>
+  );
+}
+
+/* ─── phone screen 3: QR ticket ─────────────────────────────────── */
+function TicketScreen({ progress }: { progress: MotionValue<number> }) {
+  const qrScale = useTransform(progress, [0.64, 0.78], [0.7, 1]);
+  const qrOpacity = useTransform(progress, [0.64, 0.74], [0, 1]);
+  const headY = useTransform(progress, [0.62, 0.74], [12, 0]);
+  const headOpacity = useTransform(progress, [0.62, 0.72], [0, 1]);
+  const badgeY = useTransform(progress, [0.72, 0.84], [14, 0]);
+  const badgeOpacity = useTransform(progress, [0.72, 0.82], [0, 1]);
+
+  const qr = [
+    1,1,1,0,1,1,1,
+    1,0,1,0,1,0,1,
+    1,1,1,1,0,1,1,
+    0,1,0,0,1,0,0,
+    1,0,1,0,1,1,1,
+    0,0,1,0,0,1,0,
+    1,1,1,0,1,0,1,
+  ];
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "56px 24px 24px" }}>
+      <motion.p style={{ opacity: headOpacity, y: headY, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em", color: "#52525b" }}>
+        Your ticket
+      </motion.p>
+      <motion.p style={{ opacity: headOpacity, y: headY, marginTop: 6, fontSize: 17, fontWeight: 900, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>
+        Campus Lights Fest
+      </motion.p>
+      <motion.p style={{ opacity: headOpacity, y: headY, fontSize: 11, color: "#52525b" }}>
+        Tonight · Main Stage · GA
+      </motion.p>
+      <motion.div style={{ opacity: qrOpacity, scale: qrScale, marginTop: 18, width: 140, height: 140, background: "#fff", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", padding: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, width: "100%", height: "100%" }}>
+          {qr.map((c, i) => (
+            <div key={i} style={{ background: c ? "#000" : "#fff", borderRadius: 1 }} />
+          ))}
+        </div>
+      </motion.div>
+      <motion.div style={{ opacity: badgeOpacity, y: badgeY, marginTop: 14, display: "flex", alignItems: "center", gap: 7, background: "rgba(75,250,148,0.12)", borderRadius: 999, padding: "7px 16px" }}>
+        <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4BFA94" }} />
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#4BFA94" }}>VALID · SCAN TO ENTER</span>
+      </motion.div>
+      <p style={{ marginTop: 14, fontSize: 10, color: "#3f3f46", textAlign: "center", lineHeight: 1.6 }}>Show this at the door.<br />Works offline.</p>
+    </div>
+  );
+}
+
+/* ─── thin, minimal phone shell (no thick grey border) ──────────── */
+function PhoneShell({ children }: { children: React.ReactNode }) {
+  const W = 320, H = 660;
+  const frameW = 6;       // ← thin, like a real iPhone Pro
+  const innerR = 48;
+  const frameR = 54;
+
+  return (
+    <div style={{ position: "relative", width: W, height: H, flexShrink: 0 }}>
+      {/* Outer frame — pure black with subtle highlight */}
+      <div style={{
+        position: "absolute", inset: 0, borderRadius: frameR,
+        background: "#0b0b0d",
+        boxShadow: [
+          "inset 0 0 0 1px rgba(255,255,255,0.10)",   // top edge gloss
+          "inset 0 1.5px 0 rgba(255,255,255,0.06)",
+          "inset 0 -1px 0 rgba(0,0,0,0.6)",
+          "0 1px 0 rgba(255,255,255,0.04)",
+          "0 40px 120px -20px rgba(0,0,0,0.85)",
+          "0 20px 60px -10px rgba(0,0,0,0.55)",
+          "0 0 90px -20px rgba(75,250,148,0.20)",
+        ].join(", "),
+      }} />
+
+      {/* Subtle metallic side highlight (titanium feel) */}
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, borderRadius: frameR, pointerEvents: "none",
+        background: "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 6%, rgba(255,255,255,0) 94%, rgba(255,255,255,0.07) 100%)",
+      }} />
+
+      {/* Side buttons — slim, flush */}
+      <div style={{ position: "absolute", left: -2, top: 90, width: 2, height: 22, borderRadius: 1, background: "#0b0b0d" }} />
+      <div style={{ position: "absolute", left: -2, top: 122, width: 2, height: 30, borderRadius: 1, background: "#0b0b0d" }} />
+      <div style={{ position: "absolute", left: -2, top: 162, width: 2, height: 30, borderRadius: 1, background: "#0b0b0d" }} />
+      <div style={{ position: "absolute", right: -2, top: 145, width: 2, height: 55, borderRadius: 1, background: "#0b0b0d" }} />
+
+      {/* Inner screen */}
+      <div style={{
+        position: "absolute",
+        top: frameW, left: frameW,
+        right: frameW, bottom: frameW,
+        borderRadius: innerR,
+        overflow: "hidden",
+        background: "#000",
+        boxShadow: "inset 0 0 0 1.5px #000, inset 0 0 22px rgba(0,0,0,0.6)",
+      }}>
+        {/* Status bar */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 52, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px 0" }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>9:41</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <svg width="16" height="11" viewBox="0 0 16 11" fill="white"><rect x="0" y="4" width="3" height="7" rx="1" /><rect x="4" y="2.5" width="3" height="8.5" rx="1" /><rect x="8" y="1" width="3" height="10" rx="1" /><rect x="12" y="0" width="3" height="11" rx="1" /></svg>
+          </div>
+        </div>
+        {/* Dynamic island */}
+        <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 116, height: 32, borderRadius: 20, background: "#000", zIndex: 30, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }} />
+
+        {children}
+
+        {/* Home bar */}
+        <div style={{ position: "absolute", bottom: 8, left: "50%", transform: "translateX(-50%)", width: 110, height: 4.5, borderRadius: 3, background: "rgba(255,255,255,0.28)" }} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── main component ─────────────────────────────────────────────── */
+export function HomeTopSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+
+  const { scrollY } = useScroll();
+  const [top, setTop]     = useState(0);
+  const [range, setRange] = useState(2800);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const recalc = () => {
+      setTop(el.offsetTop);
+      setRange(Math.max(1, el.offsetHeight - window.innerHeight));
+    };
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, []);
+
+  const progress = useTransform(scrollY, [top, top + range], [0, 1], { clamp: true });
+
+  /* scene text fades */
+  const s1 = useTransform(progress, [0, 0.26, 0.36], [1, 1, 0]);
+  const s2 = useTransform(progress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
+  const s3 = useTransform(progress, [0.60, 0.70, 1], [0, 1, 1]);
+
+  /* scene text vertical lift (smoother feel) */
+  const s1y = useTransform(progress, [0, 0.36], [0, -30]);
+  const s2y = useTransform(progress, [0.30, 0.66], [30, -30]);
+  const s3y = useTransform(progress, [0.60, 1], [30, 0]);
+
+  /* phone screens */
+  const p1 = useTransform(progress, [0, 0.28, 0.38], [1, 1, 0]);
+  const p2 = useTransform(progress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
+  const p3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
+
+  /*
+   * phone movement — way more dramatic, but rotateY is gentle so
+   * neither side foreshortens enough to look 2D.
+   *
+   *   X: drifts L → centred → R   (parallax)
+   *   Y: floats up & down
+   *   scale: zooms in then settles
+   *   rotateZ: slight in-plane tilt (tumbling feel)
+   *   rotateY: tiny — just enough to feel 3D
+   *   rotateX: subtle pitch
+   */
+  const phoneX       = useTransform(progress, [0, 0.5, 1],          [80, 0, -60]);
+  const phoneY       = useTransform(progress, [0, 0.25, 0.6, 1],    [60, -10, -40, 20]);
+  const phoneScale   = useTransform(progress, [0, 0.18, 0.55, 1],   [0.82, 1.04, 1, 0.94]);
+  const phoneRotateZ = useTransform(progress, [0, 0.5, 1],          [-6, 1, 5]);
+  const phoneRotateY = useTransform(progress, [0, 0.5, 1],          [4, -2, -6]);   // small
+  const phoneRotateX = useTransform(progress, [0, 0.5, 1],          [-4, 0, 3]);    // small
+
+  /* glow follows phone */
+  const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.45, 0.85, 0.55]);
+
+  /* scroll hint */
+  const hintOpacity = useTransform(progress, [0, 0.06], [1, 0]);
+
+  const sceneOps = [s1, s2, s3];
+  const sceneYs  = [s1y, s2y, s3y];
+  const phoneOps = [p1, p2, p3];
+
+  return (
+    <div ref={containerRef} className="relative bg-black" style={{ minHeight: "320vh" }}>
+      <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
+
+        {/* ambient glows */}
+        <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+          <div style={{ position: "absolute", top: "20%", left: "5%",  width: 480, height: 480, borderRadius: "50%", background: "rgba(75,250,148,0.07)", filter: "blur(130px)" }} />
+          <div style={{ position: "absolute", top: "30%", right: "5%", width: 300, height: 300, borderRadius: "50%", background: "rgba(0,0,254,0.07)",  filter: "blur(100px)" }} />
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "100%", padding: "0 5vw", gap: 40 }}>
+
+          {/* ── left: text scenes ── */}
+          <div style={{ flex: 1, maxWidth: 560, position: "relative", minHeight: 480 }}>
+            {scenes.map((scene, i) => (
+              <motion.div
+                key={i}
+                style={{
+                  opacity: sceneOps[i],
+                  y: sceneYs[i],
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column", justifyContent: "center",
+                  willChange: "transform, opacity",
+                }}
+              >
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em", color: "#4BFA94", margin: 0 }}>
+                  {scene.eyebrow}
+                </p>
+                <h1 style={{ margin: "10px 0 0", fontSize: "clamp(2.8rem, 5.5vw, 5rem)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.88, color: "#fff" }}>
+                  {scene.line1}<br />
+                  <span style={{ backgroundImage: "linear-gradient(90deg, #4BFA94, #a7f3d0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    {scene.line2}
+                  </span>
+                </h1>
+                <p style={{ margin: "20px 0 0", fontSize: 15, lineHeight: 1.65, color: "#71717a", maxWidth: 400 }}>
+                  {scene.body}
+                </p>
+                <div style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 10 }}>
+                  <Link
+                    href={scene.cta.href}
+                    style={{ display: "inline-flex", alignItems: "center", height: 48, borderRadius: 999, background: "#4BFA94", padding: "0 28px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.16em", color: "#000", boxShadow: "0 0 30px -6px rgba(75,250,148,0.55)", textDecoration: "none" }}
+                  >
+                    {scene.cta.label}
+                  </Link>
+                  {scene.cta2 && (
+                    <Link
+                      href={scene.cta2.href}
+                      style={{ display: "inline-flex", alignItems: "center", height: 48, borderRadius: 999, border: "1px solid rgba(255,255,255,0.18)", padding: "0 28px", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.16em", color: "#fff", textDecoration: "none" }}
+                    >
+                      {scene.cta2.label}
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* ── right: phone ── */}
+          <div className="hidden lg:flex" style={{ flexShrink: 0, position: "relative", alignItems: "center", justifyContent: "center" }}>
+            {/* phone-tracking glow */}
+            <motion.div
+              aria-hidden
+              style={{
+                opacity: glowOpacity,
+                position: "absolute", width: 520, height: 520, borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(75,250,148,0.22), transparent 60%)",
+                filter: "blur(40px)",
+                pointerEvents: "none",
+              }}
+            />
+            <div style={{ perspective: "1400px" }}>
+              <motion.div
+                style={
+                  reduceMotion
+                    ? {}
+                    : ({
+                        x: phoneX,
+                        y: phoneY,
+                        scale: phoneScale,
+                        rotateX: phoneRotateX,
+                        rotateY: phoneRotateY,
+                        rotateZ: phoneRotateZ,
+                        transformStyle: "preserve-3d",
+                        willChange: "transform",
+                      } as CSSProperties)
+                }
+              >
+                <PhoneShell>
+                  <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0 }}>
+                    <FeedScreen progress={progress} />
+                  </motion.div>
+                  <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0 }}>
+                    <VerifyScreen progress={progress} />
+                  </motion.div>
+                  <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0 }}>
+                    <TicketScreen progress={progress} />
+                  </motion.div>
+                </PhoneShell>
+              </motion.div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* scene progress dots */}
+        <div style={{ position: "absolute", bottom: 40, right: 40, display: "flex", flexDirection: "column", gap: 7 }}>
+          {phoneOps.map((op, i) => (
+            <motion.div key={i} style={{ opacity: op, width: 6, height: 6, borderRadius: "50%", background: "#4BFA94" }} />
+          ))}
+        </div>
+
+        {/* scroll hint */}
+        <motion.div
+          style={{ opacity: hintOpacity, position: "absolute", bottom: 32, left: "50%", x: "-50%", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
+        >
+          <span style={{ fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: "#3f3f46" }}>
+            Scroll to explore
+          </span>
+          <motion.div
+            animate={reduceMotion ? undefined : { y: [0, 7, 0] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            style={{ width: 1, height: 22, borderRadius: 1, background: "#3f3f46" }}
+          />
+        </motion.div>
+
+      </div>
+    </div>
   );
 }

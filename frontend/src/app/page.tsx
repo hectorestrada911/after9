@@ -1,5 +1,6 @@
 import { HomeHostSection } from "@/components/home-host-section";
 import { HomeHowSection } from "@/components/home-how-section";
+import { HomeSchoolsCta } from "@/components/home-schools-cta";
 import { HomeSocialProof } from "@/components/home-social-proof";
 import { HomeTopSection } from "@/components/home-top-section";
 import { HomeTrendingRail, type HomeTrendingEvent } from "@/components/home-trending-rail";
@@ -34,6 +35,7 @@ export default async function HomePage() {
   return (
     <main className="min-w-0 text-zinc-100">
       <HomeTopSection />
+      <HomeSchoolsCta />
       <HomeSocialProof />
       <HomeTrendingRail events={events} />
       <HomeHowSection />

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Menu, Search, UserRound, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function SiteHeader() {
@@ -39,207 +39,125 @@ export function SiteHeader() {
     setMobileOpen(false);
   }
 
-  const discoverItems = [
-    { href: "/", label: "Browse events" },
-    { href: "/demo", label: "Sample event" },
-    { href: "/contact", label: "Contact" },
-  ];
-
   if (hideHeader) return null;
 
+  const navItems = [
+    { href: "/dashboard", label: "Hosts" },
+    { href: "/#browse-events", label: "Students" },
+    { href: "/#how-it-works", label: "Blog" },
+    { href: "/contact", label: "Join Us" },
+    { href: "/#faq", label: "FAQs" },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
-      <div className="container-page flex h-[3.25rem] min-w-0 items-center gap-3 sm:h-16 sm:gap-6">
+    <header className="sticky top-0 z-40 border-b border-white/[0.04] bg-black/75 backdrop-blur-2xl">
+      <div className="container-page flex h-16 items-center justify-between gap-6 sm:h-[68px]">
         <Link href="/" className="flex shrink-0 items-center">
-          <Image src="/rage-logo.png" alt="RAGE" width={160} height={48} className="h-8 w-auto object-contain sm:h-10" priority />
+          <Image
+            src="/rage-logo.png"
+            alt="RAGE"
+            width={140}
+            height={42}
+            className="h-7 w-auto sm:h-8"
+            priority
+          />
         </Link>
 
-        <div className="hidden h-10 min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-4 md:flex">
-          <Search size={15} className="shrink-0 text-zinc-500" strokeWidth={1.75} />
-          <input
-            type="text"
-            placeholder="Search events, venues, cities"
-            className="ml-3 w-full min-w-0 border-0 bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
-          />
-        </div>
-
-        <nav className="ml-auto hidden items-center gap-7 text-sm font-medium text-zinc-400 lg:ml-0 lg:flex">
-          {authedEmail ? (
-            <>
-              <Link href="/account" className="font-semibold text-white transition hover:text-brand-green">
-                Account
-              </Link>
-              <Link href="/account#my-events" className="transition hover:text-white">
-                My events
-              </Link>
-              <Link href="/dashboard#scan-qr" className="font-semibold text-brand-green transition hover:text-emerald-300">
-                Scan QR
-              </Link>
-              <Link href="/my-tickets" className="transition hover:text-white">
-                My tickets
-              </Link>
-              <Link href="/dashboard" className="transition hover:text-white">
-                {"Events & analytics"}
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/my-tickets" className="transition hover:text-white">
-                My tickets
-              </Link>
-              <Link href="/dashboard" className="transition hover:text-white">
-                Host dashboard
-              </Link>
-            </>
-          )}
-          {discoverItems.map((item) => (
-            <Link key={item.href} href={item.href} className="transition hover:text-white">
+        <nav className="hidden items-center gap-9 lg:flex">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-[15px] font-medium text-zinc-300 transition-colors hover:text-white"
+            >
               {item.label}
             </Link>
           ))}
-          {authedEmail ? (
-            <button type="button" onClick={onSignOut} className="inline-flex items-center gap-1.5 text-zinc-300 transition hover:text-white">
-              <LogOut className="h-4 w-4" aria-hidden />
-              Logout
-            </button>
-          ) : (
-            <div className="inline-flex items-center gap-4">
-              <Link href="/signup" className="transition hover:text-white">
-                Register
-              </Link>
-              <Link href="/login" className="transition hover:text-white">
-                Login
-              </Link>
-            </div>
-          )}
         </nav>
 
-        <button
-          type="button"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          onClick={() => setMobileOpen((v) => !v)}
-          className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.14] text-zinc-200 transition hover:border-white/35 hover:text-white lg:hidden"
-        >
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </button>
-
-        <Link
-          href="/create-event"
-          className="hidden h-9 shrink-0 items-center rounded-full bg-white px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-zinc-200 sm:h-10 sm:px-5 sm:text-[11px] lg:inline-flex"
-        >
-          Create event
-        </Link>
+        <div className="flex items-center gap-2">
+          {authedEmail ? (
+            <>
+              <Link
+                href="/account"
+                className="hidden h-10 items-center rounded-full bg-zinc-900 px-5 text-[14px] font-semibold text-white transition hover:bg-zinc-800 lg:inline-flex"
+              >
+                Account
+              </Link>
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="hidden h-10 items-center text-[14px] font-medium text-zinc-400 transition hover:text-white lg:inline-flex"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden h-10 items-center rounded-full bg-zinc-900 px-5 text-[14px] font-semibold text-white transition hover:bg-zinc-800 lg:inline-flex"
+            >
+              Login
+            </Link>
+          )}
+          <Link
+            href="/create-event"
+            className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-black transition hover:bg-zinc-200"
+          >
+            Create
+          </Link>
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMobileOpen((v) => !v)}
+            className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-300 transition hover:text-white lg:hidden"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
+
       {mobileOpen && (
-        <div className="border-t border-white/[0.08] px-4 py-4 lg:hidden">
-          <div className="container-page space-y-2 px-0">
-            {authedEmail ? (
-              <>
-                <p className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Your account</p>
-                <Link
-                  href="/account"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.05]"
-                >
-                  Account hub
-                </Link>
-                <Link
-                  href="/account#my-events"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  My events
-                </Link>
-                <Link
-                  href="/dashboard#scan-qr"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-brand-green transition hover:bg-white/[0.05] hover:text-emerald-300"
-                >
-                  Scan QR
-                </Link>
-                <Link
-                  href="/my-tickets"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  My tickets
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  {"Events & analytics"}
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/my-tickets"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  My tickets
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  Host dashboard
-                </Link>
-              </>
-            )}
-            <p className="px-2.5 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Discover</p>
-            {discoverItems.map((item) => (
+        <div className="border-t border-white/[0.05] py-3 lg:hidden">
+          <div className="container-page space-y-1">
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                className="block rounded-lg px-3 py-2.5 text-[15px] font-medium text-zinc-200 transition hover:bg-white/[0.04] hover:text-white"
               >
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/create-event"
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg bg-white px-2.5 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200"
-            >
-              Create event
-            </Link>
-            {authedEmail ? (
-              <>
-                <p className="inline-flex items-center gap-1.5 px-2.5 pt-2 text-xs text-zinc-500">
-                  <UserRound className="h-3.5 w-3.5" aria-hidden />
-                  {authedEmail}
-                </p>
-                <button
-                  type="button"
-                  onClick={onSignOut}
-                  className="block w-full rounded-lg px-2.5 py-2 text-left text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/signup"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  Register
-                </Link>
+            <div className="mt-2 border-t border-white/[0.05] pt-2">
+              {authedEmail ? (
+                <>
+                  <Link
+                    href="/account"
+                    onClick={() => setMobileOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-white transition hover:bg-white/[0.04]"
+                  >
+                    Account
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={onSignOut}
+                    className="block w-full rounded-lg px-3 py-2.5 text-left text-[15px] font-medium text-zinc-400 transition hover:bg-white/[0.04] hover:text-white"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                  className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-white transition hover:bg-white/[0.04]"
                 >
                   Login
                 </Link>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

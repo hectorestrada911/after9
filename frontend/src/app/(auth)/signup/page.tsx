@@ -57,7 +57,8 @@ function SignupForm() {
 
     flushUi(() => setLoading(true));
     try {
-      const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup`;
+      const nextAfterVerify = hostIntent ? hostNext : next;
+      const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup&next=${encodeURIComponent(nextAfterVerify)}`;
       const { data, error: signErr } = await supabase.auth.signUp({
         email: formEmail,
         password,

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, CalendarRange, MapPin, Pencil } from "lucide-react";
 import CopyEventLink from "@/components/copy-event-link";
+import { EventDeleteButton } from "@/components/event-delete-button";
 import { EventShareActions } from "@/components/event-share-actions";
 import { eventVisibilityLabel } from "@/lib/event-visibility";
 
@@ -105,6 +106,7 @@ export function EventWorkspaceHero({
             >
               Scan QR
             </Link>
+            <EventDeleteButton eventId={eventId} eventTitle={event.title} />
           </div>
         </div>
 

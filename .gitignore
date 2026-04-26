@@ -4,6 +4,7 @@
 # Root
 .env
 .next/
+Marketing
 
 # Frontend
 frontend/node_modules/
@@ -22,3 +23,5 @@ frontend/tsconfig.tsbuildinfo
 
 # Cursor skills (UI/UX Pro Max ships Python helpers)
 .cursor/skills/**/__pycache__/
+.cursor/skills/
+.agents/

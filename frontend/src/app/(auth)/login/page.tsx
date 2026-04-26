@@ -107,7 +107,8 @@ function LoginForm() {
       setLoading(true);
       setError(null);
     });
-    const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup`;
+    const nextAfterVerify = searchParams.get("next") ? next : hasEventDraft ? "/dashboard/events/new" : "/account";
+    const emailRedirectTo = `${window.location.origin}/auth/callback?type=signup&next=${encodeURIComponent(nextAfterVerify)}`;
     const { error: resendErr } = await supabase.auth.resend({
       type: "signup",
       email: trimmed,

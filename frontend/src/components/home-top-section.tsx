@@ -203,10 +203,10 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
 }
 
 /* ─── titanium phone shell ──────────────────────────────────────── */
-export function PhoneShell({ children, w = 320, h = 660 }: { children: React.ReactNode; w?: number; h?: number }) {
-  const frameW = 6;
-  const innerR = 48;
-  const frameR = 54;
+export function PhoneShell({ children, w = 300, h = 620 }: { children: React.ReactNode; w?: number; h?: number }) {
+  const frameW = 7;
+  const innerR = 50;
+  const frameR = 58;
 
   const buttonGrad = "linear-gradient(to bottom, #2c2c2e 0%, #4d4d50 40%, #4d4d50 60%, #2c2c2e 100%)";
 
@@ -232,10 +232,10 @@ export function PhoneShell({ children, w = 320, h = 660 }: { children: React.Rea
       }} />
 
       {/* volume notches */}
-      <div style={{ position: "absolute", left: -3, top: 88, width: 4, height: 24, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "absolute", left: -3, top: 124, width: 4, height: 38, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "absolute", left: -3, top: 170, width: 4, height: 38, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
-      <div style={{ position: "absolute", right: -3, top: 145, width: 4, height: 64, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 1px 0 1.5px rgba(0,0,0,0.6)" }} />
+      <div style={{ position: "absolute", left: -4, top: 100, width: 4, height: 26, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
+      <div style={{ position: "absolute", left: -4, top: 138, width: 4, height: 44, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
+      <div style={{ position: "absolute", left: -4, top: 192, width: 4, height: 44, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), -1px 0 1.5px rgba(0,0,0,0.6)" }} />
+      <div style={{ position: "absolute", right: -4, top: 162, width: 4, height: 72, borderRadius: 2, background: buttonGrad, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), 1px 0 1.5px rgba(0,0,0,0.6)" }} />
 
       <div style={{
         position: "absolute",
@@ -246,34 +246,26 @@ export function PhoneShell({ children, w = 320, h = 660 }: { children: React.Rea
         background: "#000",
         boxShadow: "inset 0 0 0 1.5px #000, inset 0 0 22px rgba(0,0,0,0.6)",
       }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 52, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px 0" }}>
+        {/* status bar */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 52, zIndex: 20, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 22px 0" }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: "#fff", letterSpacing: "-0.01em" }}>9:41</span>
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
             <svg width="16" height="11" viewBox="0 0 16 11" fill="white"><rect x="0" y="4" width="3" height="7" rx="1" /><rect x="4" y="2.5" width="3" height="8.5" rx="1" /><rect x="8" y="1" width="3" height="10" rx="1" /><rect x="12" y="0" width="3" height="11" rx="1" /></svg>
           </div>
         </div>
 
-        {/* Dynamic island with camera glares */}
-        <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 116, height: 32, borderRadius: 20, background: "#000", zIndex: 30, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
-          <div style={{
-            position: "relative",
-            width: 8, height: 8, borderRadius: "50%",
-            background: "radial-gradient(circle at 30% 30%, #1a4a6e 0%, #0a1828 55%, #000 100%)",
-            boxShadow: "inset 0 0 1px rgba(120,180,220,0.45)",
-          }}>
+        {/* Dynamic island */}
+        <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 118, height: 32, borderRadius: 20, background: "#000", zIndex: 30, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
+          <div style={{ position: "relative", width: 8, height: 8, borderRadius: "50%", background: "radial-gradient(circle at 30% 30%, #1a4a6e 0%, #0a1828 55%, #000 100%)", boxShadow: "inset 0 0 1px rgba(120,180,220,0.45)" }}>
             <div style={{ position: "absolute", top: 1, left: 1, width: 2.5, height: 2.5, borderRadius: "50%", background: "rgba(180,220,255,0.65)", filter: "blur(0.3px)" }} />
           </div>
-          <div style={{
-            width: 6, height: 6, borderRadius: "50%",
-            background: "radial-gradient(circle at 35% 35%, #2a2a2c 0%, #050505 70%)",
-            boxShadow: "inset 0 0 1px rgba(255,255,255,0.08)",
-          }} />
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "radial-gradient(circle at 35% 35%, #2a2a2c 0%, #050505 70%)", boxShadow: "inset 0 0 1px rgba(255,255,255,0.08)" }} />
         </div>
 
         {children}
 
-        {/* Home bar — bright white */}
-        <div style={{ position: "absolute", bottom: 8, left: "50%", transform: "translateX(-50%)", width: 120, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.95)", boxShadow: "0 0 6px rgba(255,255,255,0.25)" }} />
+        {/* Home bar */}
+        <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", width: 120, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.95)", boxShadow: "0 0 8px rgba(255,255,255,0.3)" }} />
       </div>
     </div>
   );
@@ -312,28 +304,26 @@ export function HomeTopSection() {
   const p2 = useTransform(progress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
   const p3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
 
-  /*
-   * Phone stays centered. Scale starts BIG (zoomed in, frame partially clipped),
-   * settles to 1.0 in the middle scene, and pulls back slightly at the end.
-   */
-  const phoneScale   = useTransform(progress, [0, 0.18, 0.55, 1],  [1.45, 1.00, 0.95, 0.82]);
-  const phoneY       = useTransform(progress, [0, 0.25, 0.6, 1],   [-20, 0, 10, 30]);
-  const phoneRotateY = useTransform(progress, [0, 0.5, 1],         [0, -3, -8]);
-  const phoneRotateZ = useTransform(progress, [0, 0.5, 1],         [0, 1, 4]);
-  const phoneRotateX = useTransform(progress, [0, 0.5, 1],         [-2, 0, 3]);
+  /* phone rises from below viewport bottom, settles at bottom-center */
+  const phoneY       = useTransform(progress, [0, 0.30, 1],    [430, 0, -16]);
+  const phoneRotateX = useTransform(progress, [0, 0.30, 1],    [-12, 0, 2]);
+  const phoneRotateY = useTransform(progress, [0.25, 0.7, 1],  [0, -5, -10]);
+  const phoneRotateZ = useTransform(progress, [0.25, 1],       [0, 3]);
 
-  /*
-   * Side text fades in only as the phone shrinks (after scene 1).
-   * Eyebrow + headline ABOVE phone follow scene transitions.
-   */
-  const sideTextOpacity = useTransform(progress, [0.05, 0.22], [0, 1]);
-  const headerOpacity   = useTransform(progress, [0, 0.04], [0, 1]);
+  /* hero headline: fades in immediately, fades out as phone settles + side text appears */
+  const heroOpacity = useTransform(progress, [0, 0.04, 0.22, 0.40], [0, 1, 1, 0]);
+  const heroY       = useTransform(progress, [0.22, 0.40], [0, -28]);
 
-  /* ambient glow follows phone */
-  const glowOpacity = useTransform(progress, [0, 0.5, 1], [0.6, 0.85, 0.5]);
+  /* side text slides in once phone is settled */
+  const sideOpacity = useTransform(progress, [0.24, 0.44], [0, 1]);
+  const sideXL      = useTransform(progress, [0.24, 0.44], [-32, 0]);
+  const sideXR      = useTransform(progress, [0.24, 0.44], [32, 0]);
+
+  /* glow behind phone */
+  const glowOpacity = useTransform(progress, [0, 0.32, 0.7, 1], [0, 0.9, 0.85, 0.5]);
 
   /* scroll hint */
-  const hintOpacity = useTransform(progress, [0, 0.05], [1, 0]);
+  const hintOpacity = useTransform(progress, [0, 0.06], [1, 0]);
 
   const sceneOps = [s1, s2, s3];
   const phoneOps = [p1, p2, p3];
@@ -344,49 +334,112 @@ export function HomeTopSection() {
 
         {/* ambient glows */}
         <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", top: "20%", left: "10%", width: 480, height: 480, borderRadius: "50%", background: "rgba(75,250,148,0.06)", filter: "blur(140px)" }} />
-          <div style={{ position: "absolute", bottom: "10%", right: "10%", width: 360, height: 360, borderRadius: "50%", background: "rgba(0,0,254,0.06)", filter: "blur(120px)" }} />
+          <div style={{ position: "absolute", top: "15%", left: "8%", width: 500, height: 500, borderRadius: "50%", background: "rgba(75,250,148,0.05)", filter: "blur(150px)" }} />
+          <div style={{ position: "absolute", bottom: "5%", right: "8%", width: 380, height: 380, borderRadius: "50%", background: "rgba(0,0,254,0.05)", filter: "blur(130px)" }} />
         </div>
 
-        {/* TOP HEADLINE — eyebrow + scene title above phone */}
+        {/* ── HERO HEADLINE — top center, fades out as phone + side text take over ── */}
         <motion.div
-          style={{ opacity: headerOpacity }}
-          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center pt-[7vh]"
+          style={{ opacity: heroOpacity, y: heroY }}
+          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[11vh] text-center"
         >
-          {scenes.map((scene, i) => (
-            <motion.div
-              key={i}
-              style={{
-                opacity: sceneOps[i],
-                position: i === 0 ? "relative" : "absolute",
-                top: i === 0 ? "auto" : "7vh",
-                textAlign: "center",
-              }}
-            >
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#4BFA94]">
-                {scene.eyebrow}
-              </p>
-              <h1 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
-                {scene.line1}{" "}
-                <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">
-                  {scene.line2}
-                </span>
-              </h1>
-            </motion.div>
-          ))}
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">
+            Discover
+          </p>
+          <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
+            Your campus.<br />
+            <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">
+              Your night.
+            </span>
+          </h1>
+          <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
+            Every party, show, and event near you — curated by students, for students.
+          </p>
+          <Link
+            href="/signup"
+            className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
+            style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
+          >
+            Get the app
+          </Link>
         </motion.div>
 
-        {/* CENTER: phone */}
-        <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 5 }}>
-          {/* tracking glow */}
+        {/* ── LEFT SIDE TEXT — outer div handles position+centering, inner motion handles fade+slide ── */}
+        <div className="absolute top-1/2 z-10 hidden -translate-y-[60%] lg:block" style={{ left: "5vw" }}>
+          <motion.div style={{ opacity: sideOpacity, x: sideXL }}>
+            {scenes.map((scene, i) => (
+              <motion.div
+                key={i}
+                style={{
+                  opacity: sceneOps[i],
+                  position: i === 0 ? "relative" : "absolute",
+                  top: i === 0 ? "auto" : 0,
+                  left: i === 0 ? "auto" : 0,
+                }}
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-[#4BFA94]">
+                  {scene.eyebrow}
+                </p>
+                <h2 className="mt-2 w-[220px] text-2xl font-black uppercase leading-[0.92] tracking-[-0.03em] text-white lg:text-3xl">
+                  {scene.line1}<br />{scene.line2}
+                </h2>
+                <p className="mt-3 w-[200px] text-[12px] leading-relaxed text-zinc-500">
+                  {scene.body}
+                </p>
+                <Link
+                  href={scene.cta.href}
+                  className="mt-5 inline-flex h-10 items-center rounded-full bg-[#4BFA94] px-6 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
+                  style={{ boxShadow: "0 0 20px -4px rgba(75,250,148,0.45)" }}
+                >
+                  {scene.cta.label}
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ── RIGHT SIDE TAGS — outer div handles position+centering, inner motion handles fade+slide ── */}
+        <div className="absolute top-1/2 z-10 hidden -translate-y-[60%] text-right lg:block" style={{ right: "5vw" }}>
+          <motion.div style={{ opacity: sideOpacity, x: sideXR }}>
+            {scenes.map((scene, i) => (
+              <motion.div
+                key={i}
+                style={{
+                  opacity: sceneOps[i],
+                  position: i === 0 ? "relative" : "absolute",
+                  top: i === 0 ? "auto" : 0,
+                  right: i === 0 ? "auto" : 0,
+                }}
+              >
+                <p className="whitespace-pre text-right text-[10px] font-bold uppercase leading-[1.6] tracking-[0.22em] text-zinc-600">
+                  {scene.rightTag}
+                </p>
+                <p className="mt-4 whitespace-pre text-right text-[10px] font-bold uppercase leading-[1.6] tracking-[0.22em] text-zinc-700">
+                  {scene.leftTag}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ── PHONE — anchored bottom-center, rises from below viewport ── */}
+        <div
+          className="absolute bottom-0 left-1/2 z-[5]"
+          style={{ transform: "translateX(-50%)" }}
+        >
+          {/* glow */}
           <motion.div
             aria-hidden
             style={{
               opacity: glowOpacity,
               position: "absolute",
-              width: 560, height: 560, borderRadius: "50%",
+              bottom: 0,
+              left: "50%",
+              width: 480, height: 480,
+              translate: "-50% 20%",
+              borderRadius: "50%",
               background: "radial-gradient(circle, rgba(75,250,148,0.28), transparent 60%)",
-              filter: "blur(50px)",
+              filter: "blur(55px)",
               pointerEvents: "none",
             }}
           />
@@ -394,13 +447,12 @@ export function HomeTopSection() {
             <motion.div
               style={
                 reduceMotion
-                  ? { scale: 1 }
+                  ? {}
                   : {
-                      scale: phoneScale,
                       y: phoneY,
+                      rotateX: phoneRotateX,
                       rotateY: phoneRotateY,
                       rotateZ: phoneRotateZ,
-                      rotateX: phoneRotateX,
                       willChange: "transform",
                     }
               }
@@ -420,78 +472,8 @@ export function HomeTopSection() {
           </div>
         </div>
 
-        {/* LEFT side tag */}
-        <motion.div
-          style={{ opacity: sideTextOpacity }}
-          className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 pl-[5vw] lg:block"
-        >
-          {scenes.map((scene, i) => (
-            <motion.p
-              key={i}
-              style={{
-                opacity: sceneOps[i],
-                position: i === 0 ? "relative" : "absolute",
-                top: i === 0 ? "auto" : 0,
-                left: 0,
-                paddingLeft: "5vw",
-              }}
-              className="whitespace-pre text-[10px] font-bold uppercase leading-[1.5] tracking-[0.22em] text-zinc-500"
-            >
-              {scene.leftTag}
-            </motion.p>
-          ))}
-        </motion.div>
-
-        {/* RIGHT side tag */}
-        <motion.div
-          style={{ opacity: sideTextOpacity }}
-          className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 pr-[5vw] text-right lg:block"
-        >
-          {scenes.map((scene, i) => (
-            <motion.p
-              key={i}
-              style={{
-                opacity: sceneOps[i],
-                position: i === 0 ? "relative" : "absolute",
-                top: i === 0 ? "auto" : 0,
-                right: 0,
-                paddingRight: "5vw",
-              }}
-              className="whitespace-pre text-right text-[10px] font-bold uppercase leading-[1.5] tracking-[0.22em] text-zinc-500"
-            >
-              {scene.rightTag}
-            </motion.p>
-          ))}
-        </motion.div>
-
-        {/* BOTTOM: body + CTA */}
-        <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center pb-[7vh]">
-          {scenes.map((scene, i) => (
-            <motion.div
-              key={i}
-              style={{
-                opacity: sceneOps[i],
-                position: i === 0 ? "relative" : "absolute",
-                bottom: i === 0 ? "auto" : "7vh",
-              }}
-              className="flex flex-col items-center text-center"
-            >
-              <p className="max-w-md px-6 text-sm leading-relaxed text-zinc-400 sm:text-base">
-                {scene.body}
-              </p>
-              <Link
-                href={scene.cta.href}
-                className="mt-5 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
-                style={{ boxShadow: "0 0 30px -6px rgba(75,250,148,0.55)" }}
-              >
-                {scene.cta.label}
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-
         {/* progress dots */}
-        <div className="absolute bottom-10 right-10 z-20 flex flex-col gap-2">
+        <div className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
           {phoneOps.map((op, i) => (
             <motion.div key={i} style={{ opacity: op }} className="h-1.5 w-1.5 rounded-full bg-[#4BFA94]" />
           ))}

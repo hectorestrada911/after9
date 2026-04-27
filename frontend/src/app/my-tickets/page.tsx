@@ -31,6 +31,11 @@ type TicketRow = {
   created_at?: string;
 };
 
+type OrderWithTickets = Omit<OrderRow, "events"> & {
+  events: OrderRow["events"];
+  tickets: TicketRow[];
+};
+
 function formatDate(dateLike: string) {
   try {
     return new Date(dateLike).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -68,7 +73,7 @@ function normalizeTickets(value: unknown): TicketRow[] {
   return [value as TicketRow];
 }
 
-async function fetchOrdersWithTickets(service: ReturnType<typeof createClient>, email: string) {
+async function fetchOrdersWithTickets(service: any, email: string): Promise<OrderWithTickets[]> {
   const { data: rawOrders } = await service
     .from("orders")
     .select(
@@ -77,7 +82,7 @@ async function fetchOrdersWithTickets(service: ReturnType<typeof createClient>, 
     .ilike("buyer_email", email)
     .order("created_at", { ascending: false });
 
-  return (rawOrders ?? []).map((raw) => {
+  return (rawOrders ?? []).map((raw: Record<string, unknown>) => {
     const row = raw as Record<string, unknown>;
     const tickets = normalizeTickets(row.tickets).sort((a, b) =>
       (b.created_at ?? "").localeCompare(a.created_at ?? ""),
@@ -125,7 +130,7 @@ export default async function MyTicketsPage() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  let orders = await fetchOrdersWithTickets(service, user.email ?? "");
+  let orders: OrderWithTickets[] = await fetchOrdersWithTickets(service, user.email ?? "");
 
   const needsRepair = orders
     .filter((o) => o.payment_status !== "paid" && o.tickets.length === 0)

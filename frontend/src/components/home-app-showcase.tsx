@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { PhoneShell } from "@/components/home-top-section";
 
@@ -57,7 +56,7 @@ function HomeFeedScreen() {
         ))}
       </div>
       <p style={{ fontSize: 10, color: "#52525b", marginTop: 6 }}>Après-Ski Colorado</p>
-      <p style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>'80s in Aspen</p>
+      <p style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>&rsquo;80s in Aspen</p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -213,7 +213,7 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
 }
 
 /* ─── titanium phone shell ──────────────────────────────────────── */
-export function PhoneShell({ children, w = 300, h = 620 }: { children: React.ReactNode; w?: number; h?: number }) {
+export function PhoneShell({ children, w = 300, h = 620 }: { children: ReactNode; w?: number; h?: number }) {
   const frameW = 7;
   const innerR = 50;
   const frameR = 58;

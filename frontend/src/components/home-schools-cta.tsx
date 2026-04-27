@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { HomeBannerVideo } from "@/components/home-banner-video";
 
 const row1 = [
   "NYU", "UCLA", "USC", "UMich", "Cornell", "Georgetown", "Duke", "Vanderbilt",
@@ -43,14 +42,23 @@ export function HomeSchoolsCta() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden min-h-screen">
       <style>{`
         @keyframes marquee     { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
         @keyframes marquee-rev { from { transform: translateX(-50%); } to { transform: translateX(0); }    }
       `}</style>
 
       {/* Video background */}
-      <HomeBannerVideo className="absolute inset-0 h-full w-full" />
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        src="/a9-banner.mp4"
+        poster="/host-review-scene.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      />
 
       {/* Dark overlay — heavier at edges, lighter in center so video breathes */}
       <div

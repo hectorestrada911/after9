@@ -14,7 +14,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
   if (!profile) return { kind: "no_profile" };
 
-  const { data: event, error } = await supabase
+  const eventWithArchive = await supabase
     .from("events")
     .select(
       "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at",
@@ -23,7 +23,21 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
     .eq("host_id", userId)
     .maybeSingle();
 
-  if (error || !event) return { kind: "missing" };
+  const eventWithoutArchive =
+    eventWithArchive.error && eventWithArchive.error.message.toLowerCase().includes("archived_at")
+      ? await supabase
+          .from("events")
+          .select(
+            "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note",
+          )
+          .eq("id", eventId)
+          .eq("host_id", userId)
+          .maybeSingle()
+      : null;
+
+  const event = eventWithoutArchive?.data ?? eventWithArchive.data;
+  const eventError = eventWithoutArchive?.error ?? eventWithArchive.error;
+  if (eventError || !event) return { kind: "missing" };
 
   const [{ data: orders }, { count: ticketsTotal }, { count: ticketsCheckedIn }] = await Promise.all([
     supabase

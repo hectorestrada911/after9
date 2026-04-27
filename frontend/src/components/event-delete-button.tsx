@@ -15,7 +15,11 @@ export function EventDeleteButton({ eventId, eventTitle }: { eventId: string; ev
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/host/events/${eventId}`, { method: "DELETE" });
+      const res = await fetch(`/api/host/events/${eventId}`, {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ confirmText }),
+      });
       const payload = (await res.json().catch(() => null)) as { error?: string } | null;
       if (!res.ok) {
         setError(payload?.error ?? "Could not delete event.");

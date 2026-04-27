@@ -7,6 +7,10 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const { data: sessionData } = await supabase.auth.getSession();
   const userId = sessionData.session?.user?.id;
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const body = (await _req.json().catch(() => null)) as { confirmText?: string } | null;
+  if ((body?.confirmText ?? "").trim().toUpperCase() !== "DELETE") {
+    return NextResponse.json({ error: "Type DELETE to confirm event deletion." }, { status: 400 });
+  }
 
   const [{ count: paidOrders }, { count: checkIns }] = await Promise.all([
     supabase.from("orders").select("id", { head: true, count: "exact" }).eq("event_id", id).eq("payment_status", "paid"),

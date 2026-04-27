@@ -43,13 +43,40 @@ export default async function DashboardPage() {
     );
   }
 
-  const { data: events } = await supabase
+  type EventRowBase = {
+    id: string;
+    slug: string;
+    title: string;
+    date: string;
+    ticket_price: number;
+    tickets_available: number;
+  };
+  type EventRowWithArchive = EventRowBase & { archived_at: string | null };
+
+  const eventsWithArchive = await supabase
     .from("events")
     .select("id,slug,title,date,ticket_price,tickets_available,archived_at")
     .eq("host_id", userId)
     .order("date", { ascending: true });
-  const activeEvents = (events ?? []).filter((e) => !e.archived_at);
-  const archivedEvents = (events ?? []).filter((e) => Boolean(e.archived_at));
+
+  // Backward-compatible fallback for projects where archived_at is not migrated yet.
+  const eventsWithoutArchive =
+    eventsWithArchive.error && eventsWithArchive.error.message.toLowerCase().includes("archived_at")
+      ? await supabase
+          .from("events")
+          .select("id,slug,title,date,ticket_price,tickets_available")
+          .eq("host_id", userId)
+          .order("date", { ascending: true })
+      : null;
+
+  const events = (eventsWithoutArchive?.data ?? eventsWithArchive.data ?? []) as Array<EventRowBase | EventRowWithArchive>;
+  const hasArchiveColumn = !eventsWithoutArchive;
+  const activeEvents: EventRowBase[] = hasArchiveColumn
+    ? (events as EventRowWithArchive[]).filter((e) => !e.archived_at)
+    : (events as EventRowBase[]);
+  const archivedEvents: EventRowBase[] = hasArchiveColumn
+    ? (events as EventRowWithArchive[]).filter((e) => Boolean(e.archived_at))
+    : [];
   const eventIds = activeEvents.map((e) => e.id);
 
   const [ordersRes, checkInsRes] = await Promise.all([

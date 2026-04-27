@@ -1,11 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import crypto from "crypto";
+import QRCode from "qrcode";
 import { Calendar, CheckCircle2, MapPin, Ticket } from "lucide-react";
+import { TICKET_QR_TO_PNG_OPTIONS } from "@/lib/qr-ticket";
+import { getStripe } from "@/lib/stripe";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
 
-export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ order_id?: string }> }) {
+export default async function CheckoutSuccessPage({ searchParams }: { searchParams: Promise<{ order_id?: string; session_id?: string }> }) {
   const params = await searchParams;
   const orderId = params.order_id;
+  const sessionId = params.session_id;
 
   let order: { id: string; buyer_name: string; quantity: number; event_id: string } | null = null;
   let tickets: { ticket_code: string; qr_code_url: string | null }[] | null = null;
@@ -14,9 +19,47 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
   if (orderId) {
     try {
       const supabase = getSupabaseServiceRoleClient();
-      const { data: o } = await supabase.from("orders").select("id,buyer_name,quantity,event_id").eq("id", orderId).maybeSingle();
+      const { data: o } = await supabase.from("orders").select("id,buyer_name,quantity,event_id,payment_status").eq("id", orderId).maybeSingle();
       order = o;
-      const { data: t } = await supabase.from("tickets").select("ticket_code,qr_code_url").eq("order_id", orderId).limit(20);
+      let { data: t } = await supabase.from("tickets").select("ticket_code,qr_code_url").eq("order_id", orderId).limit(20);
+
+      // Fallback when webhook delivery lags/misses: fulfill tickets on success page for paid sessions.
+      if (o && (!t || t.length === 0) && sessionId) {
+        try {
+          const stripe = getStripe();
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          const paid = session.payment_status === "paid" || session.status === "complete";
+          if (paid && session.metadata?.orderId === orderId) {
+            await supabase.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
+            const { count: existingCount } = await supabase
+              .from("tickets")
+              .select("id", { count: "exact", head: true })
+              .eq("order_id", orderId);
+            const missing = Math.max((o.quantity ?? 0) - (existingCount ?? 0), 0);
+            if (missing > 0) {
+              const ticketsToInsert = await Promise.all(
+                Array.from({ length: missing }).map(async () => {
+                  const ticketCode = `TK-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+                  const qrCodeUrl = await QRCode.toDataURL(ticketCode, TICKET_QR_TO_PNG_OPTIONS);
+                  return {
+                    order_id: orderId,
+                    event_id: o.event_id,
+                    ticket_code: ticketCode,
+                    qr_code_url: qrCodeUrl,
+                    status: "active" as const,
+                  };
+                }),
+              );
+              await supabase.from("tickets").insert(ticketsToInsert);
+            }
+            const refreshed = await supabase.from("tickets").select("ticket_code,qr_code_url").eq("order_id", orderId).limit(20);
+            t = refreshed.data ?? [];
+          }
+        } catch {
+          // Keep page resilient; webhook may still complete shortly.
+        }
+      }
+
       tickets = t ?? [];
       if (o?.event_id) {
         const { data: e } = await supabase.from("events").select("title,date,location,image_url,slug").eq("id", o.event_id).maybeSingle();

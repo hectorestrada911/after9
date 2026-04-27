@@ -1,7 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import crypto from "crypto";
+import QRCode from "qrcode";
 import { createClient } from "@supabase/supabase-js";
 import { Ticket } from "lucide-react";
+import { TICKET_QR_TO_PNG_OPTIONS } from "@/lib/qr-ticket";
+import { getStripe } from "@/lib/stripe";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 
@@ -64,6 +68,28 @@ function normalizeTickets(value: unknown): TicketRow[] {
   return [value as TicketRow];
 }
 
+async function fetchOrdersWithTickets(service: ReturnType<typeof createClient>, email: string) {
+  const { data: rawOrders } = await service
+    .from("orders")
+    .select(
+      "id,event_id,buyer_name,buyer_email,quantity,total_amount,payment_status,created_at,events(title,date,location,slug,image_url),tickets(id,order_id,event_id,ticket_code,qr_code_url,status,created_at)",
+    )
+    .ilike("buyer_email", email)
+    .order("created_at", { ascending: false });
+
+  return (rawOrders ?? []).map((raw) => {
+    const row = raw as Record<string, unknown>;
+    const tickets = normalizeTickets(row.tickets).sort((a, b) =>
+      (b.created_at ?? "").localeCompare(a.created_at ?? ""),
+    );
+    return {
+      ...(raw as Omit<OrderRow, "events">),
+      events: normalizeEventRelation(row.events),
+      tickets,
+    };
+  });
+}
+
 export default async function MyTicketsPage() {
   const supabase = await getSupabaseServerClient();
   const { data: sessionData } = await supabase.auth.getSession();
@@ -99,26 +125,53 @@ export default async function MyTicketsPage() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // One round-trip: orders + nested tickets (avoids sequential queries).
-  const { data: rawOrders } = await service
-    .from("orders")
-    .select(
-      "id,event_id,buyer_name,buyer_email,quantity,total_amount,payment_status,created_at,events(title,date,location,slug,image_url),tickets(id,order_id,event_id,ticket_code,qr_code_url,status,created_at)",
-    )
-    .ilike("buyer_email", user.email ?? "")
-    .order("created_at", { ascending: false });
+  let orders = await fetchOrdersWithTickets(service, user.email ?? "");
 
-  const orders = (rawOrders ?? []).map((raw) => {
-    const row = raw as Record<string, unknown>;
-    const tickets = normalizeTickets(row.tickets).sort((a, b) =>
-      (b.created_at ?? "").localeCompare(a.created_at ?? ""),
-    );
-    return {
-      ...(raw as Omit<OrderRow, "events">),
-      events: normalizeEventRelation(row.events),
-      tickets,
-    };
-  });
+  const needsRepair = orders
+    .filter((o) => o.payment_status !== "paid" && o.tickets.length === 0)
+    .slice(0, 5);
+
+  if (needsRepair.length > 0) {
+    try {
+      const stripe = getStripe();
+      const sessions = await stripe.checkout.sessions.list({ limit: 100 });
+      const paidByOrder = new Map(
+        sessions.data
+          .filter((s) => (s.payment_status === "paid" || s.status === "complete") && s.metadata?.orderId)
+          .map((s) => [s.metadata?.orderId as string, true]),
+      );
+
+      for (const order of needsRepair) {
+        if (!paidByOrder.get(order.id)) continue;
+        await service.from("orders").update({ payment_status: "paid" }).eq("id", order.id);
+        const { count: existingCount } = await service
+          .from("tickets")
+          .select("id", { count: "exact", head: true })
+          .eq("order_id", order.id);
+        const missing = Math.max((order.quantity ?? 0) - (existingCount ?? 0), 0);
+        if (missing > 0) {
+          const ticketsToInsert = await Promise.all(
+            Array.from({ length: missing }).map(async () => {
+              const ticketCode = `TK-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+              const qrCodeUrl = await QRCode.toDataURL(ticketCode, TICKET_QR_TO_PNG_OPTIONS);
+              return {
+                order_id: order.id,
+                event_id: order.event_id,
+                ticket_code: ticketCode,
+                qr_code_url: qrCodeUrl,
+                status: "active" as const,
+              };
+            }),
+          );
+          await service.from("tickets").insert(ticketsToInsert);
+        }
+      }
+
+      orders = await fetchOrdersWithTickets(service, user.email ?? "");
+    } catch {
+      // If Stripe reconciliation fails, keep rendering existing state.
+    }
+  }
 
   return (
     <main className="container-page py-10 sm:py-14">

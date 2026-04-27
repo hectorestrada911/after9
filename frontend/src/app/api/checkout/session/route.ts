@@ -104,6 +104,16 @@ export async function POST(req: NextRequest) {
         platformFeeAmount: String(platformFeeAmount),
         hostNetAmount: String(hostNetAmount),
       },
+      payment_intent_data: {
+        metadata: {
+          orderId: orderRow.id,
+          eventId,
+          slug,
+          buyerName,
+          buyerEmail,
+          quantity: String(quantity),
+        },
+      },
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderRow.id}`,
       cancel_url: `${appUrl}/events/${slug}`,
     });

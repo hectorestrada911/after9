@@ -1,14 +1,24 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useTransform,
   useReducedMotion,
   type MotionValue,
 } from "framer-motion";
+
+const cyclingPhrases = [
+  "Your night.",
+  "Your vibe.",
+  "Your rage.",
+  "Your scene.",
+  "Your move.",
+  "Your crowd.",
+];
 
 /* ─── scene data ─────────────────────────────────────────────────── */
 const scenes = [
@@ -275,6 +285,13 @@ export function PhoneShell({ children, w = 300, h = 620 }: { children: React.Rea
 export function HomeTopSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  const [phraseIdx, setPhraseIdx] = useState(0);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const id = setInterval(() => setPhraseIdx(i => (i + 1) % cyclingPhrases.length), 2200);
+    return () => clearInterval(id);
+  }, [reduceMotion]);
 
   const { scrollY } = useScroll();
   const [top, setTop]     = useState(0);
@@ -351,8 +368,19 @@ export function HomeTopSection() {
           </p>
           <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
             Your campus.<br />
-            <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">
-              Your night.
+            <span className="relative inline-block overflow-hidden" style={{ minWidth: "8ch" }}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={phraseIdx}
+                  className="inline-block bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent"
+                  initial={{ y: "60%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={{ y: "-60%", opacity: 0 }}
+                  transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  {cyclingPhrases[phraseIdx]}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </h1>
           <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">

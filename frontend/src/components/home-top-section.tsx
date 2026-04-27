@@ -228,11 +228,7 @@ export function PhoneShell({ children, w = 300, h = 620 }: { children: React.Rea
         boxShadow: [
           "inset 0 0 0 1px rgba(255,255,255,0.10)",
           "inset 0 1.5px 0 rgba(255,255,255,0.06)",
-          "inset 0 -1px 0 rgba(0,0,0,0.6)",
-          "0 1px 0 rgba(255,255,255,0.04)",
-          "0 40px 120px -20px rgba(0,0,0,0.85)",
-          "0 20px 60px -10px rgba(0,0,0,0.55)",
-          "0 0 90px -20px rgba(75,250,148,0.20)",
+          "0 30px 80px -24px rgba(0,0,0,0.85)",
         ].join(", "),
       }} />
 
@@ -352,11 +348,17 @@ export function HomeTopSection() {
     <div ref={containerRef} className="relative bg-black" style={{ minHeight: "320vh" }}>
       <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
 
-        {/* ambient glows */}
-        <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", top: "15%", left: "8%", width: 500, height: 500, borderRadius: "50%", background: "rgba(75,250,148,0.05)", filter: "blur(150px)" }} />
-          <div style={{ position: "absolute", bottom: "5%", right: "8%", width: 380, height: 380, borderRadius: "50%", background: "rgba(0,0,254,0.05)", filter: "blur(130px)" }} />
-        </div>
+        {/* ambient glows — radial gradients (no `filter: blur`) so we don't repaint on scroll */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background:
+              "radial-gradient(circle at 12% 25%, rgba(75,250,148,0.06), transparent 38%), radial-gradient(circle at 88% 88%, rgba(0,0,254,0.05), transparent 40%)",
+          }}
+        />
 
         {/* ── HERO HEADLINE — visible on load, fades as side text takes over ── */}
         <motion.div
@@ -462,36 +464,38 @@ export function HomeTopSection() {
               position: "absolute",
               bottom: 0,
               left: "50%",
-              width: 480, height: 480,
+              width: 560, height: 560,
               translate: "-50% 20%",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(75,250,148,0.28), transparent 60%)",
-              filter: "blur(55px)",
+              background: "radial-gradient(circle, rgba(75,250,148,0.22), transparent 62%)",
               pointerEvents: "none",
+              willChange: "opacity",
             }}
           />
-          <div style={{ perspective: "1500px" }}>
+          <div style={{ perspective: "1500px", transform: "translateZ(0)" }}>
             <motion.div
               style={
                 reduceMotion
-                  ? {}
+                  ? { transform: "translateZ(0)" }
                   : {
                       y: phoneY,
                       rotateX: phoneRotateX,
                       rotateY: phoneRotateY,
                       rotateZ: phoneRotateZ,
                       willChange: "transform",
+                      backfaceVisibility: "hidden",
+                      transformStyle: "preserve-3d",
                     }
               }
             >
               <PhoneShell>
-                <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0 }}>
+                <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity" }}>
                   <FeedScreen progress={progress} />
                 </motion.div>
-                <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0 }}>
+                <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity" }}>
                   <VerifyScreen progress={progress} />
                 </motion.div>
-                <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0 }}>
+                <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0, willChange: "opacity" }}>
                   <TicketScreen progress={progress} />
                 </motion.div>
               </PhoneShell>

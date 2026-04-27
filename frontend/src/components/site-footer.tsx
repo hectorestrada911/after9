@@ -60,12 +60,20 @@ export function SiteFooter() {
             <ul className="space-y-3 text-sm text-zinc-400">
               <li><Link href="/contact" className="transition hover:text-white">Get help</Link></li>
               <li><Link href="/contact" className="transition hover:text-white">Work with us</Link></li>
+              <li><Link href="/terms" className="transition hover:text-white">Terms &amp; Conditions</Link></li>
+              <li><Link href="/privacy" className="transition hover:text-white">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
-        <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 text-[11px] text-zinc-600 sm:flex-row">
+        <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 text-[11px] text-zinc-600 sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} After9. All rights reserved.</p>
-          <p className="uppercase tracking-[0.18em]">Secure checkout · Mobile tickets · Fast door entry</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="uppercase tracking-[0.18em]">Secure checkout · Mobile tickets · Fast door entry</p>
+            <span className="hidden text-zinc-700 sm:inline">•</span>
+            <Link href="/terms" className="transition hover:text-zinc-300">Terms</Link>
+            <span className="text-zinc-700">•</span>
+            <Link href="/privacy" className="transition hover:text-zinc-300">Privacy</Link>
+          </div>
         </div>
       </div>
     </footer>

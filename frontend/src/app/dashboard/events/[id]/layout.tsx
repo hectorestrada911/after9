@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { EventHostNav } from "@/components/event-host-nav";
 import { EventWorkspaceHero } from "@/components/event-workspace-hero";
-import { EventWorkspaceMissing } from "@/components/event-workspace-missing";
 import { resolveEventWorkspace } from "./_workspace";
 
 export default async function EventWorkspaceLayout({
@@ -14,10 +13,6 @@ export default async function EventWorkspaceLayout({
   const { id } = await params;
   const bundle = await resolveEventWorkspace(id);
   const publicBase = process.env.NEXT_PUBLIC_APP_URL || "";
-
-  if (bundle.kind !== "ok") {
-    return <EventWorkspaceMissing reason={bundle.reason} />;
-  }
 
   return (
     <div className="min-w-0">

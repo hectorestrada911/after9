@@ -54,33 +54,24 @@ export default async function DashboardPage() {
 
   const [ordersRes, checkInsRes] = await Promise.all([
     eventIds.length > 0
-      ? supabase
-          .from("orders")
-          .select("id,event_id,buyer_name,buyer_email,total_amount,quantity,payment_status,created_at")
-          .in("event_id", eventIds)
-      : Promise.resolve({
-          data: [] as { id: string; event_id: string; buyer_name: string; buyer_email: string; total_amount: number; quantity: number; payment_status: string; created_at: string }[],
-          error: null,
-        }),
+      ? supabase.from("orders").select("id,event_id,buyer_name,buyer_email,total_amount,quantity,created_at").in("event_id", eventIds)
+      : Promise.resolve({ data: [] as { id: string; event_id: string; buyer_name: string; buyer_email: string; total_amount: number; quantity: number; created_at: string }[], error: null }),
     eventIds.length > 0
       ? supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", eventIds)
       : Promise.resolve({ count: 0, error: null }),
   ]);
   const orders = ordersRes.data;
-  const paidOrders = (orders ?? []).filter((o) => o.payment_status === "paid");
   const checkedIn = checkInsRes.count;
 
-  const revenue = paidOrders.reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
-  const ticketsSold = paidOrders.reduce((sum, o) => sum + (o.quantity ?? 0), 0);
+  const revenue = (orders ?? []).reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
+  const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);
   const attendeeRows = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
   const recentOrders = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 12);
   const salesData = activeEvents.map((event) => ({
     name: event.title.length > 16 ? `${event.title.slice(0, 16)}…` : event.title,
-    sold: paidOrders.filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
+    sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
   }));
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const upcomingForScanner = activeEvents.find((e) => (e.date ?? "") >= todayIso) ?? activeEvents[0];
-  const scannerHref = upcomingForScanner ? `/dashboard/events/${upcomingForScanner.id}/check-in` : null;
+  const scannerHref = activeEvents[0] ? `/dashboard/events/${activeEvents[0].id}/check-in` : "/dashboard/events/new";
   const isFirstHostView = activeEvents.length === 0 && (orders?.length ?? 0) === 0;
 
   return (
@@ -105,21 +96,12 @@ export default async function DashboardPage() {
             <p className="mt-1 text-sm text-zinc-300">At the door? Open your scanner in one tap, or jump to your event list.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {scannerHref ? (
-              <Link
-                href={scannerHref}
-                className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
-              >
-                Start scanner now
-              </Link>
-            ) : (
-              <span
-                title="Create an event first to enable the door scanner."
-                className="inline-flex h-10 cursor-not-allowed items-center rounded-full border border-white/15 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-zinc-500"
-              >
-                Scanner unavailable
-              </span>
-            )}
+            <Link
+              href={scannerHref}
+              className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+            >
+              Start scanner now
+            </Link>
             <Link
               href="#my-events"
               className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
@@ -292,23 +274,15 @@ export default async function DashboardPage() {
           />
         ) : (
           activeEvents.map((event) => {
-            const sold = paidOrders.filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
+            const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
             const pct = Math.min(Math.round((sold / Math.max(event.tickets_available, 1)) * 100), 100);
-            const isPast = (event.date ?? "") < todayIso;
             return (
               <Card key={event.id} className="border-white/[0.1] bg-zinc-950/60 text-white transition hover:border-white/25">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
-                        {event.title}
-                      </Link>
-                      {isPast ? (
-                        <span className="rounded-full border border-zinc-600/50 bg-zinc-700/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                          Past event
-                        </span>
-                      ) : null}
-                    </div>
+                    <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
+                      {event.title}
+                    </Link>
                     <p className="text-sm text-zinc-400">{formatEventDate(event.date)}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -349,7 +323,7 @@ export default async function DashboardPage() {
       </section>
 
       {archivedEvents.length > 0 ? (
-        <section id="archived-events" className="mt-8 space-y-3 scroll-mt-28">
+        <section className="mt-8 space-y-3">
           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Archived events</h2>
           {archivedEvents.map((event) => (
             <Card key={event.id} className="border-white/[0.08] bg-zinc-950/40 text-white">

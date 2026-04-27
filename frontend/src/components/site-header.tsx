@@ -45,12 +45,6 @@ export function SiteHeader() {
     { href: "/contact", label: "Contact" },
   ];
 
-  function isActiveHref(href: string) {
-    const base = href.split("#")[0] || "/";
-    if (base === "/") return pathname === "/";
-    return pathname === base || pathname.startsWith(`${base}/`);
-  }
-
   if (hideHeader) return null;
 
   return (
@@ -72,63 +66,34 @@ export function SiteHeader() {
         <nav className="ml-auto hidden items-center gap-7 text-sm font-medium text-zinc-400 lg:ml-0 lg:flex">
           {authedEmail ? (
             <>
-              <Link
-                href="/account"
-                className={`font-semibold transition ${
-                  isActiveHref("/account") ? "text-brand-green" : "text-white hover:text-brand-green"
-                }`}
-              >
+              <Link href="/account" className="font-semibold text-white transition hover:text-brand-green">
                 Account
               </Link>
-              <Link
-                href="/account#my-events"
-                className={`transition ${isActiveHref("/account") ? "text-brand-green" : "hover:text-white"}`}
-              >
+              <Link href="/account#my-events" className="transition hover:text-white">
                 My events
               </Link>
-              <Link
-                href="/dashboard#scan-qr"
-                className={`font-semibold transition ${
-                  isActiveHref("/dashboard") ? "text-brand-green" : "hover:text-emerald-300"
-                }`}
-              >
+              <Link href="/dashboard#scan-qr" className="font-semibold text-brand-green transition hover:text-emerald-300">
                 Scan QR
               </Link>
-              <Link
-                href="/my-tickets"
-                className={`transition ${isActiveHref("/my-tickets") ? "text-brand-green" : "hover:text-white"}`}
-              >
+              <Link href="/my-tickets" className="transition hover:text-white">
                 My tickets
               </Link>
-              <Link
-                href="/dashboard"
-                className={`transition ${isActiveHref("/dashboard") ? "text-brand-green" : "hover:text-white"}`}
-              >
+              <Link href="/dashboard" className="transition hover:text-white">
                 {"Events & analytics"}
               </Link>
             </>
           ) : (
             <>
-              <Link
-                href="/my-tickets"
-                className={`transition ${isActiveHref("/my-tickets") ? "text-brand-green" : "hover:text-white"}`}
-              >
+              <Link href="/my-tickets" className="transition hover:text-white">
                 My tickets
               </Link>
-              <Link
-                href="/dashboard"
-                className={`transition ${isActiveHref("/dashboard") ? "text-brand-green" : "hover:text-white"}`}
-              >
+              <Link href="/dashboard" className="transition hover:text-white">
                 Host dashboard
               </Link>
             </>
           )}
           {discoverItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`transition ${isActiveHref(item.href) ? "text-brand-green" : "hover:text-white"}`}
-            >
+            <Link key={item.href} href={item.href} className="transition hover:text-white">
               {item.label}
             </Link>
           ))}
@@ -174,45 +139,35 @@ export function SiteHeader() {
                 <Link
                   href="/account"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-semibold transition hover:bg-white/[0.05] ${
-                    isActiveHref("/account") ? "bg-brand-green/10 text-brand-green" : "text-white"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.05]"
                 >
                   Account hub
                 </Link>
                 <Link
                   href="/account#my-events"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.05] hover:text-white ${
-                    isActiveHref("/account") ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
                   My events
                 </Link>
                 <Link
                   href="/dashboard#scan-qr"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-semibold transition hover:bg-white/[0.05] hover:text-emerald-300 ${
-                    isActiveHref("/dashboard") ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-brand-green transition hover:bg-white/[0.05] hover:text-emerald-300"
                 >
                   Scan QR
                 </Link>
                 <Link
                   href="/my-tickets"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.05] hover:text-white ${
-                    isActiveHref("/my-tickets") ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
                   My tickets
                 </Link>
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.05] hover:text-white ${
-                    isActiveHref("/dashboard") ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
                   {"Events & analytics"}
                 </Link>
@@ -222,18 +177,14 @@ export function SiteHeader() {
                 <Link
                   href="/my-tickets"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.05] hover:text-white ${
-                    isActiveHref("/my-tickets") ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
                   My tickets
                 </Link>
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className={`block rounded-lg px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.05] hover:text-white ${
-                    isActiveHref("/dashboard") ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                  }`}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
                   Host dashboard
                 </Link>
@@ -245,9 +196,7 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`block rounded-lg px-2.5 py-2 text-sm font-medium transition hover:bg-white/[0.05] hover:text-white ${
-                  isActiveHref(item.href) ? "bg-brand-green/10 text-brand-green" : "text-zinc-200"
-                }`}
+                className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
               >
                 {item.label}
               </Link>

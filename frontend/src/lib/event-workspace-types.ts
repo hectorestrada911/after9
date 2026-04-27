@@ -35,7 +35,7 @@ export type OrderRow = {
 export type WorkspaceBundle =
   | { kind: "unauth" }
   | { kind: "no_profile" }
-  | { kind: "missing"; reason: "not_found" | "not_owner" }
+  | { kind: "missing" }
   | {
       kind: "ok";
       event: HostEventRow;

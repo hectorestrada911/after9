@@ -4,7 +4,6 @@ import { resolveEventWorkspace } from "../_workspace";
 export default async function EventOrdersPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const bundle = await resolveEventWorkspace(id);
-  if (bundle.kind !== "ok") return null;
 
   return (
     <div className="space-y-6">

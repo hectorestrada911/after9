@@ -3,8 +3,7 @@ import { resolveEventWorkspace } from "../_workspace";
 
 export default async function EventTeamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const bundle = await resolveEventWorkspace(id);
-  if (bundle.kind !== "ok") return null;
+  await resolveEventWorkspace(id);
 
   return (
     <div className="space-y-3">

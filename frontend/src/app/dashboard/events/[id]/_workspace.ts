@@ -14,30 +14,24 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
   if (!profile) return { kind: "no_profile" };
 
-  const eventWithArchive = await supabase
-    .from("events")
-    .select(
-      "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at",
-    )
-    .eq("id", eventId)
-    .eq("host_id", userId)
-    .maybeSingle();
+  const selectWithArchive =
+    "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at";
+  const selectWithoutArchive =
+    "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note";
 
-  const eventWithoutArchive =
-    eventWithArchive.error && eventWithArchive.error.message.toLowerCase().includes("archived_at")
-      ? await supabase
-          .from("events")
-          .select(
-            "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note",
-          )
-          .eq("id", eventId)
-          .eq("host_id", userId)
-          .maybeSingle()
-      : null;
+  async function fetchEvent(selectClause: string, field: "id" | "slug") {
+    return supabase.from("events").select(selectClause).eq(field, eventId).eq("host_id", userId).maybeSingle();
+  }
 
-  const event = eventWithoutArchive?.data ?? eventWithArchive.data;
-  const eventError = eventWithoutArchive?.error ?? eventWithArchive.error;
-  if (eventError || !event) return { kind: "missing" };
+  // Keep scanner/event workspace resilient across old links (slug-based) and older schemas (no archived_at).
+  const candidates = [
+    await fetchEvent(selectWithArchive, "id"),
+    await fetchEvent(selectWithoutArchive, "id"),
+    await fetchEvent(selectWithArchive, "slug"),
+    await fetchEvent(selectWithoutArchive, "slug"),
+  ];
+  const event = (candidates.find((r) => r.data)?.data ?? null) as unknown as HostEventRow | null;
+  if (!event) return { kind: "missing" };
 
   const [{ data: orders }, { count: ticketsTotal }, { count: ticketsCheckedIn }] = await Promise.all([
     supabase
@@ -51,7 +45,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
 
   return {
     kind: "ok",
-    event: event as HostEventRow,
+    event,
     orders: (orders ?? []) as OrderRow[],
     ticketsTotal: ticketsTotal ?? 0,
     ticketsCheckedIn: ticketsCheckedIn ?? 0,

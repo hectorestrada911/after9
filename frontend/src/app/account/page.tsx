@@ -32,11 +32,15 @@ export default async function AccountPage() {
 
   const [{ data: profile }, { data: hostedEvents }] = await Promise.all([
     supabase.from("profiles").select("id,full_name").eq("id", user.id).maybeSingle(),
-    supabase.from("events").select("id,slug,title,date,image_url,visibility,tickets_available").eq("host_id", user.id).order("date", { ascending: true }),
+    supabase
+      .from("events")
+      .select("id,slug,title,date,image_url,visibility,tickets_available,archived_at")
+      .eq("host_id", user.id)
+      .order("date", { ascending: true }),
   ]);
   const hasHostProfile = Boolean(profile);
 
-  const eventRows = hostedEvents ?? [];
+  const eventRows = (hostedEvents ?? []).filter((e) => !e.archived_at);
   const eventIds = eventRows.map((e) => e.id);
   const eventCount = eventIds.length;
 
@@ -46,10 +50,11 @@ export default async function AccountPage() {
   let hostCheckIns = 0;
   if (eventIds.length > 0) {
     const [hostOrdersRes, checkInsRes] = await Promise.all([
-      supabase.from("orders").select("event_id,total_amount,quantity").in("event_id", eventIds),
+      supabase.from("orders").select("event_id,total_amount,quantity,payment_status").in("event_id", eventIds),
       supabase.from("check_ins").select("*", { count: "exact", head: true }).in("event_id", eventIds),
     ]);
     for (const o of hostOrdersRes.data ?? []) {
+      if (o.payment_status !== "paid") continue;
       const q = o.quantity ?? 0;
       hostGrossCents += o.total_amount ?? 0;
       hostTicketsSold += q;
@@ -129,6 +134,8 @@ export default async function AccountPage() {
               const cap = Math.max(event.tickets_available ?? 0, 1);
               const pct = Math.min(Math.round((sold / cap) * 100), 100);
               const vis = eventVisibilityLabel(event.visibility);
+              const todayIso = new Date().toISOString().slice(0, 10);
+              const isPast = (event.date ?? "") < todayIso;
               return (
                 <li
                   key={event.id}
@@ -165,6 +172,11 @@ export default async function AccountPage() {
                         <span className="rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                           {vis}
                         </span>
+                        {isPast ? (
+                          <span className="rounded-full border border-zinc-600/50 bg-zinc-700/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                            Past event
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 text-sm text-zinc-400">{formatEventDate(event.date)}</p>
                       <div className="mt-3">

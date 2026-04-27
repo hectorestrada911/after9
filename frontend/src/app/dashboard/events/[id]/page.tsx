@@ -7,6 +7,7 @@ import { resolveEventWorkspace } from "./_workspace";
 export default async function EventOverviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const bundle = await resolveEventWorkspace(id);
+  if (bundle.kind !== "ok") return null;
   const { event, orders, ticketsTotal, ticketsCheckedIn } = bundle;
 
   const paid = orders.filter((o) => o.payment_status === "paid");

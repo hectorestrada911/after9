@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import type { HostEventRow, OrderRow, WorkspaceBundle } from "@/lib/event-workspace-types";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -14,7 +14,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
   if (!profile) return { kind: "no_profile" };
 
-  const { data: event, error } = await supabase
+  const { data: ownEvent } = await supabase
     .from("events")
     .select(
       "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at",
@@ -23,7 +23,10 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
     .eq("host_id", userId)
     .maybeSingle();
 
-  if (error || !event) return { kind: "missing" };
+  if (!ownEvent) {
+    const { data: anyEvent } = await supabase.from("events").select("id").eq("id", eventId).maybeSingle();
+    return { kind: "missing", reason: anyEvent ? "not_owner" : "not_found" };
+  }
 
   const [{ data: orders }, { count: ticketsTotal }, { count: ticketsCheckedIn }] = await Promise.all([
     supabase
@@ -37,7 +40,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
 
   return {
     kind: "ok",
-    event: event as HostEventRow,
+    event: ownEvent as HostEventRow,
     orders: (orders ?? []) as OrderRow[],
     ticketsTotal: ticketsTotal ?? 0,
     ticketsCheckedIn: ticketsCheckedIn ?? 0,
@@ -51,9 +54,6 @@ export async function resolveEventWorkspace(eventId: string) {
   }
   if (bundle.kind === "no_profile") {
     redirect(`/onboarding?next=${encodeURIComponent(`/dashboard/events/${eventId}`)}`);
-  }
-  if (bundle.kind === "missing") {
-    notFound();
   }
   return bundle;
 }

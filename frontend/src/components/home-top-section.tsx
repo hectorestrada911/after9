@@ -1,15 +1,24 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useTransform,
   useReducedMotion,
   type MotionValue,
 } from "framer-motion";
-import { HomeBannerVideoLoader } from "@/components/home-banner-video-loader";
+
+const cyclingPhrases = [
+  "Your night.",
+  "Your vibe.",
+  "Your rage.",
+  "Your scene.",
+  "Your move.",
+  "Your crowd.",
+];
 
 /* ─── scene data ─────────────────────────────────────────────────── */
 const scenes = [
@@ -219,11 +228,7 @@ export function PhoneShell({ children, w = 300, h = 620 }: { children: React.Rea
         boxShadow: [
           "inset 0 0 0 1px rgba(255,255,255,0.10)",
           "inset 0 1.5px 0 rgba(255,255,255,0.06)",
-          "inset 0 -1px 0 rgba(0,0,0,0.6)",
-          "0 1px 0 rgba(255,255,255,0.04)",
-          "0 40px 120px -20px rgba(0,0,0,0.85)",
-          "0 20px 60px -10px rgba(0,0,0,0.55)",
-          "0 0 90px -20px rgba(75,250,148,0.20)",
+          "0 30px 80px -24px rgba(0,0,0,0.85)",
         ].join(", "),
       }} />
 
@@ -276,6 +281,13 @@ export function PhoneShell({ children, w = 300, h = 620 }: { children: React.Rea
 export function HomeTopSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  const [phraseIdx, setPhraseIdx] = useState(0);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const id = setInterval(() => setPhraseIdx(i => (i + 1) % cyclingPhrases.length), 2200);
+    return () => clearInterval(id);
+  }, [reduceMotion]);
 
   const { scrollY } = useScroll();
   const [top, setTop]     = useState(0);
@@ -294,44 +306,37 @@ export function HomeTopSection() {
   }, []);
 
   const progress = useTransform(scrollY, [top, top + range], [0, 1], { clamp: true });
-  const phoneStart = 0.44;
-  const phoneProgress = useTransform(progress, (latest) => {
-    if (latest <= phoneStart) return 0;
-    const normalized = (latest - phoneStart) / (1 - phoneStart);
-    return Math.max(0, Math.min(1, normalized));
-  });
-  const phoneLayerOpacity = useTransform(phoneProgress, [0, 0.06], [0, 1]);
 
   /* scene fades */
-  const s1 = useTransform(phoneProgress, [0, 0.26, 0.36], [1, 1, 0]);
-  const s2 = useTransform(phoneProgress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
-  const s3 = useTransform(phoneProgress, [0.60, 0.70, 1], [0, 1, 1]);
+  const s1 = useTransform(progress, [0, 0.26, 0.36], [1, 1, 0]);
+  const s2 = useTransform(progress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
+  const s3 = useTransform(progress, [0.60, 0.70, 1], [0, 1, 1]);
 
   /* phone screens */
-  const p1 = useTransform(phoneProgress, [0, 0.28, 0.38], [1, 1, 0]);
-  const p2 = useTransform(phoneProgress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
-  const p3 = useTransform(phoneProgress, [0.62, 0.72, 1], [0, 1, 1]);
+  const p1 = useTransform(progress, [0, 0.28, 0.38], [1, 1, 0]);
+  const p2 = useTransform(progress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
+  const p3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
 
-  /* phone rises from below viewport bottom, settles at bottom-center */
-  const phoneY       = useTransform(phoneProgress, [0, 0.22, 1], [820, 0, -16]);
-  const phoneRotateX = useTransform(phoneProgress, [0, 0.22, 1], [-12, 0, 2]);
-  const phoneRotateY = useTransform(phoneProgress, [0.2, 0.58, 1], [0, -5, -10]);
-  const phoneRotateZ = useTransform(phoneProgress, [0.2, 1], [0, 3]);
+  /*
+   * Phone is VISIBLE on initial load — angled at bottom of screen like doorlist.
+   * Rises and straightens as user scrolls. rotateZ starts tilted, normalises.
+   */
+  const phoneY       = useTransform(progress, [0, 0.28, 1],   [320, 0, -16]);
+  const phoneRotateX = useTransform(progress, [0, 0.28, 1],   [-10, 0, 2]);
+  const phoneRotateY = useTransform(progress, [0, 0.28, 0.7, 1], [-8, 0, -5, -10]);
+  const phoneRotateZ = useTransform(progress, [0, 0.28, 1],   [-6, 0, 3]);
 
-  /* hero headline: fades in immediately, fades out as phone settles + side text appears */
-  const heroOpacity = useTransform(progress, [0, 0.04, 0.22, 0.40], [0, 1, 1, 0]);
+  /* hero headline visible immediately, fades out as side text appears */
+  const heroOpacity = useTransform(progress, [0, 0.22, 0.40], [1, 1, 0]);
   const heroY       = useTransform(progress, [0.22, 0.40], [0, -28]);
-  const heroVideoOpacity = useTransform(progress, [0.02, 0.1, 0.24, 0.4], [0, 1, 1, 0]);
-  const heroVideoY = useTransform(progress, [0.02, 0.24, 0.4], [20, 0, -28]);
-  const heroVideoScale = useTransform(progress, [0.06, 0.4], [1, 1.04]);
 
-  /* side text slides in once phone is settled */
-  const sideOpacity = useTransform(phoneProgress, [0.12, 0.34], [0, 1]);
-  const sideXL      = useTransform(phoneProgress, [0.12, 0.34], [-32, 0]);
-  const sideXR      = useTransform(phoneProgress, [0.12, 0.34], [32, 0]);
+  /* side text slides in as phone settles */
+  const sideOpacity = useTransform(progress, [0.24, 0.44], [0, 1]);
+  const sideXL      = useTransform(progress, [0.24, 0.44], [-32, 0]);
+  const sideXR      = useTransform(progress, [0.24, 0.44], [32, 0]);
 
   /* glow behind phone */
-  const glowOpacity = useTransform(phoneProgress, [0, 0.24, 0.7, 1], [0, 0.9, 0.85, 0.5]);
+  const glowOpacity = useTransform(progress, [0, 0.30, 0.7, 1], [0.4, 0.9, 0.85, 0.5]);
 
   /* scroll hint */
   const hintOpacity = useTransform(progress, [0, 0.06], [1, 0]);
@@ -343,48 +348,56 @@ export function HomeTopSection() {
     <div ref={containerRef} className="relative bg-black" style={{ minHeight: "320vh" }}>
       <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
 
-        {/* ambient glows */}
-        <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-          <div style={{ position: "absolute", top: "15%", left: "8%", width: 500, height: 500, borderRadius: "50%", background: "rgba(75,250,148,0.05)", filter: "blur(150px)" }} />
-          <div style={{ position: "absolute", bottom: "5%", right: "8%", width: 380, height: 380, borderRadius: "50%", background: "rgba(0,0,254,0.05)", filter: "blur(130px)" }} />
-        </div>
+        {/* ambient glows — radial gradients (no `filter: blur`) so we don't repaint on scroll */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background:
+              "radial-gradient(circle at 12% 25%, rgba(75,250,148,0.06), transparent 38%), radial-gradient(circle at 88% 88%, rgba(0,0,254,0.05), transparent 40%)",
+          }}
+        />
 
-        {/* ── HERO HEADLINE — top center, fades out as phone + side text take over ── */}
+        {/* ── HERO HEADLINE — visible on load, fades as side text takes over ── */}
         <motion.div
           style={{ opacity: heroOpacity, y: heroY }}
-          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[11vh] text-center"
+          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[10vh] text-center"
         >
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">
             Discover
           </p>
           <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
             Your campus.<br />
-            <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">
-              Your night.
+            <span className="relative inline-block overflow-hidden" style={{ minWidth: "8ch" }}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={phraseIdx}
+                  className="inline-block bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent"
+                  initial={{ y: "60%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={{ y: "-60%", opacity: 0 }}
+                  transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  {cyclingPhrases[phraseIdx]}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </h1>
           <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
             Every party, show, and event near you — curated by students, for students.
           </p>
           <Link
-            href="/#browse-events"
+            href="/signup"
             className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
             style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
           >
-            Browse events
+            Get the app
           </Link>
         </motion.div>
 
-        <motion.div
-          style={{ opacity: heroVideoOpacity, y: heroVideoY, scale: heroVideoScale }}
-          className="pointer-events-none absolute inset-x-0 top-[50vh] z-[7] mx-auto w-[min(92vw,980px)] px-3 sm:px-6"
-        >
-          <div className="pointer-events-auto overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60 p-2 backdrop-blur-[2px] sm:rounded-3xl sm:p-3">
-            <HomeBannerVideoLoader />
-          </div>
-        </motion.div>
-
-        {/* ── LEFT SIDE TEXT — outer div handles position+centering, inner motion handles fade+slide ── */}
+        {/* ── LEFT SIDE TEXT ── */}
         <div className="absolute top-1/2 z-10 hidden -translate-y-[60%] lg:block" style={{ left: "5vw" }}>
           <motion.div style={{ opacity: sideOpacity, x: sideXL }}>
             {scenes.map((scene, i) => (
@@ -418,7 +431,7 @@ export function HomeTopSection() {
           </motion.div>
         </div>
 
-        {/* ── RIGHT SIDE TAGS — outer div handles position+centering, inner motion handles fade+slide ── */}
+        {/* ── RIGHT SIDE TAGS ── */}
         <div className="absolute top-1/2 z-10 hidden -translate-y-[60%] text-right lg:block" style={{ right: "5vw" }}>
           <motion.div style={{ opacity: sideOpacity, x: sideXR }}>
             {scenes.map((scene, i) => (
@@ -442,12 +455,8 @@ export function HomeTopSection() {
           </motion.div>
         </div>
 
-        {/* ── PHONE — anchored bottom-center, rises from below viewport ── */}
-        <motion.div
-          className="absolute bottom-0 left-1/2 z-[5]"
-          style={{ transform: "translateX(-50%)", opacity: phoneLayerOpacity }}
-        >
-          {/* glow */}
+        {/* ── PHONE — visible on load at angle, rises and straightens on scroll ── */}
+        <div className="absolute bottom-0 left-1/2 z-[5]" style={{ transform: "translateX(-50%)" }}>
           <motion.div
             aria-hidden
             style={{
@@ -455,49 +464,51 @@ export function HomeTopSection() {
               position: "absolute",
               bottom: 0,
               left: "50%",
-              width: 480, height: 480,
+              width: 560, height: 560,
               translate: "-50% 20%",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(75,250,148,0.28), transparent 60%)",
-              filter: "blur(55px)",
+              background: "radial-gradient(circle, rgba(75,250,148,0.22), transparent 62%)",
               pointerEvents: "none",
+              willChange: "opacity",
             }}
           />
-          <div style={{ perspective: "1500px" }}>
+          <div style={{ perspective: "1500px", transform: "translateZ(0)" }}>
             <motion.div
               style={
                 reduceMotion
-                  ? {}
+                  ? { transform: "translateZ(0)" }
                   : {
                       y: phoneY,
                       rotateX: phoneRotateX,
                       rotateY: phoneRotateY,
                       rotateZ: phoneRotateZ,
                       willChange: "transform",
+                      backfaceVisibility: "hidden",
+                      transformStyle: "preserve-3d",
                     }
               }
             >
               <PhoneShell>
-                <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0 }}>
-                  <FeedScreen progress={phoneProgress} />
+                <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity" }}>
+                  <FeedScreen progress={progress} />
                 </motion.div>
-                <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0 }}>
-                  <VerifyScreen progress={phoneProgress} />
+                <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity" }}>
+                  <VerifyScreen progress={progress} />
                 </motion.div>
-                <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0 }}>
-                  <TicketScreen progress={phoneProgress} />
+                <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0, willChange: "opacity" }}>
+                  <TicketScreen progress={progress} />
                 </motion.div>
               </PhoneShell>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
 
         {/* progress dots */}
-        <motion.div style={{ opacity: phoneLayerOpacity }} className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
+        <div className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
           {phoneOps.map((op, i) => (
             <motion.div key={i} style={{ opacity: op }} className="h-1.5 w-1.5 rounded-full bg-[#4BFA94]" />
           ))}
-        </motion.div>
+        </div>
 
         {/* scroll hint */}
         <motion.div

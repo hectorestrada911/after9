@@ -349,7 +349,7 @@ export default async function DashboardPage() {
       </section>
 
       {archivedEvents.length > 0 ? (
-        <section className="mt-8 space-y-3">
+        <section id="archived-events" className="mt-8 space-y-3 scroll-mt-28">
           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Archived events</h2>
           {archivedEvents.map((event) => (
             <Card key={event.id} className="border-white/[0.08] bg-zinc-950/40 text-white">

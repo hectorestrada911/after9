@@ -40,9 +40,14 @@ export default async function AccountPage() {
   ]);
   const hasHostProfile = Boolean(profile);
 
-  const eventRows = (hostedEvents ?? []).filter((e) => !e.archived_at);
-  const eventIds = eventRows.map((e) => e.id);
-  const eventCount = eventIds.length;
+  const allEventRows = hostedEvents ?? [];
+  const activeEventRows = allEventRows.filter((e) => !e.archived_at);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const pastEventCount = activeEventRows.filter((e) => (e.date ?? "") < todayIso).length;
+  const archivedEventCount = allEventRows.filter((e) => Boolean(e.archived_at)).length;
+  const eventIds = activeEventRows.map((e) => e.id);
+  const eventCount = activeEventRows.length;
+  const totalEventCount = allEventRows.length;
 
   const soldByEvent = new Map<string, number>();
   let hostGrossCents = 0;
@@ -113,13 +118,33 @@ export default async function AccountPage() {
         </section>
       ) : null}
 
-      {eventCount > 0 ? (
+      {totalEventCount > 0 ? (
         <section id="my-events" className="mt-8 scroll-mt-28">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Hosting</p>
               <h2 className="mt-1 text-xl font-black tracking-tight text-white sm:text-2xl">Your events</h2>
               <p className="mt-1 text-sm text-zinc-500">Flyer, public link, and host tools. Pick up where you left off.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  href="/account#my-events"
+                  className="inline-flex h-8 items-center rounded-full border border-white/20 bg-white/[0.03] px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-200 transition hover:border-white/45 hover:text-white"
+                >
+                  All ({totalEventCount})
+                </Link>
+                <Link
+                  href="/account#my-events"
+                  className="inline-flex h-8 items-center rounded-full border border-white/20 bg-white/[0.03] px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-200 transition hover:border-white/45 hover:text-white"
+                >
+                  Past ({pastEventCount})
+                </Link>
+                <Link
+                  href="/dashboard#archived-events"
+                  className="inline-flex h-8 items-center rounded-full border border-white/20 bg-white/[0.03] px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-200 transition hover:border-white/45 hover:text-white"
+                >
+                  Archived ({archivedEventCount})
+                </Link>
+              </div>
             </div>
             <Link
               href="/dashboard"
@@ -129,13 +154,13 @@ export default async function AccountPage() {
             </Link>
           </div>
           <ul className="mt-4 space-y-4">
-            {eventRows.slice(0, 5).map((event) => {
+            {allEventRows.slice(0, 5).map((event) => {
               const sold = soldByEvent.get(event.id) ?? 0;
               const cap = Math.max(event.tickets_available ?? 0, 1);
               const pct = Math.min(Math.round((sold / cap) * 100), 100);
               const vis = eventVisibilityLabel(event.visibility);
-              const todayIso = new Date().toISOString().slice(0, 10);
               const isPast = (event.date ?? "") < todayIso;
+              const isArchived = Boolean(event.archived_at);
               return (
                 <li
                   key={event.id}
@@ -172,6 +197,11 @@ export default async function AccountPage() {
                         <span className="rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                           {vis}
                         </span>
+                        {isArchived ? (
+                          <span className="rounded-full border border-zinc-600/50 bg-zinc-700/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                            Archived
+                          </span>
+                        ) : null}
                         {isPast ? (
                           <span className="rounded-full border border-zinc-600/50 bg-zinc-700/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                             Past event
@@ -216,9 +246,9 @@ export default async function AccountPage() {
               );
             })}
           </ul>
-          {eventCount > 5 ? (
+          {totalEventCount > 5 ? (
             <p className="mt-3 text-center text-xs text-zinc-500">
-              Showing 5 of {eventCount}.{" "}
+              Showing 5 of {totalEventCount}.{" "}
               <Link href="/dashboard" className="font-semibold text-zinc-300 underline-offset-2 hover:text-white hover:underline">
                 Open dashboard for the full list
               </Link>

@@ -20,37 +20,54 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    const { data: event, error: eventErr } = await supabase
-      .from("events")
-      .select("ticket_price, tickets_available, archived_at")
-      .eq("id", eventId)
-      .single();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(eventId));
+    let resolvedEvent:
+      | { id: string; ticket_price: number; tickets_available: number | null; archived_at?: string | null }
+      | null = null;
 
-    if (eventErr || !event) {
-      return NextResponse.json({ error: "Event not found." }, { status: 404 });
+    if (isUuid) {
+      const { data } = await supabase
+        .from("events")
+        .select("id, ticket_price, tickets_available, archived_at")
+        .eq("id", eventId)
+        .maybeSingle();
+      resolvedEvent = data ?? null;
     }
-    if (event.archived_at) {
+
+    if (!resolvedEvent) {
+      const { data } = await supabase
+        .from("events")
+        .select("id, ticket_price, tickets_available, archived_at")
+        .eq("slug", slug)
+        .maybeSingle();
+      resolvedEvent = data ?? null;
+    }
+
+    if (!resolvedEvent) {
+      return NextResponse.json({ error: "Event not found. Please refresh and try again." }, { status: 404 });
+    }
+    if (resolvedEvent.archived_at) {
       return NextResponse.json({ error: "This event is archived and no longer accepts purchases." }, { status: 409 });
     }
 
     const { count: soldCount } = await supabase
       .from("tickets")
       .select("id", { count: "exact", head: true })
-      .eq("event_id", eventId);
+      .eq("event_id", resolvedEvent.id);
 
-    const remaining = Math.max((event.tickets_available ?? 0) - (soldCount ?? 0), 0);
+    const remaining = Math.max((resolvedEvent.tickets_available ?? 0) - (soldCount ?? 0), 0);
     if (remaining < quantity) {
       return NextResponse.json({ error: "Not enough tickets remaining." }, { status: 409 });
     }
 
     const feePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
-    const totalAmount = event.ticket_price * quantity;
+    const totalAmount = resolvedEvent.ticket_price * quantity;
     const platformFeeAmount = platformFeeFromGrossCents(totalAmount, feePercent);
     const hostNetAmount = hostNetFromGrossCents(totalAmount, feePercent);
     const { data: orderRow, error: orderErr } = await supabase
       .from("orders")
       .insert({
-        event_id: eventId,
+        event_id: resolvedEvent.id,
         buyer_name: buyerName,
         buyer_email: buyerEmail,
         quantity,
@@ -74,7 +91,7 @@ export async function POST(req: NextRequest) {
           quantity,
           price_data: {
             currency: "usd",
-            unit_amount: event.ticket_price,
+            unit_amount: resolvedEvent.ticket_price,
             product_data: {
               name: title,
               description: "Mobile ticket + QR · Instant confirmation",
@@ -94,7 +111,7 @@ export async function POST(req: NextRequest) {
       },
       metadata: {
         orderId: orderRow.id,
-        eventId,
+        eventId: resolvedEvent.id,
         slug,
         buyerName,
         buyerEmail,
@@ -107,7 +124,7 @@ export async function POST(req: NextRequest) {
       payment_intent_data: {
         metadata: {
           orderId: orderRow.id,
-          eventId,
+          eventId: resolvedEvent.id,
           slug,
           buyerName,
           buyerEmail,

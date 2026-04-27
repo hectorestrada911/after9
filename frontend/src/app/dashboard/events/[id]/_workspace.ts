@@ -17,7 +17,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
   const { data: event, error } = await supabase
     .from("events")
     .select(
-      "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note",
+      "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at",
     )
     .eq("id", eventId)
     .eq("host_id", userId)

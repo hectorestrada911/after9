@@ -38,13 +38,15 @@ export function HomeScrollSplitVisual() {
       const el = driverRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      const travel = el.offsetHeight - window.innerHeight;
-      if (travel <= 0) {
-        queueMicrotask(() => setT(1));
-        return;
-      }
-      const raw = (-rect.top / travel) * 1.08;
-      queueMicrotask(() => setT(smoothstep(Math.max(0, Math.min(1, raw)))));
+      const viewport = window.innerHeight;
+      if (viewport <= 0) return;
+      // Start once section reaches lower viewport, end before it fully leaves.
+      const start = viewport * 0.85;
+      const end = -rect.height + viewport * 0.2;
+      const travel = start - end;
+      if (travel <= 0) return;
+      const raw = (start - rect.top) / travel;
+      setT(smoothstep(Math.max(0, Math.min(1, raw))));
     };
 
     const onScroll = () => {
@@ -72,7 +74,7 @@ export function HomeScrollSplitVisual() {
   const leftRot = -3 * (1 - progress);
   const rightRot = 3 * (1 - progress);
   const scale = 0.92 + 0.08 * progress;
-  const copyOpacity = 0.25 + 0.75 * smoothstep((progress - 0.12) / 0.55);
+  const copyOpacity = 0.55 + 0.45 * smoothstep((progress - 0.08) / 0.45);
   const pillsOpacity = 0.2 + 0.8 * smoothstep((progress - 0.45) / 0.45);
 
   return (
@@ -83,11 +85,11 @@ export function HomeScrollSplitVisual() {
             className="order-2 flex flex-col justify-center px-1 lg:order-1 lg:col-span-4 lg:pr-4"
             style={{ opacity: reducedMotion ? 1 : copyOpacity }}
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-500">While you scroll</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">While you scroll</p>
             <h3 className="mt-3 text-2xl font-black leading-[1.05] tracking-tighter text-white sm:text-3xl">
               Room and door, same story.
             </h3>
-            <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
+            <p className="mt-4 text-sm leading-relaxed text-zinc-300 sm:text-base">
               The closer these two frames get, the closer you are to a night that is published, sold, and ready at the
               door. No PNG mockups required, just motion and contrast.
             </p>

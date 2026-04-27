@@ -44,7 +44,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const { slug } = await params;
   const supabase = await getSupabaseServerClient();
   const { data: event } = await supabase.from("events").select("*, profiles(organizer_name)").eq("slug", slug).single();
-  if (!event) return notFound();
+  if (!event || event.archived_at) return notFound();
 
   const mapUrls = mapLinksForAddress(event.location);
 

@@ -9,6 +9,7 @@ import {
   useReducedMotion,
   type MotionValue,
 } from "framer-motion";
+import { HomeBannerVideoLoader } from "@/components/home-banner-video-loader";
 
 /* ─── scene data ─────────────────────────────────────────────────── */
 const scenes = [
@@ -19,7 +20,7 @@ const scenes = [
     body: "Every party, show, and event near you — curated by students, for students.",
     leftTag: "BUILT FOR\nCOLLEGE NIGHTS",
     rightTag: "TRUSTED AT\n500+ CAMPUSES",
-    cta: { label: "Get the app", href: "/signup" },
+    cta: { label: "Browse events", href: "/#browse-events" },
   },
   {
     eyebrow: ".edu verified",
@@ -28,7 +29,7 @@ const scenes = [
     body: "Only verified students see private events and buy tickets. Real community — no randos.",
     leftTag: "BOTS\nNOT WELCOME",
     rightTag: ".EDU GATED\nBY DEFAULT",
-    cta: { label: "Verify your .edu", href: "/signup" },
+    cta: { label: "Browse events", href: "/#browse-events" },
   },
   {
     eyebrow: "Door flow",
@@ -37,7 +38,7 @@ const scenes = [
     body: "QR tickets on your phone, scanned at the door in seconds. Zero paper, zero lines.",
     leftTag: "SCAN.\nGO. DONE.",
     rightTag: "OFFLINE\nREADY",
-    cta: { label: "Download RAGE", href: "/signup" },
+    cta: { label: "Create event", href: "/create-event" },
   },
 ];
 
@@ -293,34 +294,44 @@ export function HomeTopSection() {
   }, []);
 
   const progress = useTransform(scrollY, [top, top + range], [0, 1], { clamp: true });
+  const phoneStart = 0.44;
+  const phoneProgress = useTransform(progress, (latest) => {
+    if (latest <= phoneStart) return 0;
+    const normalized = (latest - phoneStart) / (1 - phoneStart);
+    return Math.max(0, Math.min(1, normalized));
+  });
+  const phoneLayerOpacity = useTransform(phoneProgress, [0, 0.06], [0, 1]);
 
   /* scene fades */
-  const s1 = useTransform(progress, [0, 0.26, 0.36], [1, 1, 0]);
-  const s2 = useTransform(progress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
-  const s3 = useTransform(progress, [0.60, 0.70, 1], [0, 1, 1]);
+  const s1 = useTransform(phoneProgress, [0, 0.26, 0.36], [1, 1, 0]);
+  const s2 = useTransform(phoneProgress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
+  const s3 = useTransform(phoneProgress, [0.60, 0.70, 1], [0, 1, 1]);
 
   /* phone screens */
-  const p1 = useTransform(progress, [0, 0.28, 0.38], [1, 1, 0]);
-  const p2 = useTransform(progress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
-  const p3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
+  const p1 = useTransform(phoneProgress, [0, 0.28, 0.38], [1, 1, 0]);
+  const p2 = useTransform(phoneProgress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
+  const p3 = useTransform(phoneProgress, [0.62, 0.72, 1], [0, 1, 1]);
 
   /* phone rises from below viewport bottom, settles at bottom-center */
-  const phoneY       = useTransform(progress, [0, 0.30, 1],    [430, 0, -16]);
-  const phoneRotateX = useTransform(progress, [0, 0.30, 1],    [-12, 0, 2]);
-  const phoneRotateY = useTransform(progress, [0.25, 0.7, 1],  [0, -5, -10]);
-  const phoneRotateZ = useTransform(progress, [0.25, 1],       [0, 3]);
+  const phoneY       = useTransform(phoneProgress, [0, 0.22, 1], [820, 0, -16]);
+  const phoneRotateX = useTransform(phoneProgress, [0, 0.22, 1], [-12, 0, 2]);
+  const phoneRotateY = useTransform(phoneProgress, [0.2, 0.58, 1], [0, -5, -10]);
+  const phoneRotateZ = useTransform(phoneProgress, [0.2, 1], [0, 3]);
 
   /* hero headline: fades in immediately, fades out as phone settles + side text appears */
   const heroOpacity = useTransform(progress, [0, 0.04, 0.22, 0.40], [0, 1, 1, 0]);
   const heroY       = useTransform(progress, [0.22, 0.40], [0, -28]);
+  const heroVideoOpacity = useTransform(progress, [0.02, 0.1, 0.24, 0.4], [0, 1, 1, 0]);
+  const heroVideoY = useTransform(progress, [0.02, 0.24, 0.4], [20, 0, -28]);
+  const heroVideoScale = useTransform(progress, [0.06, 0.4], [1, 1.04]);
 
   /* side text slides in once phone is settled */
-  const sideOpacity = useTransform(progress, [0.24, 0.44], [0, 1]);
-  const sideXL      = useTransform(progress, [0.24, 0.44], [-32, 0]);
-  const sideXR      = useTransform(progress, [0.24, 0.44], [32, 0]);
+  const sideOpacity = useTransform(phoneProgress, [0.12, 0.34], [0, 1]);
+  const sideXL      = useTransform(phoneProgress, [0.12, 0.34], [-32, 0]);
+  const sideXR      = useTransform(phoneProgress, [0.12, 0.34], [32, 0]);
 
   /* glow behind phone */
-  const glowOpacity = useTransform(progress, [0, 0.32, 0.7, 1], [0, 0.9, 0.85, 0.5]);
+  const glowOpacity = useTransform(phoneProgress, [0, 0.24, 0.7, 1], [0, 0.9, 0.85, 0.5]);
 
   /* scroll hint */
   const hintOpacity = useTransform(progress, [0, 0.06], [1, 0]);
@@ -356,12 +367,21 @@ export function HomeTopSection() {
             Every party, show, and event near you — curated by students, for students.
           </p>
           <Link
-            href="/signup"
+            href="/#browse-events"
             className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
             style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
           >
-            Get the app
+            Browse events
           </Link>
+        </motion.div>
+
+        <motion.div
+          style={{ opacity: heroVideoOpacity, y: heroVideoY, scale: heroVideoScale }}
+          className="pointer-events-none absolute inset-x-0 top-[50vh] z-[7] mx-auto w-[min(92vw,980px)] px-3 sm:px-6"
+        >
+          <div className="pointer-events-auto overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/60 p-2 backdrop-blur-[2px] sm:rounded-3xl sm:p-3">
+            <HomeBannerVideoLoader />
+          </div>
         </motion.div>
 
         {/* ── LEFT SIDE TEXT — outer div handles position+centering, inner motion handles fade+slide ── */}
@@ -423,9 +443,9 @@ export function HomeTopSection() {
         </div>
 
         {/* ── PHONE — anchored bottom-center, rises from below viewport ── */}
-        <div
+        <motion.div
           className="absolute bottom-0 left-1/2 z-[5]"
-          style={{ transform: "translateX(-50%)" }}
+          style={{ transform: "translateX(-50%)", opacity: phoneLayerOpacity }}
         >
           {/* glow */}
           <motion.div
@@ -459,25 +479,25 @@ export function HomeTopSection() {
             >
               <PhoneShell>
                 <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0 }}>
-                  <FeedScreen progress={progress} />
+                  <FeedScreen progress={phoneProgress} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0 }}>
-                  <VerifyScreen progress={progress} />
+                  <VerifyScreen progress={phoneProgress} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0 }}>
-                  <TicketScreen progress={progress} />
+                  <TicketScreen progress={phoneProgress} />
                 </motion.div>
               </PhoneShell>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* progress dots */}
-        <div className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
+        <motion.div style={{ opacity: phoneLayerOpacity }} className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
           {phoneOps.map((op, i) => (
             <motion.div key={i} style={{ opacity: op }} className="h-1.5 w-1.5 rounded-full bg-[#4BFA94]" />
           ))}
-        </div>
+        </motion.div>
 
         {/* scroll hint */}
         <motion.div

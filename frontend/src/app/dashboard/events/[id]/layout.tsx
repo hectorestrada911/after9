@@ -24,6 +24,7 @@ export default async function EventWorkspaceLayout({
           location: bundle.event.location,
           image_url: bundle.event.image_url,
           visibility: bundle.event.visibility,
+          archived_at: bundle.event.archived_at,
         }}
         eventId={id}
         publicBaseUrl={publicBase}

@@ -45,10 +45,12 @@ export default async function DashboardPage() {
 
   const { data: events } = await supabase
     .from("events")
-    .select("id,slug,title,date,ticket_price,tickets_available")
+    .select("id,slug,title,date,ticket_price,tickets_available,archived_at")
     .eq("host_id", userId)
     .order("date", { ascending: true });
-  const eventIds = (events ?? []).map((e) => e.id);
+  const activeEvents = (events ?? []).filter((e) => !e.archived_at);
+  const archivedEvents = (events ?? []).filter((e) => Boolean(e.archived_at));
+  const eventIds = activeEvents.map((e) => e.id);
 
   const [ordersRes, checkInsRes] = await Promise.all([
     eventIds.length > 0
@@ -65,12 +67,12 @@ export default async function DashboardPage() {
   const ticketsSold = (orders ?? []).reduce((sum, o) => sum + (o.quantity ?? 0), 0);
   const attendeeRows = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
   const recentOrders = (orders ?? []).slice().sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 12);
-  const salesData = (events ?? []).map((event) => ({
+  const salesData = activeEvents.map((event) => ({
     name: event.title.length > 16 ? `${event.title.slice(0, 16)}…` : event.title,
     sold: (orders ?? []).filter((o) => o.event_id === event.id).reduce((sum, o) => sum + o.quantity, 0),
   }));
-  const scannerHref = events?.[0] ? `/dashboard/events/${events[0].id}/check-in` : "/dashboard/events/new";
-  const isFirstHostView = (events?.length ?? 0) === 0 && (orders?.length ?? 0) === 0;
+  const scannerHref = activeEvents[0] ? `/dashboard/events/${activeEvents[0].id}/check-in` : "/dashboard/events/new";
+  const isFirstHostView = activeEvents.length === 0 && (orders?.length ?? 0) === 0;
 
   return (
     <main className="container-page min-w-0 py-10 sm:py-14">
@@ -214,7 +216,7 @@ export default async function DashboardPage() {
         />
         <StatCard
           label="Upcoming events"
-          value={events?.length ?? 0}
+          value={activeEvents.length}
           className="border-white/[0.1] bg-zinc-950/60"
           valueClassName="text-white"
         />
@@ -262,7 +264,7 @@ export default async function DashboardPage() {
 
       <section id="my-events" className="mt-10 space-y-3 scroll-mt-28">
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted">Your events</h2>
-        {(events ?? []).length === 0 ? (
+        {activeEvents.length === 0 ? (
           <EmptyState
             title="No events yet"
             subtitle="Create your first event to start selling tickets."
@@ -271,7 +273,7 @@ export default async function DashboardPage() {
             subtitleClassName="text-zinc-400"
           />
         ) : (
-          (events ?? []).map((event) => {
+          activeEvents.map((event) => {
             const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
             const pct = Math.min(Math.round((sold / Math.max(event.tickets_available, 1)) * 100), 100);
             return (
@@ -319,6 +321,27 @@ export default async function DashboardPage() {
           })
         )}
       </section>
+
+      {archivedEvents.length > 0 ? (
+        <section className="mt-8 space-y-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Archived events</h2>
+          {archivedEvents.map((event) => (
+            <Card key={event.id} className="border-white/[0.08] bg-zinc-950/40 text-white">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <Link href={`/dashboard/events/${event.id}`} className="text-base font-bold tracking-tight transition hover:text-brand-green">
+                    {event.title}
+                  </Link>
+                  <p className="text-xs text-zinc-500">{formatEventDate(event.date)}</p>
+                </div>
+                <span className="inline-flex rounded-full border border-zinc-500/30 bg-zinc-700/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+                  Archived
+                </span>
+              </div>
+            </Card>
+          ))}
+        </section>
+      ) : null}
 
       <section className="mt-12 space-y-4">
         <Card className="border-white/[0.1] bg-zinc-950/60 text-white">

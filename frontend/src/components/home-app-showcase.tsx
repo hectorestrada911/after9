@@ -118,14 +118,14 @@ export function HomeAppShowcase() {
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link
-              href="/signup"
+              href="/create-event"
               className="inline-flex h-12 items-center rounded-full bg-white px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200"
               style={{ boxShadow: "0 0 30px -6px rgba(255,255,255,0.35)" }}
             >
               Create an event
             </Link>
             <Link
-              href="/signup"
+              href="/#browse-events"
               className="inline-flex h-12 items-center rounded-full border border-white/[0.18] px-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40"
             >
               Get the app →

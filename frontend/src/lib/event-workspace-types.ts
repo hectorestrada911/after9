@@ -18,6 +18,7 @@ export type HostEventRow = {
   dress_code: string | null;
   instructions: string | null;
   location_note: string | null;
+  archived_at?: string | null;
 };
 
 export type OrderRow = {

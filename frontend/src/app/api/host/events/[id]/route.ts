@@ -39,3 +39,29 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   return NextResponse.json({ ok: true });
 }
+
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await getSupabaseServerClient();
+  const { data: sessionData } = await supabase.auth.getSession();
+  const userId = sessionData.session?.user?.id;
+  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = (await req.json().catch(() => null)) as { archived?: boolean } | null;
+  if (!body || typeof body.archived !== "boolean") {
+    return NextResponse.json({ error: "Missing archived flag." }, { status: 400 });
+  }
+
+  const archivedAt = body.archived ? new Date().toISOString() : null;
+  const { data, error } = await supabase
+    .from("events")
+    .update({ archived_at: archivedAt })
+    .eq("id", id)
+    .eq("host_id", userId)
+    .select("id, archived_at")
+    .maybeSingle();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data?.id) return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  return NextResponse.json({ ok: true, archived: Boolean(data.archived_at) });
+}

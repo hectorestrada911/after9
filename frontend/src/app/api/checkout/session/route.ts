@@ -22,12 +22,15 @@ export async function POST(req: NextRequest) {
 
     const { data: event, error: eventErr } = await supabase
       .from("events")
-      .select("ticket_price, tickets_available")
+      .select("ticket_price, tickets_available, archived_at")
       .eq("id", eventId)
       .single();
 
     if (eventErr || !event) {
       return NextResponse.json({ error: "Event not found." }, { status: 404 });
+    }
+    if (event.archived_at) {
+      return NextResponse.json({ error: "This event is archived and no longer accepts purchases." }, { status: 409 });
     }
 
     const { count: soldCount } = await supabase

@@ -83,7 +83,7 @@ export function HomeSchoolsCta() {
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-4">
             <Link
-              href="/signup"
+              href="/#browse-events"
               className="inline-flex h-12 items-center rounded-full bg-white px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200"
             >
               Find your school

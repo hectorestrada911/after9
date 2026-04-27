@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, CalendarRange, MapPin, Pencil } from "lucide-react";
+import { EventArchiveToggle } from "@/components/event-archive-toggle";
 import CopyEventLink from "@/components/copy-event-link";
 import { EventDeleteButton } from "@/components/event-delete-button";
 import { EventShareActions } from "@/components/event-share-actions";
@@ -23,11 +24,13 @@ export function EventWorkspaceHero({
     location: string;
     image_url: string | null;
     visibility: string;
+    archived_at?: string | null;
   };
   eventId: string;
   publicBaseUrl: string;
 }) {
   const vis = eventVisibilityLabel(event.visibility);
+  const isArchived = Boolean(event.archived_at);
   const publicPath = `/events/${event.slug}`;
   const fullUrl = publicBaseUrl ? `${publicBaseUrl.replace(/\/$/, "")}${publicPath}` : publicPath;
 
@@ -68,6 +71,11 @@ export function EventWorkspaceHero({
                 <span className="rounded-full border border-amber-500/35 bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-200">
                   {vis}
                 </span>
+                {isArchived ? (
+                  <span className="rounded-full border border-zinc-400/35 bg-zinc-400/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-200">
+                    Archived
+                  </span>
+                ) : null}
               </div>
               <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-4xl sm:tracking-tighter">{event.title}</h1>
               <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
@@ -106,6 +114,7 @@ export function EventWorkspaceHero({
             >
               Scan QR
             </Link>
+            <EventArchiveToggle eventId={eventId} eventTitle={event.title} isArchived={isArchived} />
             <EventDeleteButton eventId={eventId} eventTitle={event.title} />
           </div>
         </div>

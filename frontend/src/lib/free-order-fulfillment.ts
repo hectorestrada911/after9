@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getResendMailEnv } from "@/lib/resend-config";
 import { TICKET_QR_TO_PNG_OPTIONS } from "@/lib/qr-ticket";
-import { sendTicketPurchaseConfirmation } from "@/lib/transactional-email";
+import { sendTicketPurchaseConfirmationWithRetry } from "@/lib/transactional-email";
 
 type ServiceClient = SupabaseClient;
 
@@ -53,7 +53,7 @@ export async function fulfillFreeOrderIfNeeded(supabase: ServiceClient, orderId:
         supabase.from("events").select("title, slug, date, start_time, location").eq("id", order.event_id).single(),
       ]);
       if (eventRow && ticketsForOrder && ticketsForOrder.length > 0) {
-        const emailResult = await sendTicketPurchaseConfirmation({
+        const emailResult = await sendTicketPurchaseConfirmationWithRetry({
           to: order.buyer_email,
           buyerName: order.buyer_name,
           eventTitle: eventRow.title,

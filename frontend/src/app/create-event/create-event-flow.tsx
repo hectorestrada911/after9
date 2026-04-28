@@ -189,6 +189,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [location, setLocation] = useState("");
   const [ticketPrice, setTicketPrice] = useState("15");
   const [ticketsAvailable, setTicketsAvailable] = useState("120");
+  const [isFreeEvent, setIsFreeEvent] = useState(false);
   const [visibility, setVisibility] = useState<Visibility>("unlisted");
   const [ageRestriction, setAgeRestriction] = useState<EventDraftV1["ageRestriction"]>("all_ages");
   const [dressCode, setDressCode] = useState("");
@@ -248,7 +249,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     setStartTime(draft.startTime);
     setEndTime(draft.endTime);
     setLocation(draft.location);
-    setTicketPrice(String(draft.ticketPrice));
+    const nextFree = draft.ticketPrice <= 0;
+    setIsFreeEvent(nextFree);
+    setTicketPrice(nextFree ? "0" : String(draft.ticketPrice));
     setTicketsAvailable(String(draft.ticketsAvailable));
     setVisibility(coerceEventVisibility(draft.visibility));
     setAgeRestriction(draft.ageRestriction);
@@ -394,7 +397,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       endTime,
       location,
       capacity,
-      ticketPrice,
+      ticketPrice: isFreeEvent ? 0 : ticketPrice,
       ticketsAvailable,
       visibility,
       ageRestriction,
@@ -494,7 +497,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E";
 
   const pct = 100;
-  const ticketPriceFloat = Number(ticketPrice) || 0;
+  const ticketPriceFloat = isFreeEvent ? 0 : Number(ticketPrice) || 0;
   const ticketPriceCents = Math.max(0, Math.round(ticketPriceFloat * 100));
   const platformFeeCents = platformFeeFromGrossCents(ticketPriceCents, platformFeePercent);
   const hostNetCents = hostNetFromGrossCents(ticketPriceCents, platformFeePercent);
@@ -682,13 +685,35 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <span className={labelClass}>Ticket price (USD)</span>
-                    <input className={field} type="number" step="0.01" min={0.5} value={ticketPrice} onChange={(e) => setTicketPrice(e.target.value)} />
+                    <input
+                      className={field}
+                      type="number"
+                      step="0.01"
+                      min={isFreeEvent ? 0 : 0.5}
+                      value={ticketPrice}
+                      disabled={isFreeEvent}
+                      onChange={(e) => setTicketPrice(e.target.value)}
+                    />
                   </div>
                   <div>
                     <span className={labelClass}>Tickets to sell</span>
                     <input className={field} type="number" min={1} value={ticketsAvailable} onChange={(e) => setTicketsAvailable(e.target.value)} />
                   </div>
                 </div>
+                <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
+                  <span>Free event (RSVP / testing)</span>
+                  <input
+                    type="checkbox"
+                    checked={isFreeEvent}
+                    onChange={(e) => {
+                      const next = e.target.checked;
+                      setIsFreeEvent(next);
+                      if (next) setTicketPrice("0");
+                      else if ((Number(ticketPrice) || 0) < 0.5) setTicketPrice("15");
+                    }}
+                    className="h-4 w-4 accent-brand-green"
+                  />
+                </label>
                 <div className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Price preview</p>
                   <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -705,10 +730,14 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                       <p className="mt-1 text-lg font-black text-brand-green">${(hostNetCents / 100).toFixed(2)}</p>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-zinc-500">Stripe processing fees are separate and can vary by card/payment method.</p>
+                  {!isFreeEvent ? (
+                    <p className="mt-2 text-xs text-zinc-500">Stripe processing fees are separate and can vary by card/payment method.</p>
+                  ) : (
+                    <p className="mt-2 text-xs text-zinc-500">Free events skip card checkout — guests still get ticket QR codes.</p>
+                  )}
                 </div>
                 <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-xs text-zinc-400">
-                  Minimum ticket price is <span className="font-semibold text-zinc-200">$0.50</span>.
+                  Paid events must be at least <span className="font-semibold text-zinc-200">$0.50</span> per ticket. Toggle free events above for $0 RSVPs.
                 </div>
                 <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
                   <span>Show tickets left publicly</span>

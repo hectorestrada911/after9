@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { fulfillFreeOrderIfNeeded } from "@/lib/free-order-fulfillment";
 import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 
 export async function POST(req: NextRequest) {
@@ -82,6 +83,12 @@ export async function POST(req: NextRequest) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+    // Free events: skip Stripe (Stripe Checkout requires a positive amount) and fulfill immediately.
+    if (totalAmount <= 0) {
+      await fulfillFreeOrderIfNeeded(supabase, orderRow.id);
+      return NextResponse.json({ url: `${appUrl}/checkout/success?order_id=${orderRow.id}` });
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

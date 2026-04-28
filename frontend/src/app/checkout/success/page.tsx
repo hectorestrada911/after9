@@ -4,6 +4,7 @@ import crypto from "crypto";
 import QRCode from "qrcode";
 import { Calendar, CheckCircle2, MapPin, Ticket } from "lucide-react";
 import { TICKET_QR_TO_PNG_OPTIONS } from "@/lib/qr-ticket";
+import { fulfillFreeOrderIfNeeded } from "@/lib/free-order-fulfillment";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
 
@@ -19,9 +20,18 @@ export default async function CheckoutSuccessPage({ searchParams }: { searchPara
   if (orderId) {
     try {
       const supabase = getSupabaseServiceRoleClient();
-      const { data: o } = await supabase.from("orders").select("id,buyer_name,quantity,event_id,payment_status").eq("id", orderId).maybeSingle();
+      const { data: o } = await supabase
+        .from("orders")
+        .select("id,buyer_name,quantity,event_id,payment_status,total_amount")
+        .eq("id", orderId)
+        .maybeSingle();
       order = o;
       let { data: t } = await supabase.from("tickets").select("ticket_code,qr_code_url").eq("order_id", orderId).limit(20);
+
+      // Free orders: no Stripe session id; fulfill immediately if still pending.
+      if (o && (o.total_amount ?? 0) === 0 && o.payment_status !== "paid") {
+        await fulfillFreeOrderIfNeeded(supabase, orderId);
+      }
 
       // Fallback when webhook delivery lags/misses: fulfill tickets on success page for paid sessions.
       if (o && (!t || t.length === 0) && sessionId) {

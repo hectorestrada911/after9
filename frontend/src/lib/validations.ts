@@ -9,7 +9,7 @@ export const eventSchema = z.object({
   endTime: z.string().min(1),
   location: z.string().min(3),
   capacity: z.coerce.number().min(1),
-  ticketPrice: z.coerce.number().min(0.5),
+  ticketPrice: z.coerce.number().min(0),
   ticketsAvailable: z.coerce.number().min(1),
   visibility: z.enum(["public", "unlisted", "private"]),
   ageRestriction: z.enum(["all_ages", "age_18_plus", "age_21_plus"]),
@@ -17,6 +17,14 @@ export const eventSchema = z.object({
   instructions: z.string().optional(),
   locationNote: z.string().optional(),
   showCapacityPublicly: z.boolean().optional(),
+}).superRefine((val, ctx) => {
+  if (val.ticketPrice > 0 && val.ticketPrice < 0.5) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["ticketPrice"],
+      message: "Paid events must be at least $0.50 per ticket (or set price to $0 for a free event).",
+    });
+  }
 });
 
 export const purchaseSchema = z.object({

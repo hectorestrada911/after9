@@ -56,6 +56,38 @@ export async function POST() {
     return NextResponse.json({ mode: "onboarding", url: accountLink.url });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown payout setup error";
+    const lower = message.toLowerCase();
+
+    if (
+      lower.includes("managing losses") ||
+      lower.includes("platform-profile") ||
+      lower.includes("connect/platform-profile")
+    ) {
+      return NextResponse.json(
+        {
+          error: "Finish your Stripe platform profile to unlock connected account setup.",
+          actionUrl: "https://dashboard.stripe.com/settings/connect/platform-profile",
+          actionLabel: "Open Stripe platform profile",
+        },
+        { status: 409 },
+      );
+    }
+
+    if (
+      lower.includes("create live connected accounts") ||
+      lower.includes("connect/accounts/overview") ||
+      lower.includes("answer the questionnaire")
+    ) {
+      return NextResponse.json(
+        {
+          error: "Stripe requires a one-time Connect questionnaire before live connected accounts can be created.",
+          actionUrl: "https://dashboard.stripe.com/connect/accounts/overview",
+          actionLabel: "Open Stripe Connect overview",
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

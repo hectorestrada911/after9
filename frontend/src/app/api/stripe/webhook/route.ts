@@ -5,7 +5,7 @@ import { getResendMailEnv } from "@/lib/resend-config";
 import { TICKET_QR_TO_PNG_OPTIONS } from "@/lib/qr-ticket";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
-import { sendTicketPurchaseConfirmation } from "@/lib/transactional-email";
+import { sendTicketPurchaseConfirmationWithRetry } from "@/lib/transactional-email";
 
 export async function POST(req: Request) {
   const stripe = getStripe();
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
             supabase.from("events").select("title, slug, date, start_time, location").eq("id", eventId).single(),
           ]);
           if (order.buyer_email && eventRow && ticketsForOrder && ticketsForOrder.length > 0) {
-            const emailResult = await sendTicketPurchaseConfirmation({
+            const emailResult = await sendTicketPurchaseConfirmationWithRetry({
               to: order.buyer_email,
               buyerName: order.buyer_name,
               eventTitle: eventRow.title,

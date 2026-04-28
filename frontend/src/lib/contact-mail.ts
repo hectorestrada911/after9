@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { escapeHtml } from "@/lib/escape-html";
+import { rageEmailDocument } from "@/lib/email-layout";
 import { getResendMailEnv } from "@/lib/resend-config";
 
 export type ContactPayload = {
@@ -33,20 +34,32 @@ export async function sendContactSubmission(payload: ContactPayload): Promise<
   const safeEmail = escapeHtml(email);
   const safeMessage = escapeHtml(message).replace(/\r\n|\r|\n/g, "<br/>");
 
-  const teamHtml = `
-    <p><strong>New message</strong> from the RAGE contact form.</p>
-    <p><strong>Name:</strong> ${safeName}<br/>
-    <strong>Email:</strong> ${safeEmail}</p>
-    <p><strong>Message:</strong></p>
-    <p style="white-space:pre-wrap;font-family:system-ui,sans-serif;">${safeMessage}</p>
+  const teamBody = `
+    <p style="margin:0 0 12px;color:rgba(255,255,255,0.72);font-size:11px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;">New contact form message</p>
+    <p style="margin:0 0 14px;"><strong style="color:#ffffff;">Name:</strong> ${safeName}<br/>
+    <strong style="color:#ffffff;">Email:</strong> ${safeEmail}</p>
+    <p style="margin:0 0 10px;color:rgba(255,255,255,0.62);font-size:11px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;">Message</p>
+    <div style="border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);padding:14px;">
+      <p style="margin:0;white-space:pre-wrap;color:rgba(255,255,255,0.86);font-size:14px;line-height:1.65;">${safeMessage}</p>
+    </div>
   `;
+  const teamHtml = rageEmailDocument({
+    preheader: `New RAGE contact message from ${name}.`,
+    title: "Support inbox",
+    bodyHtml: teamBody,
+    footerNote: "This message was submitted from rage.events/contact.",
+  });
 
-  const autoHtml = `
-    <p>Hi ${safeName},</p>
-    <p>Thanks for reaching out — we received your message and will get back to you within <strong>24 hours</strong> on business days.</p>
-    <p>If your question is urgent, reply to this email and it will go to our support inbox.</p>
-    <p style="margin-top:1.5rem;color:#666;font-size:14px;">— RAGE</p>
+  const autoBody = `
+    <p style="margin:0 0 14px;">Hi ${safeName},</p>
+    <p style="margin:0 0 14px;">Thanks for reaching out — we received your message and will reply within <strong style="color:#ffffff;">24 hours</strong> on business days.</p>
+    <p style="margin:0;color:rgba(255,255,255,0.62);font-size:14px;line-height:1.65;">If it’s urgent, reply to this email and it routes straight to our support inbox.</p>
   `;
+  const autoHtml = rageEmailDocument({
+    preheader: "We received your message — RAGE support.",
+    title: "We got your message",
+    bodyHtml: autoBody,
+  });
 
   const [toTeam, toUser] = await Promise.all([
     resend.emails.send({

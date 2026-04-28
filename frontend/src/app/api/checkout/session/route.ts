@@ -101,15 +101,25 @@ export async function POST(req: NextRequest) {
     const hostNetAmount = hostNetFromGrossCents(totalAmount, feePercent);
     const hostProfileRes = await supabase
       .from("profiles")
-      .select("stripe_connect_account_id, stripe_connect_onboarded")
+      .select("stripe_connect_account_id")
       .eq("id", resolvedEvent.host_id)
       .maybeSingle();
     const hostProfile = hostProfileRes.data;
     if (hostProfileRes.error) {
       console.error("[checkout/session] host profile payout lookup error", hostProfileRes.error);
     }
-    const destinationAccount =
-      hostProfile?.stripe_connect_account_id && hostProfile?.stripe_connect_onboarded ? hostProfile.stripe_connect_account_id : null;
+    let destinationAccount: string | null = null;
+    if (hostProfile?.stripe_connect_account_id) {
+      try {
+        // Use live Stripe account capabilities at checkout time; DB onboarding flags can be stale.
+        const hostAccount = await stripe.accounts.retrieve(hostProfile.stripe_connect_account_id);
+        if (hostAccount.charges_enabled) {
+          destinationAccount = hostProfile.stripe_connect_account_id;
+        }
+      } catch (e) {
+        console.error("[checkout/session] could not verify connected account capability", e);
+      }
+    }
     const { data: orderRow, error: orderErr } = await supabase
       .from("orders")
       .insert({

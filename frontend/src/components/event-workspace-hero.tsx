@@ -114,6 +114,12 @@ export function EventWorkspaceHero({
             >
               Scan QR
             </Link>
+            <Link
+              href="/dashboard#host-payouts"
+              className="inline-flex h-11 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-5 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+            >
+              Withdraw
+            </Link>
             <EventArchiveToggle eventId={eventId} eventTitle={event.title} isArchived={isArchived} />
             <EventDeleteButton eventId={eventId} eventTitle={event.title} />
           </div>

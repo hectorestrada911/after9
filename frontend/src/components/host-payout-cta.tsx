@@ -97,7 +97,7 @@ export default function HostPayoutCta() {
   const ready = Boolean(status?.onboarded && status?.payoutsEnabled);
 
   return (
-    <section className="mb-8 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4">
+    <section id="host-payouts" className="mb-8 scroll-mt-28 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Host payouts</p>

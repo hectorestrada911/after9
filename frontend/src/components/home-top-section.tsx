@@ -52,7 +52,7 @@ const scenes = [
 ];
 
 /* ─── phone screen 1: event feed ────────────────────────────────── */
-function FeedScreen({ progress }: { progress: MotionValue<number> }) {
+function FeedScreen({ progress, lightweight = false }: { progress: MotionValue<number>; lightweight?: boolean }) {
   const items = [
     { tag: "EVENT", tc: "#4BFA94",  title: "Campus Lights Fest",  meta: "Tonight · Main Stage",   votes: 156 },
     { tag: "PARTY", tc: "#f2ef1d",  title: "Pre-game @ Theta 🏠", meta: "9PM · 2.3 mi away",      votes: 47  },
@@ -88,35 +88,45 @@ function FeedScreen({ progress }: { progress: MotionValue<number> }) {
         ))}
       </div>
       <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
-        {items.map((item, i) => (
-          <motion.div
-            key={i}
-            style={{
-              y: cardYs[i],
-              opacity: cardOpacities[i],
-              background: "#141414",
-              borderRadius: 14,
-              padding: "10px 12px",
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: 8,
-            }}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "inline-block", background: item.tc + "22", color: item.tc, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", borderRadius: 4, padding: "2px 5px" }}>
-                {item.tag}
-              </span>
-              <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 600, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
-              <p style={{ fontSize: 10, color: "#52525b" }}>{item.meta}</p>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
-              <span style={{ fontSize: 8, color: "#3f3f46", lineHeight: 1 }}>▲</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#4BFA94" }}>{item.votes}</span>
-              <span style={{ fontSize: 8, color: "#3f3f46", lineHeight: 1 }}>▼</span>
-            </div>
-          </motion.div>
-        ))}
+        {items.map((item, i) => {
+          const cardStyles = {
+            background: "#141414",
+            borderRadius: 14,
+            padding: "10px 12px",
+            display: "flex",
+            alignItems: "flex-start" as const,
+            justifyContent: "space-between" as const,
+            gap: 8,
+          };
+          const content = (
+            <>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "inline-block", background: item.tc + "22", color: item.tc, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", borderRadius: 4, padding: "2px 5px" }}>
+                  {item.tag}
+                </span>
+                <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 600, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
+                <p style={{ fontSize: 10, color: "#52525b" }}>{item.meta}</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
+                <span style={{ fontSize: 8, color: "#3f3f46", lineHeight: 1 }}>▲</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#4BFA94" }}>{item.votes}</span>
+                <span style={{ fontSize: 8, color: "#3f3f46", lineHeight: 1 }}>▼</span>
+              </div>
+            </>
+          );
+          if (lightweight) {
+            return (
+              <div key={i} style={cardStyles}>
+                {content}
+              </div>
+            );
+          }
+          return (
+            <motion.div key={i} style={{ ...cardStyles, y: cardYs[i], opacity: cardOpacities[i] }}>
+              {content}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
@@ -281,13 +291,24 @@ export function PhoneShell({ children, w = 300, h = 620 }: { children: React.Rea
 export function HomeTopSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
+  const [isDesktop, setIsDesktop] = useState(false);
   const [phraseIdx, setPhraseIdx] = useState(0);
+  const lightweightMode = reduceMotion || !isDesktop;
 
   useEffect(() => {
-    if (reduceMotion) return;
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (lightweightMode) return;
     const id = setInterval(() => setPhraseIdx(i => (i + 1) % cyclingPhrases.length), 2200);
     return () => clearInterval(id);
-  }, [reduceMotion]);
+  }, [lightweightMode]);
 
   const { scrollY } = useScroll();
   const [top, setTop]     = useState(0);
@@ -472,10 +493,10 @@ export function HomeTopSection() {
               willChange: "opacity",
             }}
           />
-          <div style={{ perspective: "1500px", transform: "translateZ(0)" }}>
+          <div style={{ perspective: lightweightMode ? "none" : "1500px", transform: "translateZ(0)" }}>
             <motion.div
               style={
-                reduceMotion
+                lightweightMode
                   ? { transform: "translateZ(0)" }
                   : {
                       y: phoneY,
@@ -490,7 +511,7 @@ export function HomeTopSection() {
             >
               <PhoneShell>
                 <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity" }}>
-                  <FeedScreen progress={progress} />
+                  <FeedScreen progress={progress} lightweight={lightweightMode} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity" }}>
                   <VerifyScreen progress={progress} />

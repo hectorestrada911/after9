@@ -179,7 +179,7 @@ export default async function MyTicketsPage() {
   }
 
   return (
-    <main className="container-page py-10 sm:py-14">
+    <main className="container-page min-w-0 overflow-x-hidden py-10 sm:py-14">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted">Account</p>
@@ -200,21 +200,21 @@ export default async function MyTicketsPage() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {orders.map((order) => {
             const orderTickets = order.tickets;
             return (
-              <div key={order.id} className="overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-950">
+              <div key={order.id} className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-950">
                 <div className="grid gap-4 p-4 sm:grid-cols-[120px,1fr] sm:p-5">
                   <div className="relative h-24 overflow-hidden rounded-xl border border-white/[0.08] bg-zinc-900 sm:h-28">
                     {order.events?.image_url ? (
                       <Image src={order.events.image_url} alt={order.events.title} fill className="object-cover" sizes="120px" unoptimized />
                     ) : null}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">{formatDate(order.events?.date ?? order.created_at)}</p>
                     <p className="mt-1 text-lg font-bold text-white">{order.events?.title ?? "Event"}</p>
-                    <p className="mt-1 text-sm text-zinc-400">{order.events?.location ?? "Location TBA"}</p>
+                    <p className="mt-1 break-words text-sm text-zinc-400">{order.events?.location ?? "Location TBA"}</p>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs">
                       <span className="rounded-full border border-white/15 px-2.5 py-1 text-zinc-300">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</span>
                       <span className="rounded-full border border-white/15 px-2.5 py-1 text-zinc-300">${centsToDollars(order.total_amount)}</span>
@@ -230,14 +230,14 @@ export default async function MyTicketsPage() {
                     ) : null}
                   </div>
                 </div>
-                <div className="border-t border-white/[0.08] bg-black/30 p-4 sm:p-5">
+                <div className="min-w-0 border-t border-white/[0.08] bg-black/30 p-4 sm:p-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Ticket codes</p>
                   {orderTickets.length === 0 ? (
                     <p className="mt-2 text-sm text-zinc-500">Tickets are still processing. Refresh in a moment.</p>
                   ) : null}
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-3 grid min-w-0 gap-4 sm:grid-cols-2">
                     {orderTickets.map((ticket) => (
-                      <div key={ticket.id} className="rounded-xl border border-white/[0.12] bg-zinc-900/70 p-4">
+                      <div key={ticket.id} className="min-w-0 rounded-xl border border-white/[0.12] bg-zinc-900/70 p-4">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Entry QR</p>
                           <span
@@ -253,20 +253,20 @@ export default async function MyTicketsPage() {
                           </span>
                         </div>
                         {ticket.qr_code_url ? (
-                          <div className="mt-2 inline-block rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5">
+                          <div className="mt-2 inline-block max-w-full rounded-2xl bg-white p-3 shadow-lg ring-1 ring-black/5">
                             {/* eslint-disable-next-line @next/next/no-img-element -- data URL from Stripe webhook */}
                             <img
                               src={ticket.qr_code_url}
                               alt={`QR for ${ticket.ticket_code}`}
                               width={200}
                               height={200}
-                              className="h-[200px] w-[200px] max-w-full object-contain"
+                              className="h-auto w-full max-w-[220px] object-contain"
                             />
                           </div>
                         ) : (
                           <p className="mt-2 text-xs text-zinc-500">QR generating after payment…</p>
                         )}
-                        <p className="mt-3 font-mono text-xs text-zinc-300">{ticket.ticket_code}</p>
+                        <p className="mt-3 break-all font-mono text-xs text-zinc-300">{ticket.ticket_code}</p>
                         <p className="mt-1 text-xs capitalize text-zinc-500">
                           {ticket.status === "checked_in" ? "Used at door and saved in your history." : ticket.status.replace("_", " ")}
                         </p>

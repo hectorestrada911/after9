@@ -43,7 +43,6 @@ export function SiteFooter() {
             <ul className="space-y-3 text-sm text-zinc-400">
               <li><Link href="/" className="transition hover:text-white">Browse events</Link></li>
               <li><Link href="/demo" className="transition hover:text-white">Sample event</Link></li>
-              <li><Link href="/test" className="transition hover:text-white">Test flow</Link></li>
             </ul>
           </div>
           <div>
@@ -60,10 +59,23 @@ export function SiteFooter() {
             <ul className="space-y-3 text-sm text-zinc-400">
               <li><Link href="/contact" className="transition hover:text-white">Get help</Link></li>
               <li><Link href="/contact" className="transition hover:text-white">Work with us</Link></li>
+              <li><a href="mailto:partnerships@rage.events" className="transition hover:text-white">Business inquiries</a></li>
               <li><Link href="/terms" className="transition hover:text-white">Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="transition hover:text-white">Privacy Policy</Link></li>
             </ul>
           </div>
+        </div>
+        <div className="mt-10 rounded-2xl border border-brand-green/20 bg-gradient-to-r from-brand-green/[0.12] via-emerald-300/[0.08] to-transparent p-5 sm:p-6">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand-green">For venues and brands</p>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-200">
+            Running recurring events, campus activations, or sponsored nights? We help teams launch high-converting event pages, mobile ticketing, and fast door check-in.
+          </p>
+          <a
+            href="mailto:partnerships@rage.events?subject=Business%20Inquiry%20-%20RAGE"
+            className="mt-4 inline-flex h-10 items-center rounded-full border border-brand-green/35 bg-brand-green/[0.14] px-5 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-green transition hover:border-brand-green/55 hover:bg-brand-green/[0.22]"
+          >
+            Contact partnerships
+          </a>
         </div>
         <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 text-[11px] text-zinc-600 sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} After9. All rights reserved.</p>

@@ -16,6 +16,8 @@ export type EventDraftV1 = {
   capacity: number;
   ticketPrice: number;
   ticketsAvailable: number;
+  /** Newer flows can persist default host sales state for publish handoff. */
+  salesEnabled?: boolean;
   visibility: "public" | "unlisted" | "private";
   ageRestriction: "all_ages" | "age_18_plus" | "age_21_plus";
   showCapacityPublicly?: boolean;

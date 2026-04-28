@@ -135,7 +135,7 @@ export function HomeAppShowcase() {
       </div>
 
       {/* 3-phone display */}
-      <div className="relative z-10 mt-16 hidden h-[640px] items-end justify-center sm:flex">
+      <div className="relative z-10 mt-16 hidden h-[640px] items-end justify-center overflow-visible min-[740px]:flex">
         {/* LEFT phone */}
         <motion.div
           initial={reduceMotion ? undefined : { opacity: 0, y: 60, rotateZ: -8 }}
@@ -147,9 +147,9 @@ export function HomeAppShowcase() {
             transformOrigin: "bottom center",
             zIndex: 1,
           }}
-          className="-mr-12"
+          className="-mr-4 md:-mr-8 lg:-mr-12"
         >
-          <div style={{ transform: "scale(0.78)", transformOrigin: "bottom right" }}>
+          <div className="origin-bottom-right scale-[0.62] md:scale-[0.7] lg:scale-[0.78]">
             <PhoneShell>
               <CreateScreen />
             </PhoneShell>
@@ -181,9 +181,9 @@ export function HomeAppShowcase() {
             transformOrigin: "bottom center",
             zIndex: 1,
           }}
-          className="-ml-12"
+          className="-ml-4 md:-ml-8 lg:-ml-12"
         >
-          <div style={{ transform: "scale(0.78)", transformOrigin: "bottom left" }}>
+          <div className="origin-bottom-left scale-[0.62] md:scale-[0.7] lg:scale-[0.78]">
             <PhoneShell>
               <InviteScreen />
             </PhoneShell>
@@ -192,7 +192,7 @@ export function HomeAppShowcase() {
       </div>
 
       {/* mobile: single phone */}
-      <div className="relative z-10 mt-12 flex justify-center sm:hidden">
+      <div className="relative z-10 mt-12 flex justify-center min-[740px]:hidden">
         <div style={{ transform: "scale(0.85)", transformOrigin: "top center" }}>
           <PhoneShell>
             <HomeFeedScreen />

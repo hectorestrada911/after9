@@ -217,8 +217,8 @@ function LoginForm() {
             {justSignedUp ? (
               <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
                 {verified
-                  ? "Email confirmed. You can log in now."
-                  : "Account created. If confirmation email is required, verify it first, then log in."}
+                  ? "Email confirmed. Log in now and we will continue to your prefilled event."
+                  : "Account created. Check your inbox, verify your email, then log in to continue to your prefilled event."}
               </p>
             ) : null}
             <Input

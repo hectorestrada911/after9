@@ -130,7 +130,7 @@ function SignupForm() {
               variants={authHeroItem}
               className="mt-3 rounded-xl border border-brand-green/30 bg-brand-green/[0.12] px-3 py-2.5 text-sm leading-snug text-zinc-100 shadow-[0_0_0_1px_rgba(75,250,148,0.12)_inset]"
             >
-              Draft found. After signup, we will return you to publish that event.
+              Draft found. We will email a verification link to this inbox. After you verify and log in, we return you to your prefilled event to publish.
             </motion.p>
           ) : null}
         </motion.div>
@@ -231,6 +231,11 @@ function SignupForm() {
                 </motion.p>
               ) : null}
             </AnimatePresence>
+            {hasEventDraft ? (
+              <p className="text-xs leading-relaxed text-zinc-500">
+                After signup, check your email for verification. Once verified, log in and we will take you back to your event draft automatically.
+              </p>
+            ) : null}
             <AuthPrimaryButton type="submit" loading={loading} disabled={loading}>
               {loading ? "Creating…" : "Sign up"}
             </AuthPrimaryButton>

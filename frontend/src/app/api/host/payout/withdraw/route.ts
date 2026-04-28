@@ -33,6 +33,17 @@ export async function POST() {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown withdrawal error";
+    const lower = message.toLowerCase();
+    if (lower.includes("managing losses") || lower.includes("platform-profile")) {
+      return NextResponse.json(
+        {
+          error: "Finish your Stripe platform profile to unlock dashboard withdrawals.",
+          actionUrl: "https://dashboard.stripe.com/settings/connect/platform-profile",
+          actionLabel: "Open Stripe platform profile",
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

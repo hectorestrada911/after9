@@ -9,10 +9,17 @@ type PayoutStatus = {
   payoutsEnabled: boolean;
 };
 
+type PayoutActionError = {
+  error?: string;
+  actionUrl?: string;
+  actionLabel?: string;
+};
+
 export default function HostPayoutCta() {
   const [status, setStatus] = useState<PayoutStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorAction, setErrorAction] = useState<{ url: string; label: string } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -31,12 +38,16 @@ export default function HostPayoutCta() {
     flushUi(() => {
       setLoading(true);
       setError(null);
+      setErrorAction(null);
     });
     const res = await fetch("/api/host/payout/onboard", { method: "POST" });
-    const json = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+    const json = (await res.json().catch(() => null)) as ({ url?: string } & PayoutActionError) | null;
     setLoading(false);
     if (!res.ok || !json?.url) {
       setError(json?.error ?? "Could not start payout setup.");
+      if (json?.actionUrl) {
+        setErrorAction({ url: json.actionUrl, label: json.actionLabel ?? "Open fix" });
+      }
       return;
     }
     window.location.href = json.url;
@@ -46,12 +57,16 @@ export default function HostPayoutCta() {
     flushUi(() => {
       setLoading(true);
       setError(null);
+      setErrorAction(null);
     });
     const res = await fetch("/api/host/payout/withdraw", { method: "POST" });
-    const json = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+    const json = (await res.json().catch(() => null)) as ({ url?: string } & PayoutActionError) | null;
     setLoading(false);
     if (!res.ok || !json?.url) {
       setError(json?.error ?? "Could not open withdrawals.");
+      if (json?.actionUrl) {
+        setErrorAction({ url: json.actionUrl, label: json.actionLabel ?? "Open fix" });
+      }
       return;
     }
     window.location.href = json.url;
@@ -87,7 +102,21 @@ export default function HostPayoutCta() {
           </button>
         </div>
       </div>
-      {error ? <p className="mt-2 text-xs font-medium text-red-400">{error}</p> : null}
+      {error ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <p className="text-xs font-medium text-red-400">{error}</p>
+          {errorAction ? (
+            <a
+              href={errorAction.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-7 items-center rounded-full border border-red-300/40 px-2.5 text-[10px] font-bold uppercase tracking-wide text-red-200 transition hover:border-red-200/80 hover:text-red-100"
+            >
+              {errorAction.label}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

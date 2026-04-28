@@ -11,10 +11,26 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stalled, setStalled] = useState(false);
+
+  async function openHostedFallback() {
+    const res = await fetch("/api/host/payout/onboard", { method: "POST" });
+    const json = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+    if (!res.ok || !json?.url) {
+      setError(json?.error ?? "Could not open hosted Stripe onboarding.");
+      return;
+    }
+    window.location.href = json.url;
+  }
 
   useEffect(() => {
     let mounted = true;
     let cleanup: (() => void) | undefined;
+    const stallTimer = window.setTimeout(() => {
+      if (!mounted) return;
+      setStalled(true);
+      setLoading(false);
+    }, 7000);
 
     async function init() {
       try {
@@ -39,7 +55,9 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
         if (mounted && containerRef.current) {
           containerRef.current.innerHTML = "";
           containerRef.current.appendChild(onboarding as unknown as Node);
+          window.clearTimeout(stallTimer);
           setLoading(false);
+          setStalled(false);
         }
 
         cleanup = () => {
@@ -47,6 +65,7 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
         };
       } catch (err) {
         if (!mounted) return;
+        window.clearTimeout(stallTimer);
         const message = err instanceof Error ? err.message : "Could not load embedded onboarding.";
         setError(message);
         setLoading(false);
@@ -57,6 +76,7 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
 
     return () => {
       mounted = false;
+      window.clearTimeout(stallTimer);
       if (cleanup) cleanup();
     };
   }, []);
@@ -81,16 +101,29 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
         <div className="max-h-[80vh] overflow-y-auto bg-white">
           {loading ? (
             <div className="px-4 py-8 text-sm text-zinc-700">Loading onboarding...</div>
+          ) : stalled ? (
+            <div className="space-y-4 px-4 py-8 text-sm text-zinc-700">
+              <p className="font-semibold text-zinc-900">Embedded onboarding is taking longer than expected.</p>
+              <p>Continue with the hosted Stripe flow to finish setup now.</p>
+              <button
+                type="button"
+                onClick={() => void openHostedFallback()}
+                className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-4 text-xs font-bold uppercase tracking-wide text-white"
+              >
+                Open hosted onboarding
+              </button>
+            </div>
           ) : error ? (
             <div className="space-y-4 px-4 py-8 text-sm text-zinc-700">
               <p className="font-semibold text-red-600">{error}</p>
               <p>If embedded onboarding is unavailable, use the hosted Stripe flow instead.</p>
-              <a
-                href="/account"
+              <button
+                type="button"
+                onClick={() => void openHostedFallback()}
                 className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-4 text-xs font-bold uppercase tracking-wide text-white"
               >
-                Back to account
-              </a>
+                Open hosted onboarding
+              </button>
             </div>
           ) : (
             <div ref={containerRef} className="min-h-[620px]" />

@@ -15,6 +15,7 @@ function OnboardingForm() {
   const [error, setError] = useState<string | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [hasSession, setHasSession] = useState(false);
+  const [organizerPrefill, setOrganizerPrefill] = useState("");
 
   useEffect(() => {
     let ignore = false;
@@ -34,6 +35,15 @@ function OnboardingForm() {
       ignore = true;
     };
   }, [supabase.auth]);
+
+  useEffect(() => {
+    try {
+      const draft = sessionStorage.getItem("after9:org-name-draft") ?? "";
+      if (draft.trim()) setOrganizerPrefill(draft.trim());
+    } catch {
+      // Best-effort prefill only.
+    }
+  }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -61,6 +71,12 @@ function OnboardingForm() {
       return setError(
         "Profile saved, but your account cannot read it back yet. Refresh once, or confirm your Supabase project matches this app’s env vars.",
       );
+    }
+
+    try {
+      sessionStorage.removeItem("after9:org-name-draft");
+    } catch {
+      // noop
     }
 
     try {
@@ -115,7 +131,12 @@ function OnboardingForm() {
           Set your profile so guests trust your event pages.
         </p>
         <form onSubmit={onSubmit} className="mt-8 space-y-3">
-          <Input name="organizerName" placeholder="Shown on events (e.g. RAGE / your collective)" required />
+          <Input
+            name="organizerName"
+            placeholder="Shown on events (e.g. RAGE / your collective)"
+            required
+            defaultValue={organizerPrefill}
+          />
           <Input name="legalName" placeholder="Legal / account name (optional)" />
           <p className="text-xs leading-relaxed text-muted">
             <span className="font-semibold text-black">Shown on events</span> is what buyers see as “Hosted by …”.{" "}

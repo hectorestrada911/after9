@@ -180,6 +180,8 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [error, setError] = useState<string | null>(null);
   const [confirmDraft, setConfirmDraft] = useState<PublishConfirmDraft | null>(null);
   const [hostDisplayName, setHostDisplayName] = useState("Host");
+  const [organizationName, setOrganizationName] = useState("");
+  const [hasSelectedFlyer, setHasSelectedFlyer] = useState(false);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -262,11 +264,13 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     if (draft.coverMode === "upload" && draft.imageDataUrl) {
       setCoverMode("upload");
       setUploadDataUrl(draft.imageDataUrl);
+      setHasSelectedFlyer(true);
       if (fileRef.current) fileRef.current.value = "";
     } else {
       setCoverMode("stock");
       const match = FLYER_STOCK.find((i) => i.url === draft.imageUrl);
       if (match) setSelectedStockId(match.id);
+      setHasSelectedFlyer(true);
       setUploadDataUrl(null);
       if (fileRef.current) fileRef.current.value = "";
     }
@@ -285,7 +289,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
         if (!userId || ignore) return;
         const { data: profile } = await supabase.from("profiles").select("organizer_name").eq("id", userId).maybeSingle();
         if (!ignore && profile?.organizer_name?.trim()) {
-          setHostDisplayName(profile.organizer_name.trim());
+          const organizer = profile.organizer_name.trim();
+          setHostDisplayName(organizer);
+          setOrganizationName((prev) => (prev.trim() ? prev : organizer));
         }
       })
       .catch(() => {
@@ -329,6 +335,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   function pickStock(id: string) {
     setCoverMode("stock");
     setSelectedStockId(id);
+    setHasSelectedFlyer(true);
     setUploadDataUrl(null);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -346,6 +353,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       const data = await fileToDraftDataUrl(f, MAX_DRAFT_IMAGE_BYTES);
       setCoverMode("upload");
       setUploadDataUrl(data);
+      setHasSelectedFlyer(true);
       flash("Upload locked in");
       setFlyerPickerOpen(false);
     } catch (err) {
@@ -356,8 +364,12 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   }
 
   function validateStep0(): boolean {
+    if (!hasSelectedFlyer) {
+      setError("Select a flyer to continue.");
+      return false;
+    }
     if (coverMode === "upload" && !uploadDataUrl) {
-      setError("Drop an image or tap a stock flyer.");
+      setError("Upload a flyer image or select a stock flyer.");
       return false;
     }
     return true;
@@ -374,6 +386,10 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     }
     if (location.trim().length < 3) {
       setError("Add where it happens.");
+      return false;
+    }
+    if (organizationName.trim().length < 2) {
+      setError("Add your organizer or brand name.");
       return false;
     }
     return true;
@@ -490,7 +506,12 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     }
 
     const next = encodeURIComponent(NEXT_AFTER_AUTH);
-    router.push(`/login?next=${next}`);
+    try {
+      sessionStorage.setItem("after9:org-name-draft", organizationName.trim());
+    } catch {
+      // Best-effort only; onboarding can still proceed without a prefill.
+    }
+    router.push(`/signup?next=${next}`);
   }
 
   const chevron =
@@ -591,24 +612,36 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             {/* Flyer */}
             <div key="s0" className="animate-fadeUp space-y-5">
                   <div className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-3">
-                    <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-zinc-900">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
-                      <img src={coverThumbSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
-                  <span className="absolute left-2.5 top-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                        {formatAgeBadge(ageRestriction)}
-                      </span>
-                  <span className="absolute bottom-2.5 left-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                    Hosted by {hostDisplayName}
-                  </span>
-                    </div>
+                    {hasSelectedFlyer ? (
+                      <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-zinc-900">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
+                        <img src={coverThumbSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
+                        <span className="absolute left-2.5 top-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                          {formatAgeBadge(ageRestriction)}
+                        </span>
+                        <span className="absolute bottom-2.5 left-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                          Hosted by {organizationName.trim() || hostDisplayName}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="relative flex h-56 items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/20 bg-zinc-900/70">
+                        <button
+                          type="button"
+                          onClick={() => setFlyerPickerOpen(true)}
+                          className="inline-flex h-11 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-5 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-110"
+                        >
+                          Select flyer
+                        </button>
+                      </div>
+                    )}
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-xs text-zinc-500">Tap to change flyer, upload, or browse styles.</p>
+                      <p className="text-xs text-zinc-500">{hasSelectedFlyer ? "Change flyer, upload, or browse styles." : "Start by selecting a flyer."}</p>
                       <button
                         type="button"
                         onClick={() => setFlyerPickerOpen(true)}
                         className="inline-flex h-10 shrink-0 items-center rounded-full border border-white/20 bg-white/[0.05] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40"
                       >
-                        Choose flyer
+                        {hasSelectedFlyer ? "Change flyer" : "Select flyer"}
                       </button>
                     </div>
                   </div>
@@ -671,9 +704,18 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     theme="dark"
                   />
                 </div>
-                <p className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2 text-xs text-zinc-400">
-                  Host note: your organizer name appears as <span className="font-semibold text-zinc-200">Hosted by …</span> on the event page.
-                </p>
+                <div>
+                  <span className={labelClass}>Organizer or brand name</span>
+                  <input
+                    className={field}
+                    placeholder="What is the name of your organization?"
+                    value={organizationName}
+                    onChange={(e) => setOrganizationName(e.target.value)}
+                  />
+                  <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
+                    Guests see this as <span className="font-semibold text-zinc-300">Hosted by …</span> on your event page.
+                  </p>
+                </div>
                 <div>
                   <span className={labelClass}>Location note (optional)</span>
                   <input className={field} placeholder="Door code, floor, landmark…" value={locationNote} onChange={(e) => setLocationNote(e.target.value)} />
@@ -739,15 +781,6 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                 <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-xs text-zinc-400">
                   Paid events must be at least <span className="font-semibold text-zinc-200">$0.50</span> per ticket. Toggle free events above for $0 RSVPs.
                 </div>
-                <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
-                  <span>Show tickets left publicly</span>
-                  <input
-                    type="checkbox"
-                    checked={showCapacityPublicly}
-                    onChange={(e) => setShowCapacityPublicly(e.target.checked)}
-                    className="h-4 w-4 accent-brand-green"
-                  />
-                </label>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <span className={labelClass}>Listing</span>
@@ -804,7 +837,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     </>
                   ) : (
                     <>
-                      {resolvedMode === "hostPublish" ? (onPublish ? "Publish event" : "Continue in dashboard") : "Continue to login"}
+                      {resolvedMode === "hostPublish" ? (onPublish ? "Publish event" : "Continue in dashboard") : "Continue"}
                       <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" strokeWidth={2} />
                     </>
                   )}
@@ -816,7 +849,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   ? onPublish
                     ? "Review everything above, then publish when you are ready."
                     : "We will open the host publisher next so you can finish there."
-                  : "Log in next to publish. Your draft stays in this browser until then."}
+                  : "Continue to create your account. Your draft stays saved in this browser."}
               </p>
             </div>
           </form>

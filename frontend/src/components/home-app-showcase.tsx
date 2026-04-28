@@ -114,7 +114,7 @@ export function HomeAppShowcase() {
             RAGE
           </h2>
           <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-zinc-400">
-            Discover, create, and run your nights — all in one place. Built for students. Free to download.
+            Discover, create, and run your nights. All in one place. Built for students. Free to download.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link

@@ -26,7 +26,7 @@ const scenes = [
     eyebrow: "Discover",
     line1: "Your campus.",
     line2: "Your night.",
-    body: "Every party, show, and event near you — curated by students, for students.",
+    body: "Every party, show, and event near you, curated by students, for students.",
     leftTag: "BUILT FOR\nCOLLEGE NIGHTS",
     rightTag: "TRUSTED AT\n500+ CAMPUSES",
     cta: { label: "Browse events", href: "/#browse-events" },
@@ -35,7 +35,7 @@ const scenes = [
     eyebrow: ".edu verified",
     line1: "School email",
     line2: "only.",
-    body: "Only verified students see private events and buy tickets. Real community — no randos.",
+    body: "Only verified students see private events and buy tickets. Real community, no randos.",
     leftTag: "BOTS\nNOT WELCOME",
     rightTag: ".EDU GATED\nBY DEFAULT",
     cta: { label: "Browse events", href: "/#browse-events" },
@@ -386,7 +386,7 @@ export function HomeTopSection() {
             </span>
           </h1>
           <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
-            Every party, show, and event near you — curated by students, for students.
+            Every party, show, and event near you, curated by students, for students.
           </p>
           <Link
             href="/signup"

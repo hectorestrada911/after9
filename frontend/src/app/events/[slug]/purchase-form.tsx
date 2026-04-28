@@ -145,7 +145,7 @@ export default function PurchaseForm({
         </p>
       ) : (
         <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>
-          This is a free RSVP. You won&apos;t be charged — we still generate a unique ticket QR per guest.
+          This is a free RSVP. You won&apos;t be charged. We still generate a unique ticket QR per guest.
         </p>
       )}
       <p className={cn("text-xs leading-relaxed", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>

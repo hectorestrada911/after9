@@ -733,7 +733,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   {!isFreeEvent ? (
                     <p className="mt-2 text-xs text-zinc-500">Stripe processing fees are separate and can vary by card/payment method.</p>
                   ) : (
-                    <p className="mt-2 text-xs text-zinc-500">Free events skip card checkout — guests still get ticket QR codes.</p>
+                    <p className="mt-2 text-xs text-zinc-500">Free events skip card checkout. Guests still get ticket QR codes.</p>
                   )}
                 </div>
                 <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-xs text-zinc-400">

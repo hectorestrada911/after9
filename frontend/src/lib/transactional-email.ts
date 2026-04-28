@@ -20,7 +20,7 @@ export async function sendHostWelcomeEmail(params: { to: string; displayName: st
   const resend = new Resend(env.apiKey);
   const html = `
     <p>Hi ${name},</p>
-    <p>Welcome to <strong>RAGE</strong> — you’re set up to publish events, sell tickets, and run check-in from one place.</p>
+    <p>Welcome to <strong>RAGE</strong>. You’re set up to publish events, sell tickets, and run check-in from one place.</p>
     <p><strong>Next steps</strong></p>
     <ul>
       <li>Create your first event from the dashboard.</li>
@@ -30,7 +30,7 @@ export async function sendHostWelcomeEmail(params: { to: string; displayName: st
     <p style="margin-top:1.25rem;">
       <a href="${escapeHtml(env.appUrl + "/dashboard/events/new")}" style="color:#111;font-weight:600;">Create an event →</a>
     </p>
-    <p style="margin-top:1.5rem;color:#666;font-size:14px;">— RAGE</p>
+    <p style="margin-top:1.5rem;color:#666;font-size:14px;">RAGE</p>
   `;
 
   const { error } = await resend.emails.send({
@@ -39,7 +39,7 @@ export async function sendHostWelcomeEmail(params: { to: string; displayName: st
     replyTo: env.supportInbox,
     subject: "Welcome to RAGE",
     html,
-    text: `Hi ${params.displayName.trim() || "there"},\n\nWelcome to RAGE. Create your first event: ${env.appUrl}/dashboard/events/new\n\n— RAGE`,
+    text: `Hi ${params.displayName.trim() || "there"},\n\nWelcome to RAGE. Create your first event: ${env.appUrl}/dashboard/events/new\n\nRAGE`,
     tags: [{ name: "type", value: "welcome_host" }],
   });
 
@@ -116,11 +116,11 @@ export async function sendTicketPurchaseConfirmation(params: {
     <p style="margin:20px 0 8px;font-weight:700;">Your ticket${params.tickets.length > 1 ? "s" : ""}</p>
     ${qrBlocks.join("\n")}
     <p style="margin-top:24px;font-size:13px;color:#666;">Show each QR at the door. If images don’t load, open My tickets in your browser.</p>
-    <p style="margin-top:1.5rem;color:#666;font-size:14px;">— RAGE</p>
+    <p style="margin-top:1.5rem;color:#666;font-size:14px;">RAGE</p>
   `;
 
   const codesText = params.tickets.map((t) => t.ticketCode).join("\n");
-  const text = `Hi ${params.buyerName.trim() || "Guest"},\n\nThanks for your purchase for ${params.eventTitle}.\nWhen: ${params.eventDate} ${params.eventStartTime}\nWhere: ${params.eventLocation}\n\nTickets:\n${codesText}\n\nEvent: ${eventUrl}\nMy tickets: ${ticketsUrl}\n\n— RAGE`;
+  const text = `Hi ${params.buyerName.trim() || "Guest"},\n\nThanks for your purchase for ${params.eventTitle}.\nWhen: ${params.eventDate} ${params.eventStartTime}\nWhere: ${params.eventLocation}\n\nTickets:\n${codesText}\n\nEvent: ${eventUrl}\nMy tickets: ${ticketsUrl}\n\nRAGE`;
 
   const base = {
     from: env.from,

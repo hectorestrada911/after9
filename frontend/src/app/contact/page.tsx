@@ -4,7 +4,7 @@ import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
   title: "Contact · RAGE",
-  description: "Reach the RAGE team — we reply within 24 hours on business days.",
+  description: "Reach the RAGE team. We reply within 24 hours on business days.",
 };
 
 export default function ContactPage() {
@@ -14,7 +14,7 @@ export default function ContactPage() {
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">Support</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">Contact us</h1>
         <p className="mt-3 text-sm leading-relaxed text-zinc-400 sm:text-base">
-          Questions about hosting, tickets, or your account? Send a note — we will confirm by email and aim to respond within{" "}
+          Questions about hosting, tickets, or your account? Send a note and we will confirm by email. We aim to respond within{" "}
           <span className="font-semibold text-zinc-200">24 hours</span> on business days.
         </p>
         <div className="mt-8 rounded-3xl border border-white/[0.1] bg-zinc-950/80 p-5 sm:p-8">

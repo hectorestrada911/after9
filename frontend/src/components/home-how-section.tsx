@@ -28,7 +28,7 @@ export function HomeHowSection() {
             <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">same story.</span>
           </h2>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-400">
-            What guests see and what hosts run — built from the same bones. No mismatched UI, no surprises.
+            What guests see and what hosts run, built from the same bones. No mismatched UI, no surprises.
           </p>
         </motion.div>
       </div>

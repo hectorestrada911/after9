@@ -48,7 +48,7 @@ export function ContactForm() {
       <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-5 py-6 text-center sm:px-8">
         <p className="text-sm font-semibold text-emerald-200">Message sent</p>
         <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-          Thanks — we received your note. You should get a confirmation email shortly; we aim to reply within 24 hours on business days.
+          Thanks! We received your note. You should get a confirmation email shortly. We aim to reply within 24 hours on business days.
         </p>
         <button
           type="button"

@@ -43,9 +43,9 @@ export async function sendContactSubmission(payload: ContactPayload): Promise<
 
   const autoHtml = `
     <p>Hi ${safeName},</p>
-    <p>Thanks for reaching out — we received your message and will get back to you within <strong>24 hours</strong> on business days.</p>
+    <p>Thanks for reaching out. We received your message and will get back to you within <strong>24 hours</strong> on business days.</p>
     <p>If your question is urgent, reply to this email and it will go to our support inbox.</p>
-    <p style="margin-top:1.5rem;color:#666;font-size:14px;">— RAGE</p>
+    <p style="margin-top:1.5rem;color:#666;font-size:14px;">RAGE</p>
   `;
 
   const [toTeam, toUser] = await Promise.all([
@@ -63,7 +63,7 @@ export async function sendContactSubmission(payload: ContactPayload): Promise<
       replyTo: supportInbox,
       subject: "We received your message",
       html: autoHtml,
-      text: `Hi ${name},\n\nThanks for reaching out — we received your message and will get back to you within 24 hours on business days.\n\n— RAGE`,
+      text: `Hi ${name},\n\nThanks for reaching out. We received your message and will get back to you within 24 hours on business days.\n\nRAGE`,
     }),
   ]);
 

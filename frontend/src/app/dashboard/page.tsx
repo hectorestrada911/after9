@@ -130,6 +130,12 @@ export default async function DashboardPage() {
               Start scanner now
             </Link>
             <Link
+              href="/dashboard/storefront"
+              className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
+            >
+              Storefront
+            </Link>
+            <Link
               href="#my-events"
               className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
             >

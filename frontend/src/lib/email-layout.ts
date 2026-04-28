@@ -19,26 +19,28 @@ export function rageEmailDocument(params: {
     <meta name="supported-color-schemes" content="dark" />
     <title>${title}</title>
     <style>
+      :root { color-scheme: dark; supported-color-schemes: dark; }
       @media (max-width: 620px) {
         .container { width: 100% !important; }
         .px { padding-left: 18px !important; padding-right: 18px !important; }
       }
     </style>
   </head>
-  <body style="margin:0;padding:0;background:#030303;">
+  <body style="margin:0;padding:0;background:#000000 !important;">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${pre}</div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#030303;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#000000" style="background:#000000 !important;">
       <tr>
         <td align="center" style="padding:28px 12px;">
-          <table role="presentation" width="600" cellspacing="0" cellpadding="0" class="container" style="width:600px;max-width:600px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.10);background:#0B0B0B;">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" class="container" bgcolor="#070707" style="width:600px;max-width:600px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);background:#070707 !important;box-shadow:0 0 0 1px rgba(75,250,148,0.08),0 30px 90px -45px rgba(0,0,0,0.95);">
             <tr>
-              <td class="px" style="padding:22px 26px;background:linear-gradient(135deg, rgba(75,250,148,0.22), rgba(99,102,241,0.18), rgba(244,114,182,0.14));border-bottom:1px solid rgba(255,255,255,0.10);">
+              <td class="px" bgcolor="#0A0A0A" style="padding:22px 26px;background:#0A0A0A !important;border-bottom:1px solid rgba(255,255,255,0.10);">
+                <div style="height:3px;width:74px;border-radius:999px;background:linear-gradient(90deg,#4BFA94,#86EFAC);margin:0 0 12px;"></div>
                 <p style="margin:0;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.72);font-weight:800;">RAGE</p>
                 <p style="margin:10px 0 0;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial;font-size:22px;line-height:1.15;font-weight:900;color:#ffffff;">${title}</p>
               </td>
             </tr>
             <tr>
-              <td class="px" style="padding:22px 26px;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial;color:rgba(255,255,255,0.86);font-size:15px;line-height:1.65;">
+              <td class="px" bgcolor="#070707" style="padding:22px 26px;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial;color:rgba(255,255,255,0.90);font-size:15px;line-height:1.65;background:#070707 !important;">
                 ${params.bodyHtml}
               </td>
             </tr>

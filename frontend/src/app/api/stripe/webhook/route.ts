@@ -34,11 +34,18 @@ export async function POST(req: Request) {
 
     const { data: order } = await supabase
       .from("orders")
-      .select("id, quantity, buyer_email, buyer_name, confirmation_email_sent_at")
+      .select("id, quantity, buyer_email, buyer_name, payment_status, discount_code, event_id, confirmation_email_sent_at")
       .eq("id", orderId)
       .single();
     if (order) {
+      const wasAlreadyPaid = order.payment_status === "paid";
       await supabase.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
+      if (!wasAlreadyPaid && order.discount_code) {
+        await supabase.rpc("increment_event_discount_redemption", {
+          p_event_id: order.event_id,
+          p_code: order.discount_code,
+        });
+      }
 
       // Idempotency: Stripe may retry this webhook. Only create missing tickets.
       const { count: existingCount } = await supabase

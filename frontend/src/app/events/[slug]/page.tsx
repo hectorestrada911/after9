@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Calendar, Clock3, Flame, MapPin, ShieldCheck, Sparkles, Ticket, Users, Zap } from "lucide-react";
@@ -8,6 +9,8 @@ import { normalizeGuestEventSlug } from "@/lib/guest-event-slug";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 import PurchaseForm from "./purchase-form";
+
+const FALLBACK_EVENT_IMAGE = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&w=1080&h=1350&fit=crop&q=82";
 
 function formatEventDate(isoDate: string) {
   const d = new Date(`${isoDate}T12:00:00`);
@@ -41,6 +44,61 @@ function mapLinksForAddress(address: string) {
   };
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug: rawSlug } = await params;
+  const slug = normalizeGuestEventSlug(rawSlug);
+  if (!slug) {
+    return { title: "Event · RAGE" };
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const { data: event } = await supabase
+    .from("events")
+    .select("title, description, date, location, image_url")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (!event) {
+    return { title: "Event · RAGE" };
+  }
+
+  const image = event.image_url || FALLBACK_EVENT_IMAGE;
+  const isoDate = String(event.date);
+  const dateLabel = Number.isNaN(new Date(`${isoDate}T12:00:00`).getTime())
+    ? isoDate
+    : new Date(`${isoDate}T12:00:00`).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+  const title = `${event.title} | ${dateLabel} | ${event.location}`;
+  const description = event.description?.trim() || `Get tickets for ${event.title} on RAGE.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [
+        {
+          url: image,
+          width: 1080,
+          height: 1350,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
+
 export default async function PublicEventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug: rawSlug } = await params;
   const slug = normalizeGuestEventSlug(rawSlug);
@@ -60,9 +118,10 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
   const feeDisplay = centsToDollars(platformFeeFromGrossCents(event.ticket_price, platformFeePercent));
   const lowStock = remaining > 0 && remaining <= Math.max(12, Math.ceil((event.tickets_available ?? 0) * 0.15));
   const moving = sold >= 3;
+  const salesPaused = event.sales_enabled === false;
 
   const organizer = event.profiles?.organizer_name ?? "Host";
-  const imageSrc = event.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30";
+  const imageSrc = event.image_url || FALLBACK_EVENT_IMAGE;
 
   return (
     <main className="relative min-w-0 bg-[#030303] text-white antialiased [color-scheme:dark]">
@@ -250,9 +309,9 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                     </span>
                   </div>
 
-                  {remaining <= 0 && (
+                  {(remaining <= 0 || salesPaused) && (
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-bold text-white">
-                      Sold out. Contact the host for a waitlist.
+                      {salesPaused ? "Sales are paused by the host right now." : "Sold out. Contact the host for a waitlist."}
                     </div>
                   )}
 
@@ -262,7 +321,7 @@ export default async function PublicEventPage({ params }: { params: Promise<{ sl
                       price={event.ticket_price}
                       title={event.title}
                       slug={slug}
-                      soldOut={remaining <= 0}
+                      soldOut={remaining <= 0 || salesPaused}
                       theme="dark"
                     />
                   </div>

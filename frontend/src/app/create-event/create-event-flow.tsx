@@ -30,6 +30,7 @@ export type CreateEventPublishPayload = {
   capacity: number;
   ticketPrice: number;
   ticketsAvailable: number;
+  salesEnabled: boolean;
   visibility: Visibility;
   ageRestriction: EventDraftV1["ageRestriction"];
   dressCode?: string;
@@ -39,6 +40,8 @@ export type CreateEventPublishPayload = {
   coverMode: "stock" | "upload";
   uploadDataUrl: string | null;
 };
+
+const UNLIMITED_TICKETS = 5000;
 
 function localDateISO(d = new Date()) {
   const y = d.getFullYear();
@@ -136,16 +139,10 @@ function compressToJpegDataUrl(file: File, maxStrLen: number): Promise<string> {
 }
 
 const field =
-  "h-11 w-full rounded-xl border border-white/[0.14] bg-white/[0.07] px-3.5 text-[13px] font-normal text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] placeholder:text-zinc-500 transition " +
-  "focus:border-brand-green/55 focus:bg-white/[0.1] focus:outline-none focus:ring-2 focus:ring-brand-green/25";
+  "h-11 w-full rounded-xl border border-white/[0.12] bg-white/[0.05] px-3.5 text-[13px] font-normal text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] placeholder:text-zinc-600 transition-all duration-200 " +
+  "focus:-translate-y-[1px] focus:border-brand-green/55 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-brand-green/25";
 
-const labelClass = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-400";
-
-function formatAgeBadge(a: EventDraftV1["ageRestriction"]) {
-  if (a === "age_18_plus") return "18+";
-  if (a === "age_21_plus") return "21+";
-  return "All ages";
-}
+const labelClass = "mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500";
 
 type CreateEventFlowProps = {
   flowMode?: CreateEventFlowMode;
@@ -191,6 +188,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
   const [location, setLocation] = useState("");
   const [ticketPrice, setTicketPrice] = useState("15");
   const [ticketsAvailable, setTicketsAvailable] = useState("120");
+  const [limitTicketQuantity, setLimitTicketQuantity] = useState(false);
   const [isFreeEvent, setIsFreeEvent] = useState(false);
   const [visibility, setVisibility] = useState<Visibility>("unlisted");
   const [ageRestriction, setAgeRestriction] = useState<EventDraftV1["ageRestriction"]>("all_ages");
@@ -254,7 +252,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     const nextFree = draft.ticketPrice <= 0;
     setIsFreeEvent(nextFree);
     setTicketPrice(nextFree ? "0" : String(draft.ticketPrice));
-    setTicketsAvailable(String(draft.ticketsAvailable));
+    const draftLooksUnlimited = draft.ticketsAvailable >= UNLIMITED_TICKETS;
+    setLimitTicketQuantity(!draftLooksUnlimited);
+    setTicketsAvailable(draftLooksUnlimited ? "120" : String(draft.ticketsAvailable));
     setVisibility(coerceEventVisibility(draft.visibility));
     setAgeRestriction(draft.ageRestriction);
     setShowCapacityPublicly(draft.showCapacityPublicly ?? false);
@@ -403,7 +403,9 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
 
     const imageUrl = coverMode === "upload" ? placeholderCoverUrl() : selectedStock.url;
 
-    const capacity = Number(ticketsAvailable) || 0;
+    const ticketLimitCount = Number(ticketsAvailable) || 0;
+    const effectiveTicketsAvailable = limitTicketQuantity ? ticketLimitCount : UNLIMITED_TICKETS;
+    const capacity = effectiveTicketsAvailable;
     const parsed = eventSchema.safeParse({
       title,
       description: description.trim(),
@@ -414,7 +416,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       location,
       capacity,
       ticketPrice: isFreeEvent ? 0 : ticketPrice,
-      ticketsAvailable,
+      ticketsAvailable: effectiveTicketsAvailable,
       visibility,
       ageRestriction,
       dressCode: dressCode || undefined,
@@ -441,6 +443,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       capacity: parsed.data.capacity,
       ticketPrice: parsed.data.ticketPrice,
       ticketsAvailable: parsed.data.ticketsAvailable,
+      salesEnabled: false,
       visibility: parsed.data.visibility,
       ageRestriction: parsed.data.ageRestriction,
       showCapacityPublicly,
@@ -481,6 +484,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             capacity: parsed.data.capacity,
             ticketPrice: parsed.data.ticketPrice,
             ticketsAvailable: parsed.data.ticketsAvailable,
+            salesEnabled: false,
             visibility: parsed.data.visibility,
             ageRestriction: parsed.data.ageRestriction,
             dressCode: parsed.data.dressCode,
@@ -571,10 +575,10 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
           )}
         </header>
 
-        <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-2 sm:max-w-lg sm:px-6 sm:pb-28 sm:pt-4">
-          <div className="mb-8">
+        <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-3 sm:max-w-lg sm:px-6 sm:pb-28 sm:pt-5">
+          <div className="mb-7">
             <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">Create your event</p>
-            <h1 className="mt-2 text-center text-xl font-semibold leading-snug tracking-tight text-zinc-50 sm:text-2xl">
+            <h1 className="mt-2 text-center text-[1.62rem] font-semibold leading-[1.12] tracking-[-0.02em] text-zinc-50 sm:text-[1.95rem]">
               Flyer, story, and tickets, all in one place
             </h1>
           </div>
@@ -610,39 +614,51 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             )}
 
             {/* Flyer */}
-            <div key="s0" className="animate-fadeUp space-y-5">
-                  <div className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-3">
+            <div key="s0" className="animate-fadeUp space-y-4">
+                  <div className="rounded-2xl border border-white/[0.1] bg-white/[0.03] p-3">
                     {hasSelectedFlyer ? (
-                      <div className="relative overflow-hidden rounded-xl border border-white/[0.12] bg-zinc-900">
+                      <div className="mx-auto w-full max-w-[360px]">
+                      <div className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/[0.1] bg-zinc-900">
+                        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/35 via-transparent to-black/10 opacity-90" />
+                        <div className="pointer-events-none absolute -inset-px rounded-xl ring-1 ring-white/10 transition-all duration-300 group-hover:ring-brand-green/40" />
                         {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
-                        <img src={coverThumbSrc} alt="" className="h-48 w-full object-cover sm:h-56" />
-                        <span className="absolute left-2.5 top-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                          {formatAgeBadge(ageRestriction)}
-                        </span>
-                        <span className="absolute bottom-2.5 left-2.5 inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                        <img src={coverThumbSrc} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.015]" />
+                        <span className="absolute bottom-2.5 left-2.5 z-[2] inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                           Hosted by {organizationName.trim() || hostDisplayName}
                         </span>
                       </div>
+                      </div>
                     ) : (
-                      <div className="relative flex h-56 items-center justify-center overflow-hidden rounded-xl border border-dashed border-white/20 bg-zinc-900/70">
+                      <div className="mx-auto w-full max-w-[360px]">
+                      <div className="group relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-zinc-900/70">
+                        <div
+                          className="pointer-events-none absolute inset-0 opacity-80"
+                          style={{
+                            backgroundImage:
+                              "radial-gradient(circle at 50% 22%, rgba(75,250,148,0.14), transparent 42%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06), transparent 45%)",
+                          }}
+                        />
                         <button
                           type="button"
                           onClick={() => setFlyerPickerOpen(true)}
-                          className="inline-flex h-11 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-5 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-110"
+                          className="relative z-[2] inline-flex h-11 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-6 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_28px_-8px_rgba(75,250,148,0.8)] transition duration-200 hover:brightness-110 active:scale-[0.98]"
                         >
                           Select flyer
                         </button>
                       </div>
+                      </div>
                     )}
                     <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-xs text-zinc-500">{hasSelectedFlyer ? "Change flyer, upload, or browse styles." : "Start by selecting a flyer."}</p>
-                      <button
-                        type="button"
-                        onClick={() => setFlyerPickerOpen(true)}
-                        className="inline-flex h-10 shrink-0 items-center rounded-full border border-white/20 bg-white/[0.05] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/40"
-                      >
-                        {hasSelectedFlyer ? "Change flyer" : "Select flyer"}
-                      </button>
+                      <p className="text-xs text-zinc-500">{hasSelectedFlyer ? "Tap Change to refine style or upload a new one." : "Select a vertical flyer to start."}</p>
+                      {hasSelectedFlyer ? (
+                        <button
+                          type="button"
+                          onClick={() => setFlyerPickerOpen(true)}
+                          className="inline-flex h-9 shrink-0 items-center rounded-full border border-white/20 bg-white/[0.05] px-3.5 text-[11px] font-bold uppercase tracking-wide text-white transition hover:border-white/40"
+                        >
+                          Change
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 <input
@@ -661,7 +677,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
               </div>
 
             {/* Story */}
-            <div key="s1" className="animate-fadeUp mt-10 space-y-5">
+            <div key="s1" className="animate-fadeUp mt-9 space-y-5">
                 <div>
                   <span className={labelClass}>Event title</span>
                   <input className={field} placeholder="e.g. Rooftop sunset social" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -677,7 +693,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                 </div>
                 <div>
                   <span className={labelClass}>When</span>
-                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-500">We prefilled tonight. Tweak anything.</p>
+                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-600">We prefilled tonight. Tweak anything.</p>
                   <div className="grid grid-cols-1 gap-2">
                     <div>
                       <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Date</span>
@@ -723,7 +739,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
               </div>
 
             {/* Tickets */}
-            <div key="s2" className="animate-fadeUp mt-10 space-y-5">
+            <div key="s2" className="animate-fadeUp mt-9 space-y-5">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <span className={labelClass}>Ticket price (USD)</span>
@@ -738,8 +754,28 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     />
                   </div>
                   <div>
-                    <span className={labelClass}>Tickets to sell</span>
-                    <input className={field} type="number" min={1} value={ticketsAvailable} onChange={(e) => setTicketsAvailable(e.target.value)} />
+                    <span className={labelClass}>Ticket quantity</span>
+                    <div className="flex items-center justify-between rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2">
+                      <span className="text-xs text-zinc-300">{limitTicketQuantity ? "Limited" : "Unlimited"}</span>
+                      <button
+                        type="button"
+                        onClick={() => setLimitTicketQuantity((v) => !v)}
+                        className="inline-flex h-8 items-center rounded-full border border-white/20 bg-white/[0.06] px-3 text-[10px] font-bold uppercase tracking-wide text-white transition hover:border-white/40"
+                      >
+                        {limitTicketQuantity ? "Set unlimited" : "Set qty"}
+                      </button>
+                    </div>
+                    {limitTicketQuantity ? (
+                      <input
+                        className={`${field} mt-2`}
+                        type="number"
+                        min={1}
+                        value={ticketsAvailable}
+                        onChange={(e) => setTicketsAvailable(e.target.value)}
+                      />
+                    ) : (
+                      <p className="mt-2 text-xs text-zinc-500">Unlimited keeps sales open until you manually turn sales off.</p>
+                    )}
                   </div>
                 </div>
                 <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
@@ -779,7 +815,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                   )}
                 </div>
                 <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-xs text-zinc-400">
-                  Paid events must be at least <span className="font-semibold text-zinc-200">$0.50</span> per ticket. Toggle free events above for $0 RSVPs.
+                  Sales are <span className="font-semibold text-zinc-200">OFF by default</span> after publish. Turn them on from the host event page when you are ready.
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
@@ -793,19 +829,6 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                       <option value="public">Public (home page)</option>
                       <option value="unlisted">Unlisted (link only)</option>
                       <option value="private">Private (you only)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <span className={labelClass}>Age</span>
-                    <select
-                      className={`${field} cursor-pointer appearance-none bg-[length:0.875rem] bg-[right_0.65rem_center] bg-no-repeat pr-9`}
-                      style={{ backgroundImage: `url("${chevron}")` }}
-                      value={ageRestriction}
-                      onChange={(e) => setAgeRestriction(e.target.value as EventDraftV1["ageRestriction"])}
-                    >
-                      <option value="all_ages">All ages</option>
-                      <option value="age_18_plus">18+</option>
-                      <option value="age_21_plus">21+</option>
                     </select>
                   </div>
                 </div>
@@ -823,12 +846,12 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                 </div>
               </div>
 
-            <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/[0.06] bg-[#030303]/90 px-4 py-3.5 backdrop-blur-2xl supports-[backdrop-filter]:bg-[#030303]/75 sm:static sm:mt-10 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+            <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/[0.06] bg-[#030303]/90 px-4 py-3.5 shadow-[0_-24px_50px_-36px_rgba(0,0,0,0.9)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[#030303]/72 sm:static sm:mt-10 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none sm:backdrop-blur-none">
               <div className="mx-auto flex max-w-md items-center gap-2 sm:max-w-lg">
                 <button
                   type="submit"
                   disabled={Boolean(onPublish && publishBusy)}
-                  className="group flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 text-[12px] font-bold uppercase tracking-[0.12em] text-black shadow-[0_0_36px_-6px_rgba(75,250,148,0.55)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 text-[12px] font-bold uppercase tracking-[0.12em] text-black shadow-[0_0_36px_-8px_rgba(75,250,148,0.65)] transition duration-200 hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {publishBusy && onPublish ? (
                     <>
@@ -844,7 +867,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                 </button>
               </div>
               {error ? <p className="mx-auto mt-2 max-w-sm text-center text-xs font-medium text-red-300">{error}</p> : null}
-              <p className="mx-auto mt-2.5 max-w-sm text-center text-[11px] leading-relaxed text-zinc-600">
+              <p className="mx-auto mt-2 max-w-sm text-center text-[10px] leading-relaxed text-zinc-700">
                 {resolvedMode === "hostPublish"
                   ? onPublish
                     ? "Review everything above, then publish when you are ready."
@@ -974,7 +997,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                     <span className="text-zinc-500">Price:</span> ${confirmDraft.ticketPrice.toFixed(2)}
                   </p>
                   <p>
-                    <span className="text-zinc-500">Tickets:</span> {confirmDraft.ticketsAvailable}
+                    <span className="text-zinc-500">Tickets:</span> {confirmDraft.ticketsAvailable >= UNLIMITED_TICKETS ? "Unlimited" : confirmDraft.ticketsAvailable}
                   </p>
                 </div>
                 <p className="mt-3 text-xs text-zinc-500">You can still edit after publishing from the event hub.</p>

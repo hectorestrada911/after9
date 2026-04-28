@@ -3,6 +3,7 @@ import { ArrowUpRight, CalendarRange, MapPin, Pencil } from "lucide-react";
 import { EventArchiveToggle } from "@/components/event-archive-toggle";
 import CopyEventLink from "@/components/copy-event-link";
 import { EventDeleteButton } from "@/components/event-delete-button";
+import { EventSalesToggle } from "@/components/event-sales-toggle";
 import { EventShareActions } from "@/components/event-share-actions";
 import { eventVisibilityLabel } from "@/lib/event-visibility";
 
@@ -25,12 +26,14 @@ export function EventWorkspaceHero({
     image_url: string | null;
     visibility: string;
     archived_at?: string | null;
+    sales_enabled?: boolean;
   };
   eventId: string;
   publicBaseUrl: string;
 }) {
   const vis = eventVisibilityLabel(event.visibility);
   const isArchived = Boolean(event.archived_at);
+  const salesEnabled = event.sales_enabled ?? true;
   const publicPath = `/events/${event.slug}`;
   const fullUrl = publicBaseUrl ? `${publicBaseUrl.replace(/\/$/, "")}${publicPath}` : publicPath;
 
@@ -76,6 +79,15 @@ export function EventWorkspaceHero({
                     Archived
                   </span>
                 ) : null}
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    salesEnabled
+                      ? "border border-brand-green/35 bg-brand-green/15 text-brand-green"
+                      : "border border-amber-500/35 bg-amber-500/15 text-amber-200"
+                  }`}
+                >
+                  {salesEnabled ? "Sales on" : "Sales off"}
+                </span>
               </div>
               <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-4xl sm:tracking-tighter">{event.title}</h1>
               <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
@@ -108,6 +120,7 @@ export function EventWorkspaceHero({
             </Link>
             <CopyEventLink slug={event.slug} variant="dark" />
             <EventShareActions slug={event.slug} shareTitle={event.title} shareText={`${event.title}: tickets on RAGE`} />
+            <EventSalesToggle eventId={eventId} eventTitle={event.title} salesEnabled={salesEnabled} />
             <Link
               href={`/dashboard/events/${eventId}/check-in?focusScanner=1#scanner`}
               className="inline-flex h-11 items-center rounded-full border border-white/25 bg-white/[0.06] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"

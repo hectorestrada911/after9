@@ -51,21 +51,26 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const userId = sessionData.session?.user?.id;
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = (await req.json().catch(() => null)) as { archived?: boolean } | null;
-  if (!body || typeof body.archived !== "boolean") {
-    return NextResponse.json({ error: "Missing archived flag." }, { status: 400 });
+  const body = (await req.json().catch(() => null)) as { archived?: boolean; salesEnabled?: boolean } | null;
+  if (!body || (typeof body.archived !== "boolean" && typeof body.salesEnabled !== "boolean")) {
+    return NextResponse.json({ error: "Missing archived or salesEnabled flag." }, { status: 400 });
   }
-
-  const archivedAt = body.archived ? new Date().toISOString() : null;
+  const updatePayload: { archived_at?: string | null; sales_enabled?: boolean } = {};
+  if (typeof body.archived === "boolean") {
+    updatePayload.archived_at = body.archived ? new Date().toISOString() : null;
+  }
+  if (typeof body.salesEnabled === "boolean") {
+    updatePayload.sales_enabled = body.salesEnabled;
+  }
   const { data, error } = await supabase
     .from("events")
-    .update({ archived_at: archivedAt })
+    .update(updatePayload)
     .eq("id", id)
     .eq("host_id", userId)
-    .select("id, archived_at")
+    .select("id, archived_at, sales_enabled")
     .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!data?.id) return NextResponse.json({ error: "Event not found." }, { status: 404 });
-  return NextResponse.json({ ok: true, archived: Boolean(data.archived_at) });
+  return NextResponse.json({ ok: true, archived: Boolean(data.archived_at), salesEnabled: Boolean(data.sales_enabled) });
 }

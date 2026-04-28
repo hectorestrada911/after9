@@ -15,6 +15,7 @@ export type HostEventRow = {
   tickets_available: number;
   visibility: Visibility;
   age_restriction: "all_ages" | "age_18_plus" | "age_21_plus";
+  sales_enabled?: boolean;
   dress_code: string | null;
   instructions: string | null;
   location_note: string | null;

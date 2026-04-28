@@ -15,6 +15,7 @@ export default async function EventOverviewPage({ params }: { params: Promise<{ 
   const scanPct = ticketsTotal > 0 ? Math.round((ticketsCheckedIn / ticketsTotal) * 100) : 0;
   const cap = Math.max(event.tickets_available, 1);
   const salesPct = Math.min(Math.round((ticketsTotal / cap) * 100), 100);
+  const isUnlimited = event.tickets_available >= 5000;
 
   const byDay = new Map<string, { revenueCents: number; tickets: number }>();
   for (const o of paid) {
@@ -62,7 +63,7 @@ export default async function EventOverviewPage({ params }: { params: Promise<{ 
         <div className="rounded-2xl border border-white/[0.1] bg-gradient-to-br from-zinc-950 to-black p-5">
           <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Inventory</p>
           <p className="mt-2 text-3xl font-black tabular-nums tracking-tight text-white">{ticketsTotal}</p>
-          <p className="mt-1 text-xs text-zinc-500">Issued of {event.tickets_available} listed for sale</p>
+          <p className="mt-1 text-xs text-zinc-500">Issued of {isUnlimited ? "Unlimited" : event.tickets_available} listed for sale</p>
         </div>
       </div>
 

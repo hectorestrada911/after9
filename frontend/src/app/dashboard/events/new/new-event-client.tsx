@@ -29,6 +29,9 @@ function mapPublishError(raw: string, attemptedVisibility: "public" | "unlisted"
   if (msg.includes("show_capacity_publicly")) {
     return "Your database is missing a recent migration. Run migrations and publish again.";
   }
+  if (msg.includes("sales_enabled")) {
+    return "Your database is missing the latest sales-controls migration. Run migrations and publish again.";
+  }
   return raw;
 }
 
@@ -165,6 +168,7 @@ export default function NewEventClient() {
       instructions: parsed.data.instructions || null,
       location_note: parsed.data.locationNote || null,
       show_capacity_publicly: parsed.data.showCapacityPublicly ?? false,
+      sales_enabled: payload.salesEnabled,
       slug,
     };
 
@@ -175,9 +179,10 @@ export default function NewEventClient() {
       created = res.data;
       insertError = res.error;
     }
-    if (insertError?.message.toLowerCase().includes("show_capacity_publicly")) {
+    if (insertError?.message.toLowerCase().includes("show_capacity_publicly") || insertError?.message.toLowerCase().includes("sales_enabled")) {
       const legacyPayload = { ...insertPayload } as Record<string, unknown>;
       delete legacyPayload.show_capacity_publicly;
+      delete legacyPayload.sales_enabled;
       const legacy = await supabase.from("events").insert(legacyPayload).select("id,slug").single();
       created = legacy.data;
       insertError = legacy.error;

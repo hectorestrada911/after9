@@ -5,7 +5,7 @@ import { fulfillFreeOrderIfNeeded } from "@/lib/free-order-fulfillment";
 import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { isUuidString, normalizeGuestEventSlug } from "@/lib/guest-event-slug";
 
-const eventCheckoutSelect = "id, host_id, ticket_price, tickets_available, archived_at" as const;
+const eventCheckoutSelect = "id, host_id, ticket_price, tickets_available, archived_at, sales_enabled" as const;
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient(supabaseUrl, serviceRole);
 
     const body = await req.json();
-    const { eventId, title, slug: rawSlug, buyerName, buyerEmail, quantity } = body;
+    const { eventId, title, slug: rawSlug, buyerName, buyerEmail, quantity, promoCode } = body;
     const slug = normalizeGuestEventSlug(rawSlug);
 
     if (!eventId || !title || !slug || !buyerName || !buyerEmail || !quantity) {
@@ -27,7 +27,14 @@ export async function POST(req: NextRequest) {
     }
 
     let resolvedEvent:
-      | { id: string; host_id: string; ticket_price: number; tickets_available: number | null; archived_at?: string | null }
+      | {
+          id: string;
+          host_id: string;
+          ticket_price: number;
+          tickets_available: number | null;
+          archived_at?: string | null;
+          sales_enabled?: boolean;
+        }
       | null = null;
 
     // Slug-first: URL is the source of truth for shared links (avoids stale/wrong eventId edge cases).
@@ -84,6 +91,9 @@ export async function POST(req: NextRequest) {
     if (resolvedEvent.archived_at) {
       return NextResponse.json({ error: "This event is archived and no longer accepts purchases." }, { status: 409 });
     }
+    if (resolvedEvent.sales_enabled === false) {
+      return NextResponse.json({ error: "Ticket sales are currently paused by the host." }, { status: 409 });
+    }
 
     const { count: soldCount } = await supabase
       .from("tickets")
@@ -96,7 +106,39 @@ export async function POST(req: NextRequest) {
     }
 
     const feePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
-    const totalAmount = resolvedEvent.ticket_price * quantity;
+    const grossTotalAmount = resolvedEvent.ticket_price * quantity;
+    let discountCode = "";
+    let discountPercent = 0;
+    let discountAmount = 0;
+    if (typeof promoCode === "string" && promoCode.trim()) {
+      const normalizedCode = promoCode.trim().toUpperCase();
+      const nowIso = new Date().toISOString();
+      const { data: discount, error: discountErr } = await supabase
+        .from("event_discount_codes")
+        .select("id, code, percent_off, active, max_redemptions, redemption_count, starts_at, ends_at")
+        .eq("event_id", resolvedEvent.id)
+        .eq("code", normalizedCode)
+        .maybeSingle();
+      if (discountErr) {
+        return NextResponse.json({ error: "Could not verify discount code right now." }, { status: 503 });
+      }
+      if (!discount || !discount.active) {
+        return NextResponse.json({ error: "Invalid or inactive discount code." }, { status: 409 });
+      }
+      if (discount.starts_at && discount.starts_at > nowIso) {
+        return NextResponse.json({ error: "This discount code is not active yet." }, { status: 409 });
+      }
+      if (discount.ends_at && discount.ends_at < nowIso) {
+        return NextResponse.json({ error: "This discount code has expired." }, { status: 409 });
+      }
+      if (typeof discount.max_redemptions === "number" && discount.redemption_count >= discount.max_redemptions) {
+        return NextResponse.json({ error: "This discount code has reached its redemption limit." }, { status: 409 });
+      }
+      discountCode = discount.code;
+      discountPercent = Math.max(0, Math.min(100, Number(discount.percent_off) || 0));
+      discountAmount = Math.round((grossTotalAmount * discountPercent) / 100);
+    }
+    const totalAmount = Math.max(0, grossTotalAmount - discountAmount);
     const platformFeeAmount = platformFeeFromGrossCents(totalAmount, feePercent);
     const hostNetAmount = hostNetFromGrossCents(totalAmount, feePercent);
     const hostProfileRes = await supabase
@@ -128,6 +170,9 @@ export async function POST(req: NextRequest) {
         buyer_email: buyerEmail,
         quantity,
         total_amount: totalAmount,
+        discount_code: discountCode || null,
+        discount_percent: discountPercent,
+        discount_amount: discountAmount,
         payment_status: "pending",
       })
       .select("id")
@@ -180,6 +225,10 @@ export async function POST(req: NextRequest) {
         quantity: String(quantity),
         platformFeePercent: String(feePercent),
         grossAmount: String(totalAmount),
+        grossBeforeDiscount: String(grossTotalAmount),
+        discountCode,
+        discountPercent: String(discountPercent),
+        discountAmount: String(discountAmount),
         platformFeeAmount: String(platformFeeAmount),
         hostNetAmount: String(hostNetAmount),
         destinationAccount: destinationAccount ?? "",

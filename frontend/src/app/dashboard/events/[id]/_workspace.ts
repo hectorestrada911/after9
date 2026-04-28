@@ -15,7 +15,7 @@ export const getEventWorkspaceBundle = cache(async (eventId: string): Promise<Wo
   if (!profile) return { kind: "no_profile" };
 
   const selectWithArchive =
-    "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at";
+    "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note,archived_at,sales_enabled";
   const selectWithoutArchive =
     "id,slug,title,description,image_url,date,start_time,end_time,location,capacity,ticket_price,tickets_available,visibility,age_restriction,dress_code,instructions,location_note";
 

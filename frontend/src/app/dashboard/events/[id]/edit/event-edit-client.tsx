@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { HostEventRow } from "@/lib/event-workspace-types";
 import type { Visibility } from "@/lib/types";
@@ -31,6 +31,34 @@ export function EventEditClient({ event }: { event: HostEventRow }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountPercent, setDiscountPercent] = useState("10");
+  const [discountBusy, setDiscountBusy] = useState(false);
+  const [discountError, setDiscountError] = useState<string | null>(null);
+  const [discountRows, setDiscountRows] = useState<
+    { id: string; code: string; percent_off: number; active: boolean; redemption_count: number; max_redemptions: number | null }[]
+  >([]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadDiscounts() {
+      const { data, error: loadErr } = await supabase
+        .from("event_discount_codes")
+        .select("id, code, percent_off, active, redemption_count, max_redemptions")
+        .eq("event_id", event.id)
+        .order("created_at", { ascending: false });
+      if (ignore) return;
+      if (loadErr) {
+        setDiscountError(loadErr.message);
+        return;
+      }
+      setDiscountRows(data ?? []);
+    }
+    void loadDiscounts();
+    return () => {
+      ignore = true;
+    };
+  }, [event.id, supabase]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -98,6 +126,50 @@ export function EventEditClient({ event }: { event: HostEventRow }) {
     router.refresh();
   }
 
+  async function createDiscountCode() {
+    const code = discountCode.trim().toUpperCase();
+    const pct = Number.parseInt(discountPercent, 10);
+    if (!code || code.length < 3) {
+      setDiscountError("Discount code must be at least 3 characters.");
+      return;
+    }
+    if (!Number.isFinite(pct) || pct < 1 || pct > 100) {
+      setDiscountError("Discount percent must be between 1 and 100.");
+      return;
+    }
+    setDiscountBusy(true);
+    setDiscountError(null);
+    const { data, error: createErr } = await supabase
+      .from("event_discount_codes")
+      .insert({ event_id: event.id, code, percent_off: pct, active: true })
+      .select("id, code, percent_off, active, redemption_count, max_redemptions")
+      .single();
+    setDiscountBusy(false);
+    if (createErr || !data) {
+      setDiscountError(createErr?.message ?? "Could not create discount code.");
+      return;
+    }
+    setDiscountRows((prev) => [data, ...prev.filter((r) => r.id !== data.id)]);
+    setDiscountCode("");
+    setDiscountPercent("10");
+  }
+
+  async function toggleDiscountActive(id: string, active: boolean) {
+    setDiscountError(null);
+    const { data, error: updateErr } = await supabase
+      .from("event_discount_codes")
+      .update({ active })
+      .eq("id", id)
+      .eq("event_id", event.id)
+      .select("id, code, percent_off, active, redemption_count, max_redemptions")
+      .single();
+    if (updateErr || !data) {
+      setDiscountError(updateErr?.message ?? "Could not update discount code.");
+      return;
+    }
+    setDiscountRows((prev) => prev.map((r) => (r.id === id ? data : r)));
+  }
+
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-6">
       <div>
@@ -126,6 +198,59 @@ export function EventEditClient({ event }: { event: HostEventRow }) {
           <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Location note</span>
           <Input className={cn(inputDark)} value={locationNote} onChange={(ev) => setLocationNote(ev.target.value)} placeholder="Door instructions, parking, etc." />
         </label>
+      </div>
+
+      <div className="space-y-4 rounded-2xl border border-white/[0.1] bg-zinc-950/50 p-5">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Discount codes</p>
+          <p className="mt-1 text-xs text-zinc-500">Create promo codes guests can apply at checkout.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <label className="block space-y-1.5 sm:col-span-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Code</span>
+            <Input className={cn(inputDark)} value={discountCode} onChange={(ev) => setDiscountCode(ev.target.value.toUpperCase())} placeholder="WELCOME10" />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">% off</span>
+            <Input className={cn(inputDark)} inputMode="numeric" value={discountPercent} onChange={(ev) => setDiscountPercent(ev.target.value)} />
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => void createDiscountCode()}
+          disabled={discountBusy}
+          className="inline-flex h-10 items-center justify-center rounded-full border border-white/25 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10 disabled:opacity-50"
+        >
+          {discountBusy ? "Creating..." : "Create discount code"}
+        </button>
+        {discountError ? <p className="text-sm text-red-300">{discountError}</p> : null}
+        <div className="space-y-2">
+          {discountRows.length === 0 ? (
+            <p className="text-sm text-zinc-500">No discount codes yet.</p>
+          ) : (
+            discountRows.map((row) => (
+              <div key={row.id} className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-black/30 px-3 py-2">
+                <div className="min-w-0">
+                  <p className="font-mono text-sm font-semibold text-white">{row.code}</p>
+                  <p className="text-xs text-zinc-500">
+                    {row.percent_off}% off · {row.redemption_count} redeemed{row.max_redemptions ? ` / ${row.max_redemptions}` : ""}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void toggleDiscountActive(row.id, !row.active)}
+                  className={`inline-flex h-8 items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-wide transition ${
+                    row.active
+                      ? "border-brand-green/40 bg-brand-green/15 text-brand-green hover:border-brand-green/60"
+                      : "border-white/20 bg-white/[0.05] text-zinc-300 hover:border-white/40"
+                  }`}
+                >
+                  {row.active ? "Active" : "Inactive"}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 rounded-2xl border border-white/[0.1] bg-zinc-950/50 p-5 sm:grid-cols-2">

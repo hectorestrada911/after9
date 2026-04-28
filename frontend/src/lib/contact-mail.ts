@@ -39,7 +39,7 @@ export async function sendContactSubmission(payload: ContactPayload): Promise<
     <p style="margin:0 0 14px;"><strong style="color:#ffffff;">Name:</strong> ${safeName}<br/>
     <strong style="color:#ffffff;">Email:</strong> ${safeEmail}</p>
     <p style="margin:0 0 10px;color:rgba(255,255,255,0.62);font-size:11px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;">Message</p>
-    <div style="border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);padding:14px;">
+    <div style="border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:#0C0C0C;padding:14px;">
       <p style="margin:0;white-space:pre-wrap;color:rgba(255,255,255,0.86);font-size:14px;line-height:1.65;">${safeMessage}</p>
     </div>
   `;

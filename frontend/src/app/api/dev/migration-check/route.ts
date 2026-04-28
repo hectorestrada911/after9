@@ -50,9 +50,11 @@ export async function GET(req: NextRequest) {
   const checks = await Promise.all([
     runCheck("events.archived_at", () => supabase.from("events").select("id, archived_at").limit(1)),
     runCheck("events.show_capacity_publicly", () => supabase.from("events").select("id, show_capacity_publicly").limit(1)),
+    runCheck("events.sales_enabled", () => supabase.from("events").select("id, sales_enabled").limit(1)),
     runCheck("orders.confirmation_email_sent_at", () =>
       supabase.from("orders").select("id, confirmation_email_sent_at").limit(1),
     ),
+    runCheck("orders.discount_columns", () => supabase.from("orders").select("id, discount_code, discount_percent, discount_amount").limit(1)),
     runCheck("profiles.stripe_connect_account_id", () =>
       supabase.from("profiles").select("id, stripe_connect_account_id").limit(1),
     ),
@@ -61,6 +63,7 @@ export async function GET(req: NextRequest) {
     ),
     runCheck("table:event_team_members", () => supabase.from("event_team_members").select("id").limit(1)),
     runCheck("table:event_team_invites", () => supabase.from("event_team_invites").select("id").limit(1)),
+    runCheck("table:event_discount_codes", () => supabase.from("event_discount_codes").select("id").limit(1)),
   ]);
 
   const missing = checks.filter((c) => !c.ok);

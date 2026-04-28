@@ -27,6 +27,7 @@ export default function PurchaseForm({
   const [quantity, setQuantity] = useState(1);
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerEmailConfirm, setBuyerEmailConfirm] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const platformFeePercent = resolvePlatformFeePercent(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT);
   const feePerTicket = platformFeeFromGrossCents(price, platformFeePercent);
   const isFree = price <= 0;
@@ -54,6 +55,7 @@ export default function PurchaseForm({
       buyerName: String(form.get("buyerName")),
       buyerEmail: normalizedEmail,
       quantity,
+      promoCode: promoCode.trim() || undefined,
     };
     const res = await fetch("/api/checkout/session", {
       method: "POST",
@@ -92,6 +94,13 @@ export default function PurchaseForm({
         className={fieldClass}
         value={buyerEmailConfirm}
         onChange={(e) => setBuyerEmailConfirm(e.target.value)}
+      />
+      <Input
+        name="promoCode"
+        placeholder="Discount code (optional)"
+        className={fieldClass}
+        value={promoCode}
+        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
       />
       <div>
         <p className={cn("mb-2 text-xs font-bold uppercase tracking-[0.14em]", theme === "dark" ? "text-zinc-500" : "text-zinc-600")}>

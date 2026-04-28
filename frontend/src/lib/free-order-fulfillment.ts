@@ -14,7 +14,7 @@ type ServiceClient = SupabaseClient;
 export async function fulfillFreeOrderIfNeeded(supabase: ServiceClient, orderId: string) {
   const { data: order } = await supabase
     .from("orders")
-    .select("id, quantity, buyer_email, buyer_name, confirmation_email_sent_at, payment_status, total_amount, event_id")
+    .select("id, quantity, buyer_email, buyer_name, confirmation_email_sent_at, payment_status, total_amount, event_id, discount_code")
     .eq("id", orderId)
     .maybeSingle();
 
@@ -25,6 +25,12 @@ export async function fulfillFreeOrderIfNeeded(supabase: ServiceClient, orderId:
   }
 
   await supabase.from("orders").update({ payment_status: "paid" }).eq("id", orderId);
+  if (order.discount_code) {
+    await supabase.rpc("increment_event_discount_redemption", {
+      p_event_id: order.event_id,
+      p_code: order.discount_code,
+    });
+  }
 
   const expected = Math.max(order.quantity ?? 0, 0);
   const { count: existingCount } = await supabase.from("tickets").select("id", { count: "exact", head: true }).eq("order_id", orderId);

@@ -7,6 +7,20 @@ export type SendResult =
   | { ok: true }
   | { ok: false; reason: "config" | "send"; message?: string };
 
+function prettyDate(raw: string): string {
+  const d = new Date(`${raw}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+}
+
+function prettyTime(raw: string): string {
+  const [h, m] = raw.split(":");
+  const hh = Number(h);
+  const mm = Number(m ?? 0);
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return raw;
+  return new Date(2000, 0, 1, hh, mm).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 function dataUrlToBase64(dataUrl: string): string | null {
   const m = /^data:image\/png;base64,(.+)$/i.exec(dataUrl.trim());
   return m ? m[1]! : null;
@@ -93,7 +107,7 @@ export async function sendTicketPurchaseConfirmation(params: {
   const resend = new Resend(env.apiKey);
   const buyer = escapeHtml(params.buyerName.trim() || "Guest");
   const title = escapeHtml(params.eventTitle);
-  const when = escapeHtml(`${params.eventDate} · ${params.eventStartTime}`);
+  const when = escapeHtml(`${prettyDate(params.eventDate)} · ${prettyTime(params.eventStartTime)}`);
   const where = escapeHtml(params.eventLocation);
   const eventUrl = `${env.appUrl}/events/${encodeURIComponent(params.eventSlug)}`;
   const ticketsUrl = `${env.appUrl}/my-tickets`;
@@ -120,7 +134,7 @@ export async function sendTicketPurchaseConfirmation(params: {
           contentType: "image/png",
         });
         qrBlocksCid.push(`
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#0C0C0C" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:#0C0C0C;">
             <tr>
               <td style="padding:14px 14px 10px;">
                 <p style="margin:0;font-family:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:12px;font-weight:900;letter-spacing:0.06em;color:rgba(255,255,255,0.86);">${code}</p>
@@ -133,7 +147,7 @@ export async function sendTicketPurchaseConfirmation(params: {
             </tr>
           </table>`);
         qrBlocksInline.push(`
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#0C0C0C" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:#0C0C0C;">
             <tr>
               <td style="padding:14px 14px 10px;">
                 <p style="margin:0;font-family:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:12px;font-weight:900;letter-spacing:0.06em;color:rgba(255,255,255,0.86);">${code}</p>
@@ -149,7 +163,7 @@ export async function sendTicketPurchaseConfirmation(params: {
       }
     }
     qrBlocksCid.push(`
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#0C0C0C" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:#0C0C0C;">
         <tr>
           <td style="padding:14px;">
             <p style="margin:0;font-family:ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:12px;font-weight:900;letter-spacing:0.06em;color:rgba(255,255,255,0.86);">${code}</p>
@@ -163,7 +177,7 @@ export async function sendTicketPurchaseConfirmation(params: {
   });
 
   const detailRows = `
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#0C0C0C" style="margin:0 0 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:#0C0C0C;">
       <tr>
         <td style="padding:14px;">
           <p style="margin:0 0 8px;color:rgba(255,255,255,0.62);font-size:11px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;">Event details</p>
@@ -208,7 +222,7 @@ export async function sendTicketPurchaseConfirmation(params: {
   const htmlCid = buildHtml(qrBlocksCid.join("\n"));
   const htmlInline = buildHtml(qrBlocksInline.join("\n"));
   const qrBlocksTextOnly = `
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#0C0C0C" style="margin:0 0 14px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:#0C0C0C;">
       <tr>
         <td style="padding:14px;">
           <p style="margin:0 0 10px;color:rgba(255,255,255,0.62);font-size:11px;font-weight:900;letter-spacing:0.14em;text-transform:uppercase;">Ticket codes</p>

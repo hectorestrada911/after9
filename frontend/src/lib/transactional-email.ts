@@ -162,18 +162,6 @@ export async function sendTicketPurchaseConfirmation(params: {
     qrBlocksInline.push(qrBlocksCid[qrBlocksCid.length - 1]!);
   });
 
-<<<<<<< HEAD
-  const html = `
-    <p>Hi ${buyer},</p>
-    <p>Thanks for your purchase. You’re going to <strong>${title}</strong>.</p>
-    <p style="margin:12px 0;"><strong>When:</strong> ${when}<br/><strong>Where:</strong> ${where}</p>
-    <p style="margin:12px 0;"><a href="${escapeHtml(eventUrl)}">Event page →</a> · <a href="${escapeHtml(ticketsUrl)}">My tickets →</a></p>
-    <p style="margin:20px 0 8px;font-weight:700;">Your ticket${params.tickets.length > 1 ? "s" : ""}</p>
-    ${qrBlocks.join("\n")}
-    <p style="margin-top:24px;font-size:13px;color:#666;">Show each QR at the door. If images don’t load, open My tickets in your browser.</p>
-    <p style="margin-top:1.5rem;color:#666;font-size:14px;">RAGE</p>
-  `;
-=======
   const detailRows = `
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.03);">
       <tr>
@@ -204,7 +192,6 @@ export async function sendTicketPurchaseConfirmation(params: {
         </p>
       `,
     });
->>>>>>> 019194022e02a6e389fa452fd240d5dd52eba993
 
   const codesText = params.tickets.map((t) => t.ticketCode).join("\n");
   const text = `Hi ${params.buyerName.trim() || "Guest"},\n\nThanks for your purchase for ${params.eventTitle}.\nWhen: ${params.eventDate} ${params.eventStartTime}\nWhere: ${params.eventLocation}\n\nTickets:\n${codesText}\n\nEvent: ${eventUrl}\nMy tickets: ${ticketsUrl}\n\nRAGE`;

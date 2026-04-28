@@ -9,6 +9,17 @@ function isInviteRole(value: string): value is InviteRole {
   return value === "manager" || value === "scanner";
 }
 
+function isMissingTeamTableError(message: string) {
+  const m = message.toLowerCase();
+  return (
+    m.includes("event_team_invites") ||
+    m.includes("event_team_members") ||
+    m.includes("relation") ||
+    m.includes("schema cache") ||
+    m.includes("does not exist")
+  );
+}
+
 export async function POST(req: Request) {
   const supabase = await getSupabaseServerClient();
   const { data: sessionData } = await supabase.auth.getSession();
@@ -38,7 +49,15 @@ export async function POST(req: Request) {
     invited_by: user.id,
     expires_at: expiresAt,
   });
-  if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
+  if (insertError) {
+    if (isMissingTeamTableError(insertError.message)) {
+      return NextResponse.json(
+        { error: "Team invites are not enabled in this database yet. Run the latest Supabase migrations and try again." },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json({ error: insertError.message }, { status: 500 });
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return NextResponse.json({

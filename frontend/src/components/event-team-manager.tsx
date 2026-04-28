@@ -19,7 +19,12 @@ type Member = {
   created_at: string;
 };
 
-type TeamPayload = { invites: Invite[]; members: Member[] };
+type TeamPayload = {
+  invites: Invite[];
+  members: Member[];
+  teamFeatureAvailable?: boolean;
+  warning?: string;
+};
 
 export default function EventTeamManager({ eventId }: { eventId: string }) {
   const [data, setData] = useState<TeamPayload>({ invites: [], members: [] });
@@ -31,9 +36,15 @@ export default function EventTeamManager({ eventId }: { eventId: string }) {
 
   async function loadTeam() {
     const res = await fetch(`/api/host/team/invites?eventId=${encodeURIComponent(eventId)}`, { cache: "no-store" });
-    if (!res.ok) return;
+    if (!res.ok) {
+      setError("Could not load team access for this event.");
+      return;
+    }
     const json = (await res.json()) as TeamPayload;
     setData({ invites: json.invites ?? [], members: json.members ?? [] });
+    if (json.teamFeatureAvailable === false && json.warning) {
+      setInfo(json.warning);
+    }
   }
 
   useEffect(() => {

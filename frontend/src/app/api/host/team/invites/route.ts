@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
 
+function isMissingTeamTableError(message: string) {
+  const m = message.toLowerCase();
+  return (
+    m.includes("event_team_invites") ||
+    m.includes("event_team_members") ||
+    m.includes("relation") ||
+    m.includes("schema cache") ||
+    m.includes("does not exist")
+  );
+}
+
 export async function GET(req: Request) {
   const supabase = await getSupabaseServerClient();
   const { data: sessionData } = await supabase.auth.getSession();
@@ -29,6 +40,17 @@ export async function GET(req: Request) {
       .order("created_at", { ascending: false }),
   ]);
 
+  const missingTeamTable =
+    (invitesError && isMissingTeamTableError(invitesError.message)) ||
+    (membersError && isMissingTeamTableError(membersError.message));
+  if (missingTeamTable) {
+    return NextResponse.json({
+      invites: [],
+      members: [{ id: `owner-${event.host_id}`, user_id: event.host_id, role: "owner", created_at: new Date(0).toISOString() }],
+      teamFeatureAvailable: false,
+      warning: "Team invites are not enabled in this database yet. Run the latest Supabase migrations to enable them.",
+    });
+  }
   if (invitesError) return NextResponse.json({ error: invitesError.message }, { status: 500 });
   if (membersError) return NextResponse.json({ error: membersError.message }, { status: 500 });
   const membersWithOwner = [

@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
 
+function isMissingTeamTableError(message: string) {
+  const m = message.toLowerCase();
+  return (
+    m.includes("event_team_invites") ||
+    m.includes("event_team_members") ||
+    m.includes("relation") ||
+    m.includes("schema cache") ||
+    m.includes("does not exist")
+  );
+}
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const token = (url.searchParams.get("token") ?? "").trim();
@@ -17,11 +28,14 @@ export async function GET(req: Request) {
   }
 
   const service = getSupabaseServiceRoleClient();
-  const { data: invite } = await service
+  const { data: invite, error: inviteError } = await service
     .from("event_team_invites")
     .select("id,event_id,invited_email,role,expires_at,accepted_at,invited_by")
     .eq("token", token)
     .maybeSingle();
+  if (inviteError && isMissingTeamTableError(inviteError.message)) {
+    return NextResponse.redirect(new URL("/dashboard?team=unavailable", url.origin));
+  }
 
   if (!invite || invite.accepted_at || new Date(invite.expires_at).getTime() < Date.now()) {
     return NextResponse.redirect(new URL("/dashboard?team=expired", url.origin));
@@ -40,6 +54,9 @@ export async function GET(req: Request) {
     { onConflict: "event_id,user_id" },
   );
   if (memberError) {
+    if (isMissingTeamTableError(memberError.message)) {
+      return NextResponse.redirect(new URL("/dashboard?team=unavailable", url.origin));
+    }
     return NextResponse.redirect(new URL("/dashboard?team=error", url.origin));
   }
 

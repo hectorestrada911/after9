@@ -35,6 +35,17 @@ export default function HostPayoutCta() {
   }, []);
 
   async function openPayoutSetup() {
+    const proceed = window.confirm(
+      [
+        "To receive payouts, hosts must complete a one-time Stripe Connect setup.",
+        "",
+        "Why: Stripe requires identity and payout details to comply with payment laws and securely send your earnings.",
+        "",
+        "You can use your existing Stripe login or create one in a minute.",
+      ].join("\n"),
+    );
+    if (!proceed) return;
+
     flushUi(() => {
       setLoading(true);
       setError(null);
@@ -82,6 +93,11 @@ export default function HostPayoutCta() {
           <p className="mt-1 text-sm text-zinc-300">
             {ready ? "Withdraw your funds from Stripe dashboard." : "Set up Stripe Connect once to unlock withdrawals."}
           </p>
+          {!ready ? (
+            <p className="mt-1 text-xs text-zinc-500">
+              One-time setup: Stripe verifies identity and payout details so we can send earnings securely.
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
           <button

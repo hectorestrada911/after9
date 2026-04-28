@@ -57,6 +57,38 @@ export async function POST() {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown account session error";
+    const lower = message.toLowerCase();
+
+    if (
+      lower.includes("managing losses") ||
+      lower.includes("platform-profile") ||
+      lower.includes("connect/platform-profile")
+    ) {
+      return NextResponse.json(
+        {
+          error: "Platform owner action required: complete Stripe Connect platform profile for live payouts.",
+          actionUrl: "https://dashboard.stripe.com/settings/connect/platform-profile",
+          actionLabel: "Open Stripe platform profile",
+        },
+        { status: 409 },
+      );
+    }
+
+    if (
+      lower.includes("create live connected accounts") ||
+      lower.includes("connect/accounts/overview") ||
+      lower.includes("answer the questionnaire")
+    ) {
+      return NextResponse.json(
+        {
+          error: "Platform owner action required: complete the Stripe Connect live questionnaire.",
+          actionUrl: "https://dashboard.stripe.com/connect/accounts/overview",
+          actionLabel: "Open Stripe Connect overview",
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

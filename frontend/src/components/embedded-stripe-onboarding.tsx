@@ -10,6 +10,7 @@ type Props = {
 export default function EmbeddedStripeOnboarding({ onClose }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorAction, setErrorAction] = useState<{ url: string; label: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [stalled, setStalled] = useState(false);
 
@@ -43,8 +44,13 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
           publishableKey,
           fetchClientSecret: async () => {
             const res = await fetch("/api/host/payout/account-session", { method: "POST" });
-            const json = (await res.json().catch(() => null)) as { clientSecret?: string; error?: string } | null;
+            const json = (await res.json().catch(() => null)) as
+              | { clientSecret?: string; error?: string; actionUrl?: string; actionLabel?: string }
+              | null;
             if (!res.ok || !json?.clientSecret) {
+              if (json?.actionUrl) {
+                setErrorAction({ url: json.actionUrl, label: json.actionLabel ?? "Open Stripe setup" });
+              }
               throw new Error(json?.error ?? "Could not start Stripe onboarding.");
             }
             return json.clientSecret;
@@ -116,14 +122,27 @@ export default function EmbeddedStripeOnboarding({ onClose }: Props) {
           ) : error ? (
             <div className="space-y-4 px-4 py-8 text-sm text-zinc-700">
               <p className="font-semibold text-red-600">{error}</p>
-              <p>If embedded onboarding is unavailable, use the hosted Stripe flow instead.</p>
-              <button
-                type="button"
-                onClick={() => void openHostedFallback()}
-                className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-4 text-xs font-bold uppercase tracking-wide text-white"
-              >
-                Open hosted onboarding
-              </button>
+              {errorAction ? (
+                <a
+                  href={errorAction.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-4 text-xs font-bold uppercase tracking-wide text-white"
+                >
+                  {errorAction.label}
+                </a>
+              ) : (
+                <>
+                  <p>If embedded onboarding is unavailable, use the hosted Stripe flow instead.</p>
+                  <button
+                    type="button"
+                    onClick={() => void openHostedFallback()}
+                    className="inline-flex h-10 items-center rounded-full bg-zinc-900 px-4 text-xs font-bold uppercase tracking-wide text-white"
+                  >
+                    Open hosted onboarding
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <div ref={containerRef} className="min-h-[620px]" />

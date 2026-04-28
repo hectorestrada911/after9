@@ -4,6 +4,7 @@ import { Calendar, Clock3, Flame, MapPin, ShieldCheck, Sparkles, Ticket, Users, 
 import { MobileBuyCta } from "@/components/mobile-buy-cta";
 import { EventShareActions } from "@/components/event-share-actions";
 import { platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
+import { normalizeGuestEventSlug } from "@/lib/guest-event-slug";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import { centsToDollars } from "@/lib/utils";
 import PurchaseForm from "./purchase-form";
@@ -41,7 +42,9 @@ function mapLinksForAddress(address: string) {
 }
 
 export default async function PublicEventPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = normalizeGuestEventSlug(rawSlug);
+  if (!slug) return notFound();
   const supabase = await getSupabaseServerClient();
   const { data: event } = await supabase.from("events").select("*, profiles(organizer_name)").eq("slug", slug).single();
   if (!event || event.archived_at) return notFound();

@@ -3,6 +3,9 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { fulfillFreeOrderIfNeeded } from "@/lib/free-order-fulfillment";
 import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
+import { isUuidString, normalizeGuestEventSlug } from "@/lib/guest-event-slug";
+
+const eventCheckoutSelect = "id, ticket_price, tickets_available, archived_at" as const;
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,33 +18,64 @@ export async function POST(req: NextRequest) {
     const stripe = new Stripe(stripeKey);
     const supabase = createClient(supabaseUrl, serviceRole);
 
-    const { eventId, title, slug, buyerName, buyerEmail, quantity } = await req.json();
+    const body = await req.json();
+    const { eventId, title, slug: rawSlug, buyerName, buyerEmail, quantity } = body;
+    const slug = normalizeGuestEventSlug(rawSlug);
 
     if (!eventId || !title || !slug || !buyerName || !buyerEmail || !quantity) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(eventId));
     let resolvedEvent:
       | { id: string; ticket_price: number; tickets_available: number | null; archived_at?: string | null }
       | null = null;
 
-    if (isUuid) {
-      const { data } = await supabase
+    // Slug-first: URL is the source of truth for shared links (avoids stale/wrong eventId edge cases).
+    const { data: bySlug, error: slugErr } = await supabase
+      .from("events")
+      .select(eventCheckoutSelect)
+      .eq("slug", slug)
+      .maybeSingle();
+    if (slugErr) {
+      console.error("[checkout/session] slug lookup error", slugErr);
+      return NextResponse.json(
+        { error: "Ticket checkout is temporarily unavailable. Please try again in a moment." },
+        { status: 503 },
+      );
+    }
+    resolvedEvent = bySlug ?? null;
+
+    // Case-only mismatch (rare): slugs are usually lowercase; ilike is safe when slug has no LIKE wildcards.
+    if (!resolvedEvent && /^[a-z0-9-]+$/i.test(slug)) {
+      const { data: bySlugI, error: slugIErr } = await supabase
         .from("events")
-        .select("id, ticket_price, tickets_available, archived_at")
-        .eq("id", eventId)
+        .select(eventCheckoutSelect)
+        .ilike("slug", slug)
         .maybeSingle();
-      resolvedEvent = data ?? null;
+      if (slugIErr) {
+        console.error("[checkout/session] slug ilike lookup error", slugIErr);
+        return NextResponse.json(
+          { error: "Ticket checkout is temporarily unavailable. Please try again in a moment." },
+          { status: 503 },
+        );
+      }
+      resolvedEvent = bySlugI ?? null;
     }
 
-    if (!resolvedEvent) {
-      const { data } = await supabase
+    if (!resolvedEvent && isUuidString(eventId)) {
+      const { data: byId, error: idErr } = await supabase
         .from("events")
-        .select("id, ticket_price, tickets_available, archived_at")
-        .eq("slug", slug)
+        .select(eventCheckoutSelect)
+        .eq("id", eventId)
         .maybeSingle();
-      resolvedEvent = data ?? null;
+      if (idErr) {
+        console.error("[checkout/session] id lookup error", idErr);
+        return NextResponse.json(
+          { error: "Ticket checkout is temporarily unavailable. Please try again in a moment." },
+          { status: 503 },
+        );
+      }
+      resolvedEvent = byId ?? null;
     }
 
     if (!resolvedEvent) {

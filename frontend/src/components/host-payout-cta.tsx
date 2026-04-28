@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import EmbeddedStripeOnboarding from "@/components/embedded-stripe-onboarding";
 import { flushUi } from "@/lib/flush-ui";
 
 type PayoutStatus = {
@@ -21,6 +22,7 @@ export default function HostPayoutCta() {
   const [error, setError] = useState<string | null>(null);
   const [errorAction, setErrorAction] = useState<{ url: string; label: string } | null>(null);
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showEmbeddedModal, setShowEmbeddedModal] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -61,6 +63,16 @@ export default function HostPayoutCta() {
       return;
     }
     await beginPayoutSetup();
+  }
+
+  async function launchEmbeddedOnboarding() {
+    const hasPublishable = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+    if (!hasPublishable) {
+      await beginPayoutSetup();
+      return;
+    }
+    setShowSetupModal(false);
+    setShowEmbeddedModal(true);
   }
 
   async function withdrawNow() {
@@ -186,7 +198,7 @@ export default function HostPayoutCta() {
               </button>
               <button
                 type="button"
-                onClick={() => void beginPayoutSetup()}
+                onClick={() => void launchEmbeddedOnboarding()}
                 disabled={loading}
                 className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black transition hover:brightness-110 disabled:opacity-60"
               >
@@ -196,6 +208,8 @@ export default function HostPayoutCta() {
           </div>
         </div>
       ) : null}
+
+      {showEmbeddedModal ? <EmbeddedStripeOnboarding onClose={() => setShowEmbeddedModal(false)} /> : null}
     </section>
   );
 }

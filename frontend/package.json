@@ -17,6 +17,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@stripe/connect-js": "^3.3.39",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.2",
     "@zxing/browser": "^0.1.5",

@@ -191,12 +191,51 @@ export function HomeAppShowcase() {
         </motion.div>
       </div>
 
-      {/* mobile: single phone */}
-      <div className="relative z-10 mt-12 flex justify-center min-[740px]:hidden">
-        <div style={{ transform: "scale(0.85)", transformOrigin: "top center" }}>
-          <PhoneShell>
-            <HomeFeedScreen />
-          </PhoneShell>
+      {/* mobile: mirror desktop overlap ("sneaking out") */}
+      <div className="relative z-10 mt-10 h-[440px] overflow-hidden min-[740px]:hidden">
+        <div className="flex h-full items-end justify-center">
+          <motion.div
+            initial={reduceMotion ? undefined : { opacity: 0, y: 24, rotateZ: -8 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, rotateZ: -6 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="-mr-24 translate-y-9"
+            style={{ zIndex: 1 }}
+          >
+          <div className="origin-bottom-right scale-[0.52]">
+            <PhoneShell>
+              <CreateScreen />
+            </PhoneShell>
+          </div>
+          </motion.div>
+          <motion.div
+            initial={reduceMotion ? undefined : { opacity: 0, y: 28 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.03 }}
+            className="relative"
+            style={{ zIndex: 3 }}
+          >
+          <div className="origin-bottom scale-[0.62]">
+            <PhoneShell>
+              <HomeFeedScreen />
+            </PhoneShell>
+          </div>
+          </motion.div>
+          <motion.div
+            initial={reduceMotion ? undefined : { opacity: 0, y: 24, rotateZ: 8 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, rotateZ: 6 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="-ml-24 translate-y-9"
+            style={{ zIndex: 1 }}
+          >
+          <div className="origin-bottom-left scale-[0.52]">
+            <PhoneShell>
+              <InviteScreen />
+            </PhoneShell>
+          </div>
+          </motion.div>
         </div>
       </div>
     </section>

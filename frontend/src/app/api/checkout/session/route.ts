@@ -5,7 +5,7 @@ import { fulfillFreeOrderIfNeeded } from "@/lib/free-order-fulfillment";
 import { hostNetFromGrossCents, platformFeeFromGrossCents, resolvePlatformFeePercent } from "@/lib/platform-fees";
 import { isUuidString, normalizeGuestEventSlug } from "@/lib/guest-event-slug";
 
-const eventCheckoutSelect = "id, ticket_price, tickets_available, archived_at" as const;
+const eventCheckoutSelect = "id, host_id, ticket_price, tickets_available, archived_at" as const;
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     let resolvedEvent:
-      | { id: string; ticket_price: number; tickets_available: number | null; archived_at?: string | null }
+      | { id: string; host_id: string; ticket_price: number; tickets_available: number | null; archived_at?: string | null }
       | null = null;
 
     // Slug-first: URL is the source of truth for shared links (avoids stale/wrong eventId edge cases).
@@ -99,6 +99,17 @@ export async function POST(req: NextRequest) {
     const totalAmount = resolvedEvent.ticket_price * quantity;
     const platformFeeAmount = platformFeeFromGrossCents(totalAmount, feePercent);
     const hostNetAmount = hostNetFromGrossCents(totalAmount, feePercent);
+    const hostProfileRes = await supabase
+      .from("profiles")
+      .select("stripe_connect_account_id, stripe_connect_onboarded")
+      .eq("id", resolvedEvent.host_id)
+      .maybeSingle();
+    const hostProfile = hostProfileRes.data;
+    if (hostProfileRes.error) {
+      console.error("[checkout/session] host profile payout lookup error", hostProfileRes.error);
+    }
+    const destinationAccount =
+      hostProfile?.stripe_connect_account_id && hostProfile?.stripe_connect_onboarded ? hostProfile.stripe_connect_account_id : null;
     const { data: orderRow, error: orderErr } = await supabase
       .from("orders")
       .insert({
@@ -161,8 +172,17 @@ export async function POST(req: NextRequest) {
         grossAmount: String(totalAmount),
         platformFeeAmount: String(platformFeeAmount),
         hostNetAmount: String(hostNetAmount),
+        destinationAccount: destinationAccount ?? "",
       },
       payment_intent_data: {
+        ...(destinationAccount
+          ? {
+              application_fee_amount: platformFeeAmount,
+              transfer_data: {
+                destination: destinationAccount,
+              },
+            }
+          : {}),
         metadata: {
           orderId: orderRow.id,
           eventId: resolvedEvent.id,
@@ -170,6 +190,7 @@ export async function POST(req: NextRequest) {
           buyerName,
           buyerEmail,
           quantity: String(quantity),
+          destinationAccount: destinationAccount ?? "",
         },
       },
       success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${orderRow.id}`,

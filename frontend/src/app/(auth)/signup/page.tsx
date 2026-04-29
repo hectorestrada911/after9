@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,7 +34,7 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const next = safeNextPath(nextParam);
-  const hasEventDraft = Boolean(readEventDraft());
+  const [hasEventDraft, setHasEventDraft] = useState(false);
   const hostIntent = next.startsWith("/dashboard") || hasEventDraft;
   const hostNext = next.startsWith("/dashboard") ? next : "/dashboard/events/new";
   const urlError = mapAuthCallbackError(searchParams.get("error"));
@@ -42,6 +42,10 @@ function SignupForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setHasEventDraft(Boolean(readEventDraft()));
+  }, []);
 
   async function signInWithGoogle() {
     setError(null);

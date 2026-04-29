@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -33,7 +33,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
-  const hasEventDraft = Boolean(readEventDraft());
+  const [hasEventDraft, setHasEventDraft] = useState(false);
   const effectiveNext = searchParams.get("next") ? next : hasEventDraft ? "/dashboard/events/new" : next;
   const justSignedUp = searchParams.get("justSignedUp") === "1";
   const verified = searchParams.get("verified") === "1";
@@ -43,6 +43,10 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
+
+  useEffect(() => {
+    setHasEventDraft(Boolean(readEventDraft()));
+  }, []);
 
   async function signInWithGoogle() {
     flushUi(() => { setLoading(true); setError(null); });

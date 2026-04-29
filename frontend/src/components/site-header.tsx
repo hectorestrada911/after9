@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
-import { ChevronDown, LogOut, Menu, Search, UserRound, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, UserRound, X } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type NavDropdownProps = {
@@ -13,9 +13,10 @@ type NavDropdownProps = {
   open: boolean;
   onOpenChange: (nextOpen: boolean) => void; // eslint-disable-line no-unused-vars -- callback parameter names document the API
   children: ReactNode;
+  menuClassName?: string;
 };
 
-function NavDropdown({ label, menuId, open, onOpenChange, children }: NavDropdownProps) {
+function NavDropdown({ label, menuId, open, onOpenChange, children, menuClassName }: NavDropdownProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,7 +56,7 @@ function NavDropdown({ label, menuId, open, onOpenChange, children }: NavDropdow
           id={menuId}
           role="menu"
           aria-labelledby={`${menuId}-trigger`}
-          className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[220px] rounded-xl border border-white/[0.1] bg-[#0a0a0a] py-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.04]"
+          className={`absolute top-[calc(100%+8px)] z-50 min-w-[220px] rounded-xl border border-white/[0.1] bg-[#0a0a0a] py-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.04] ${menuClassName ?? "right-0"}`}
         >
           {children}
         </div>
@@ -112,91 +113,10 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
-      <div className="container-page flex h-[3.25rem] min-w-0 items-center gap-3 sm:h-16 sm:gap-6">
+      <div className="container-page flex h-[3.25rem] min-w-0 items-center justify-between gap-3 sm:h-16 sm:gap-6">
         <Link href="/" className="flex shrink-0 items-center" onClick={closeMenus}>
           <Image src="/rage-logo.png" alt="RAGE" width={160} height={48} className="h-8 w-auto object-contain sm:h-10" priority loading="eager" />
         </Link>
-
-        <div className="hidden h-10 min-w-0 flex-1 items-center rounded-full border border-white/[0.1] bg-white/[0.04] px-4 md:flex">
-          <Search size={15} className="shrink-0 text-zinc-500" strokeWidth={1.75} />
-          <input
-            type="text"
-            placeholder="Search events, venues, cities"
-            className="ml-3 w-full min-w-0 border-0 bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
-          />
-        </div>
-
-        <nav className="ml-auto hidden items-center gap-1 text-sm lg:ml-0 lg:flex">
-          <NavDropdown
-            label="Host tools"
-            menuId={hostMenuId}
-            open={openMenu === "host"}
-            onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
-          >
-            {authedEmail ? (
-              <>
-                <Link href="/account#my-events" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  My events
-                </Link>
-                <Link href="/dashboard#scan-qr" role="menuitem" className={menuLinkClass(true)} onClick={closeMenus}>
-                  Scan QR
-                </Link>
-                <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Events &amp; analytics
-                </Link>
-              </>
-            ) : (
-              <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                Host dashboard
-              </Link>
-            )}
-          </NavDropdown>
-
-          <NavDropdown
-            label="User"
-            menuId={userMenuId}
-            open={openMenu === "user"}
-            onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
-          >
-            {authedEmail ? (
-              <>
-                <Link href="/account" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Account
-                </Link>
-                <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  My tickets
-                </Link>
-                <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Contact
-                </Link>
-                <div className="my-1 border-t border-white/[0.08]" role="separator" />
-                <button type="button" role="menuitem" onClick={onSignOut} className={`${menuLinkClass()} inline-flex items-center gap-2`}>
-                  <LogOut className="h-4 w-4 opacity-70" aria-hidden />
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  My tickets
-                </Link>
-                <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Sample event
-                </Link>
-                <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Contact
-                </Link>
-                <div className="my-1 border-t border-white/[0.08]" role="separator" />
-                <Link href="/signup" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Register
-                </Link>
-                <Link href="/login" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Login
-                </Link>
-              </>
-            )}
-          </NavDropdown>
-        </nav>
 
         <button
           type="button"
@@ -207,13 +127,102 @@ export function SiteHeader() {
           {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </button>
 
-        <Link
-          href="/create-event"
-          className="hidden h-9 shrink-0 items-center rounded-full bg-white px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-zinc-200 sm:h-10 sm:px-5 sm:text-[11px] lg:inline-flex"
-          onClick={closeMenus}
-        >
-          Create event
-        </Link>
+        <div className="hidden w-[112px] lg:block" />
+
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center lg:flex">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-black/40 px-2 py-1.5 shadow-[0_14px_40px_-24px_rgba(0,0,0,0.9)] backdrop-blur-md">
+            <Link
+              href="/"
+              onClick={closeMenus}
+              className="inline-flex h-9 items-center rounded-full px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-300 transition hover:bg-white/[0.07] hover:text-white"
+            >
+              Home
+            </Link>
+
+            <NavDropdown
+              label="Host tools"
+              menuId={hostMenuId}
+              open={openMenu === "host"}
+              onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
+              menuClassName="left-1/2 -translate-x-1/2"
+            >
+              {authedEmail ? (
+                <>
+                  <Link href="/account#my-events" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    My events
+                  </Link>
+                  <Link href="/dashboard#scan-qr" role="menuitem" className={menuLinkClass(true)} onClick={closeMenus}>
+                    Scan QR
+                  </Link>
+                  <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Events &amp; analytics
+                  </Link>
+                </>
+              ) : (
+                <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Host dashboard
+                </Link>
+              )}
+            </NavDropdown>
+
+            <NavDropdown
+              label="User"
+              menuId={userMenuId}
+              open={openMenu === "user"}
+              onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
+              menuClassName="left-1/2 -translate-x-1/2"
+            >
+              {authedEmail ? (
+                <>
+                  <Link href="/account" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Account
+                  </Link>
+                  <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    My tickets
+                  </Link>
+                  <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Sample event
+                  </Link>
+                  <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Contact
+                  </Link>
+                  <div className="my-1 border-t border-white/[0.08]" role="separator" />
+                  <button type="button" role="menuitem" onClick={onSignOut} className={`${menuLinkClass()} inline-flex items-center gap-2`}>
+                    <LogOut className="h-4 w-4 opacity-70" aria-hidden />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    My tickets
+                  </Link>
+                  <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Sample event
+                  </Link>
+                  <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Contact
+                  </Link>
+                  <div className="my-1 border-t border-white/[0.08]" role="separator" />
+                  <Link href="/signup" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Register
+                  </Link>
+                  <Link href="/login" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                    Login
+                  </Link>
+                </>
+              )}
+            </NavDropdown>
+
+            <Link
+              href="/create-event"
+              className="inline-flex h-9 items-center rounded-full bg-white px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-zinc-200"
+              onClick={closeMenus}
+            >
+              Create event
+            </Link>
+          </div>
+        </nav>
       </div>
       {mobileOpen && (
         <div className="border-t border-white/[0.08] px-4 py-4 lg:hidden">

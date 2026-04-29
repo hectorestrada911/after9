@@ -30,7 +30,7 @@ const scenes = [
     body: "Every party, show, and event near you, curated by students, for students.",
     leftTag: "BUILT FOR\nCOLLEGE NIGHTS",
     rightTag: "TRUSTED AT\n500+ CAMPUSES",
-    cta: { label: "Browse events", href: "/demo" },
+    cta: { label: "Sample event", href: "/demo" },
   },
   {
     eyebrow: ".edu verified",
@@ -39,7 +39,7 @@ const scenes = [
     body: "Only verified students see private events and buy tickets. Real community, no randos.",
     leftTag: "BOTS\nNOT WELCOME",
     rightTag: ".EDU GATED\nBY DEFAULT",
-    cta: { label: "Browse events", href: "/demo" },
+    cta: { label: "Sample event", href: "/demo" },
   },
   {
     eyebrow: "Door flow",
@@ -177,15 +177,30 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
   const badgeY = useTransform(progress, [0.72, 0.84], [14, 0]);
   const badgeOpacity = useTransform(progress, [0.72, 0.82], [0, 1]);
 
-  const qr = [
-    1,1,1,0,1,1,1,
-    1,0,1,0,1,0,1,
-    1,1,1,1,0,1,1,
-    0,1,0,0,1,0,0,
-    1,0,1,0,1,1,1,
-    0,0,1,0,0,1,0,
-    1,1,1,0,1,0,1,
+  const qrRows = [
+    "111111100001011111111",
+    "100000101111010000001",
+    "101110100010010111101",
+    "101110101001010111101",
+    "101110100111010111101",
+    "100000101010010000001",
+    "111111101010011111111",
+    "000000000111000000000",
+    "100101111010111010011",
+    "011001001111010001110",
+    "101110111001111000101",
+    "001011000111001110100",
+    "110100111000111011001",
+    "000000001101000001000",
+    "111111101001011111010",
+    "100000101111010000111",
+    "101110101001110111101",
+    "101110100110010111001",
+    "101110101010011011101",
+    "100000100111001001001",
+    "111111101001010111111",
   ];
+  const qrModules = qrRows.join("").split("");
   return (
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "56px 24px 24px" }}>
       <motion.p style={{ opacity: headOpacity, y: headY, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.2em", color: "#52525b" }}>
@@ -197,10 +212,26 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
       <motion.p style={{ opacity: headOpacity, y: headY, fontSize: 11, color: "#52525b" }}>
         Tonight · Main Stage · GA
       </motion.p>
-      <motion.div style={{ opacity: qrOpacity, scale: qrScale, marginTop: 18, width: 140, height: 140, background: "#fff", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", padding: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, width: "100%", height: "100%" }}>
-          {qr.map((c, i) => (
-            <div key={i} style={{ background: c ? "#000" : "#fff", borderRadius: 1 }} />
+      <motion.div
+        style={{
+          opacity: qrOpacity,
+          scale: qrScale,
+          marginTop: 14,
+          width: 152,
+          height: 152,
+          background: "linear-gradient(180deg, #090b12 0%, #05070d 100%)",
+          borderRadius: 20,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 12,
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 14px 28px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.035)",
+        }}
+      >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(21, 1fr)", gap: 1.2, width: "100%", height: "100%" }}>
+          {qrModules.map((cell, i) => (
+            <div key={i} style={{ background: cell === "1" ? "#f5f8ff" : "#0a1020", borderRadius: 0.8 }} />
           ))}
         </div>
       </motion.div>

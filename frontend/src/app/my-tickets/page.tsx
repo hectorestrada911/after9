@@ -196,7 +196,7 @@ export default async function MyTicketsPage() {
           <p className="mt-4 text-lg font-bold text-white">No tickets yet</p>
           <p className="mt-1 text-sm text-zinc-500">When you buy tickets, they will appear here with QR codes.</p>
           <Link href="/" className="mt-6 inline-flex h-10 items-center rounded-full bg-white px-5 text-xs font-bold uppercase tracking-wide text-black">
-            Browse events
+            Find events
           </Link>
         </div>
       ) : (

@@ -1,12 +1,11 @@
 "use client";
 
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   motion,
   AnimatePresence,
   useScroll,
-  useSpring,
   useTransform,
   useReducedMotion,
   type MotionValue,
@@ -339,25 +338,13 @@ export function HomeTopSection() {
     return () => clearInterval(id);
   }, [reduceMotion]);
 
-  const { scrollY } = useScroll();
-  const [top, setTop]     = useState(0);
-  const [range, setRange] = useState(2800);
-
-  useLayoutEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const recalc = () => {
-      setTop(el.offsetTop);
-      setRange(Math.max(1, el.offsetHeight - window.innerHeight));
-    };
-    recalc();
-    window.addEventListener("resize", recalc);
-    return () => window.removeEventListener("resize", recalc);
-  }, []);
-
-  const rawProgress = useTransform(scrollY, [top, top + range], [0, 1], { clamp: true });
-  // Smooth incoming scroll jitter while preserving the original choreography.
-  const progress = useSpring(rawProgress, { stiffness: 120, damping: 24, mass: 0.24 });
+  // Use section-scoped progress to reduce global scroll work/jitter.
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+  // Keep interactions tightly coupled to scroll so motion starts immediately.
+  const progress = scrollYProgress;
 
   /* scene fades */
   const s1 = useTransform(progress, [0, 0.26, 0.36], [1, 1, 0]);
@@ -397,8 +384,12 @@ export function HomeTopSection() {
   const phoneOps = [p1, p2, p3];
 
   return (
-    <div ref={containerRef} className="relative bg-black" style={{ minHeight: "320vh" }}>
-      <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
+    <div
+      ref={containerRef}
+      className="relative bg-black"
+      style={{ minHeight: "320vh", contain: "layout paint", isolation: "isolate" }}
+    >
+      <div className="sticky top-0 h-screen" style={{ overflow: "clip", transform: "translateZ(0)" }}>
 
         {/* ambient glows — radial gradients (no `filter: blur`) so we don't repaint on scroll */}
         <div
@@ -541,13 +532,13 @@ export function HomeTopSection() {
               }
             >
               <PhoneShell>
-                <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity" }}>
+                <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
                   <FeedScreen progress={progress} />
                 </motion.div>
-                <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity" }}>
+                <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
                   <VerifyScreen progress={progress} />
                 </motion.div>
-                <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0, willChange: "opacity" }}>
+                <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
                   <TicketScreen progress={progress} />
                 </motion.div>
               </PhoneShell>

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 
 interface AnimatedTextCycleProps {
   words: string[];
@@ -35,7 +35,7 @@ export default function AnimatedTextCycle({
     return () => clearInterval(timer);
   }, [interval, words.length]);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: {
       y: -20,
       opacity: 0,
@@ -47,7 +47,7 @@ export default function AnimatedTextCycle({
       filter: "blur(0px)",
       transition: {
         duration: 0.4,
-        ease: "easeOut",
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
     exit: {
@@ -56,7 +56,7 @@ export default function AnimatedTextCycle({
       filter: "blur(8px)",
       transition: {
         duration: 0.3,
-        ease: "easeIn",
+        ease: [0.42, 0, 1, 1],
       },
     },
   };

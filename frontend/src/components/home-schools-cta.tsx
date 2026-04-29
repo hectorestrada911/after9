@@ -122,6 +122,12 @@ export function HomeSchoolsCta() {
                 Sample event →
               </Link>
             </div>
+            <p className="mt-5 text-xs text-zinc-500">
+              Questions before you join?{" "}
+              <Link href="/faq" className="font-medium text-zinc-300 underline-offset-2 transition hover:text-white hover:underline">
+                Read the FAQ
+              </Link>
+            </p>
           </motion.div>
         </div>
 

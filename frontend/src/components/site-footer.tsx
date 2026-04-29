@@ -50,6 +50,7 @@ export function SiteFooter() {
             <ul className="space-y-3 text-sm text-zinc-400">
               <li><Link href="/demo" className="transition hover:text-white">Sample event</Link></li>
               <li><Link href="/my-tickets" className="transition hover:text-white">My tickets</Link></li>
+              <li><Link href="/faq" className="transition hover:text-white">FAQ</Link></li>
               <li><Link href="/login" className="transition hover:text-white">Login</Link></li>
               <li><Link href="/signup" className="transition hover:text-white">Sign up</Link></li>
               <li><Link href="/contact" className="transition hover:text-white">Contact</Link></li>
@@ -59,6 +60,7 @@ export function SiteFooter() {
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Company</p>
             <ul className="space-y-3 text-sm text-zinc-400">
               <li><Link href="/contact?topic=business" className="transition hover:text-white">Work with us</Link></li>
+              <li><Link href="/faq" className="transition hover:text-white">Frequently asked questions</Link></li>
               <li><Link href="/terms" className="transition hover:text-white">Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="transition hover:text-white">Privacy Policy</Link></li>
             </ul>
@@ -72,6 +74,8 @@ export function SiteFooter() {
             <Link href="/terms" className="transition hover:text-zinc-300">Terms</Link>
             <span className="text-zinc-700">•</span>
             <Link href="/privacy" className="transition hover:text-zinc-300">Privacy</Link>
+            <span className="text-zinc-700">•</span>
+            <Link href="/faq" className="transition hover:text-zinc-300">FAQ</Link>
           </div>
         </div>
       </div>

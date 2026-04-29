@@ -3,9 +3,72 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { LogOut, Menu, Search, UserRound, X } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
+import { ChevronDown, LogOut, Menu, Search, UserRound, X } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+type NavDropdownProps = {
+  label: string;
+  menuId: string;
+  open: boolean;
+  onOpenChange: (nextOpen: boolean) => void; // eslint-disable-line no-unused-vars -- callback parameter names document the API
+  children: ReactNode;
+};
+
+function NavDropdown({ label, menuId, open, onOpenChange, children }: NavDropdownProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: PointerEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        onOpenChange(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onOpenChange(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, onOpenChange]);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        id={`${menuId}-trigger`}
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-haspopup="menu"
+        onClick={() => onOpenChange(!open)}
+        className="inline-flex items-center gap-1 rounded-lg px-1.5 py-1 text-sm font-medium text-zinc-300 transition hover:text-white"
+      >
+        {label}
+        <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition ${open ? "rotate-180" : ""}`} aria-hidden />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          aria-labelledby={`${menuId}-trigger`}
+          className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[220px] rounded-xl border border-white/[0.1] bg-[#0a0a0a] py-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.04]"
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function menuLinkClass(highlight?: boolean) {
+  return `block w-full px-3 py-2.5 text-left text-sm transition hover:bg-white/[0.06] ${
+    highlight ? "font-semibold text-brand-green hover:text-emerald-300" : "font-medium text-zinc-200 hover:text-white"
+  }`;
+}
 
 export function SiteHeader() {
   const supabase = getSupabaseBrowserClient();
@@ -13,6 +76,11 @@ export function SiteHeader() {
   const hideHeader = pathname === "/create-event";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authedEmail, setAuthedEmail] = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState<"host" | "user" | null>(null);
+  const hostMenuId = useId();
+  const userMenuId = useId();
+
+  const closeMenus = useCallback(() => setOpenMenu(null), []);
 
   useEffect(() => {
     let ignore = false;
@@ -37,20 +105,15 @@ export function SiteHeader() {
     await supabase.auth.signOut();
     setAuthedEmail(null);
     setMobileOpen(false);
+    closeMenus();
   }
-
-  const discoverItems = [
-    { href: "/", label: "Browse events" },
-    { href: "/demo", label: "Sample event" },
-    { href: "/contact", label: "Contact" },
-  ];
 
   if (hideHeader) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
       <div className="container-page flex h-[3.25rem] min-w-0 items-center gap-3 sm:h-16 sm:gap-6">
-        <Link href="/" className="flex shrink-0 items-center">
+        <Link href="/" className="flex shrink-0 items-center" onClick={closeMenus}>
           <Image src="/rage-logo.png" alt="RAGE" width={160} height={48} className="h-8 w-auto object-contain sm:h-10" priority loading="eager" />
         </Link>
 
@@ -63,55 +126,76 @@ export function SiteHeader() {
           />
         </div>
 
-        <nav className="ml-auto hidden items-center gap-7 text-sm font-medium text-zinc-400 lg:ml-0 lg:flex">
-          {authedEmail ? (
-            <>
-              <Link href="/account" className="font-semibold text-white transition hover:text-brand-green">
-                Account
-              </Link>
-              <Link href="/account#my-events" className="transition hover:text-white">
-                My events
-              </Link>
-              <Link href="/dashboard#scan-qr" className="font-semibold text-brand-green transition hover:text-emerald-300">
-                Scan QR
-              </Link>
-              <Link href="/my-tickets" className="transition hover:text-white">
-                My tickets
-              </Link>
-              <Link href="/dashboard" className="transition hover:text-white">
-                {"Events & analytics"}
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/my-tickets" className="transition hover:text-white">
-                My tickets
-              </Link>
-              <Link href="/dashboard" className="transition hover:text-white">
+        <nav className="ml-auto hidden items-center gap-1 text-sm lg:ml-0 lg:flex">
+          <NavDropdown
+            label="Host tools"
+            menuId={hostMenuId}
+            open={openMenu === "host"}
+            onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
+          >
+            {authedEmail ? (
+              <>
+                <Link href="/account#my-events" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  My events
+                </Link>
+                <Link href="/dashboard#scan-qr" role="menuitem" className={menuLinkClass(true)} onClick={closeMenus}>
+                  Scan QR
+                </Link>
+                <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Events &amp; analytics
+                </Link>
+              </>
+            ) : (
+              <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
                 Host dashboard
               </Link>
-            </>
-          )}
-          {discoverItems.map((item) => (
-            <Link key={item.href} href={item.href} className="transition hover:text-white">
-              {item.label}
-            </Link>
-          ))}
-          {authedEmail ? (
-            <button type="button" onClick={onSignOut} className="inline-flex items-center gap-1.5 text-zinc-300 transition hover:text-white">
-              <LogOut className="h-4 w-4" aria-hidden />
-              Logout
-            </button>
-          ) : (
-            <div className="inline-flex items-center gap-4">
-              <Link href="/signup" className="transition hover:text-white">
-                Register
-              </Link>
-              <Link href="/login" className="transition hover:text-white">
-                Login
-              </Link>
-            </div>
-          )}
+            )}
+          </NavDropdown>
+
+          <NavDropdown
+            label="User"
+            menuId={userMenuId}
+            open={openMenu === "user"}
+            onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
+          >
+            {authedEmail ? (
+              <>
+                <Link href="/account" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Account
+                </Link>
+                <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  My tickets
+                </Link>
+                <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Contact
+                </Link>
+                <div className="my-1 border-t border-white/[0.08]" role="separator" />
+                <button type="button" role="menuitem" onClick={onSignOut} className={`${menuLinkClass()} inline-flex items-center gap-2`}>
+                  <LogOut className="h-4 w-4 opacity-70" aria-hidden />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  My tickets
+                </Link>
+                <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Sample event
+                </Link>
+                <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Contact
+                </Link>
+                <div className="my-1 border-t border-white/[0.08]" role="separator" />
+                <Link href="/signup" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Register
+                </Link>
+                <Link href="/login" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                  Login
+                </Link>
+              </>
+            )}
+          </NavDropdown>
         </nav>
 
         <button
@@ -126,23 +210,17 @@ export function SiteHeader() {
         <Link
           href="/create-event"
           className="hidden h-9 shrink-0 items-center rounded-full bg-white px-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-zinc-200 sm:h-10 sm:px-5 sm:text-[11px] lg:inline-flex"
+          onClick={closeMenus}
         >
           Create event
         </Link>
       </div>
       {mobileOpen && (
         <div className="border-t border-white/[0.08] px-4 py-4 lg:hidden">
-          <div className="container-page space-y-2 px-0">
+          <div className="container-page space-y-1 px-0">
+            <p className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#4BFA94]">Host tools</p>
             {authedEmail ? (
               <>
-                <p className="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Your account</p>
-                <Link
-                  href="/account"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.05]"
-                >
-                  Account hub
-                </Link>
                 <Link
                   href="/account#my-events"
                   onClick={() => setMobileOpen(false)}
@@ -158,72 +236,71 @@ export function SiteHeader() {
                   Scan QR
                 </Link>
                 <Link
-                  href="/my-tickets"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  My tickets
-                </Link>
-                <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
                   className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
                 >
-                  {"Events & analytics"}
+                  Events &amp; analytics
                 </Link>
               </>
             ) : (
-              <>
-                <Link
-                  href="/my-tickets"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  My tickets
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-                >
-                  Host dashboard
-                </Link>
-              </>
-            )}
-            <p className="px-2.5 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Discover</p>
-            {discoverItems.map((item) => (
               <Link
-                key={item.href}
-                href={item.href}
+                href="/dashboard"
                 onClick={() => setMobileOpen(false)}
                 className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
               >
-                {item.label}
+                Host dashboard
               </Link>
-            ))}
-            <Link
-              href="/create-event"
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-lg bg-white px-2.5 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200"
-            >
-              Create event
-            </Link>
+            )}
+
+            <p className="px-2.5 pb-1 pt-4 text-[10px] font-bold uppercase tracking-wider text-[#4BFA94]">User</p>
             {authedEmail ? (
               <>
-                <p className="inline-flex items-center gap-1.5 px-2.5 pt-2 text-xs text-zinc-500">
-                  <UserRound className="h-3.5 w-3.5" aria-hidden />
-                  {authedEmail}
-                </p>
-                <button
-                  type="button"
-                  onClick={onSignOut}
-                  className="block w-full rounded-lg px-2.5 py-2 text-left text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                <Link
+                  href="/account"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-white transition hover:bg-white/[0.05]"
                 >
-                  Logout
-                </button>
+                  Account
+                </Link>
+                <Link
+                  href="/my-tickets"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  My tickets
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Contact
+                </Link>
               </>
             ) : (
               <>
+                <Link
+                  href="/my-tickets"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  My tickets
+                </Link>
+                <Link
+                  href="/demo"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Sample event
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Contact
+                </Link>
                 <Link
                   href="/signup"
                   onClick={() => setMobileOpen(false)}
@@ -240,6 +317,30 @@ export function SiteHeader() {
                 </Link>
               </>
             )}
+
+            <Link
+              href="/create-event"
+              onClick={() => setMobileOpen(false)}
+              className="mt-3 block rounded-lg bg-white px-2.5 py-2.5 text-center text-sm font-semibold text-black transition hover:bg-zinc-200"
+            >
+              Create event
+            </Link>
+
+            {authedEmail ? (
+              <>
+                <p className="inline-flex items-center gap-1.5 px-2.5 pt-3 text-xs text-zinc-500">
+                  <UserRound className="h-3.5 w-3.5" aria-hidden />
+                  {authedEmail}
+                </p>
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  className="mt-1 block w-full rounded-lg px-2.5 py-2 text-left text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Logout
+                </button>
+              </>
+            ) : null}
           </div>
         </div>
       )}

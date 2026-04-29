@@ -39,25 +39,25 @@ export function SiteFooter() {
             </div>
           </div>
           <div>
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Discover</p>
-            <ul className="space-y-3 text-sm text-zinc-400">
-              <li><Link href="/demo" className="transition hover:text-white">Browse events</Link></li>
-              <li><Link href="/demo" className="transition hover:text-white">Sample event</Link></li>
-            </ul>
-          </div>
-          <div>
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Hosts</p>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Host tools</p>
             <ul className="space-y-3 text-sm text-zinc-400">
               <li><Link href="/create-event" className="transition hover:text-white">Create event</Link></li>
               <li><Link href="/dashboard" className="transition hover:text-white">Dashboard</Link></li>
-              <li><Link href="/login" className="transition hover:text-white">Login</Link></li>
+            </ul>
+          </div>
+          <div>
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">User</p>
+            <ul className="space-y-3 text-sm text-zinc-400">
+              <li><Link href="/demo" className="transition hover:text-white">Sample event</Link></li>
               <li><Link href="/my-tickets" className="transition hover:text-white">My tickets</Link></li>
+              <li><Link href="/login" className="transition hover:text-white">Login</Link></li>
+              <li><Link href="/signup" className="transition hover:text-white">Sign up</Link></li>
+              <li><Link href="/contact" className="transition hover:text-white">Contact</Link></li>
             </ul>
           </div>
           <div>
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Company</p>
             <ul className="space-y-3 text-sm text-zinc-400">
-              <li><Link href="/contact" className="transition hover:text-white">Get help</Link></li>
               <li><a href="mailto:partnerships@rage.events?subject=Business%20Inquiry%20-%20RAGE" className="transition hover:text-white">Work with us</a></li>
               <li><Link href="/terms" className="transition hover:text-white">Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="transition hover:text-white">Privacy Policy</Link></li>

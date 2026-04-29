@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, LogOut, Menu, UserRound, X } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -66,15 +65,13 @@ function NavDropdown({ label, menuId, open, onOpenChange, children, menuClassNam
 }
 
 function menuLinkClass(highlight?: boolean) {
-  return `block w-full px-3 py-2.5 text-left text-sm transition hover:bg-white/[0.06] ${
+  return `mx-1 block w-[calc(100%-0.5rem)] rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-white/[0.06] ${
     highlight ? "font-semibold text-brand-green hover:text-emerald-300" : "font-medium text-zinc-200 hover:text-white"
   }`;
 }
 
 export function SiteHeader() {
   const supabase = getSupabaseBrowserClient();
-  const pathname = usePathname();
-  const hideHeader = pathname === "/create-event";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authedEmail, setAuthedEmail] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<"host" | "user" | null>(null);
@@ -109,10 +106,13 @@ export function SiteHeader() {
     closeMenus();
   }
 
-  if (hideHeader) return null;
-
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent 0%, rgba(75,250,148,0.45) 50%, transparent 100%)" }}
+      />
       <div className="container-page flex h-[3.25rem] min-w-0 items-center justify-between gap-3 sm:h-16 sm:gap-6">
         <Link href="/" className="flex shrink-0 items-center" onClick={closeMenus}>
           <Image src="/rage-logo.png" alt="RAGE" width={160} height={48} className="h-8 w-auto object-contain sm:h-10" priority loading="eager" />
@@ -130,7 +130,7 @@ export function SiteHeader() {
         <div className="hidden w-[112px] lg:block" />
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center lg:flex">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-black/40 px-2 py-1.5 shadow-[0_14px_40px_-24px_rgba(0,0,0,0.9)] backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-gradient-to-b from-white/[0.06] to-white/[0.02] px-2 py-1.5 shadow-[0_16px_44px_-24px_rgba(0,0,0,0.92)] backdrop-blur-md">
             <Link
               href="/"
               onClick={closeMenus}
@@ -139,80 +139,84 @@ export function SiteHeader() {
               Home
             </Link>
 
-            <NavDropdown
-              label="Host tools"
-              menuId={hostMenuId}
-              open={openMenu === "host"}
-              onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
-              menuClassName="left-1/2 -translate-x-1/2"
-            >
-              {authedEmail ? (
-                <>
-                  <Link href="/account#my-events" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    My events
-                  </Link>
-                  <Link href="/dashboard#scan-qr" role="menuitem" className={menuLinkClass(true)} onClick={closeMenus}>
-                    Scan QR
-                  </Link>
+            <div onMouseEnter={() => setOpenMenu("host")} onMouseLeave={() => setOpenMenu((curr) => (curr === "host" ? null : curr))}>
+              <NavDropdown
+                label="Host tools"
+                menuId={hostMenuId}
+                open={openMenu === "host"}
+                onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
+                menuClassName="left-1/2 -translate-x-1/2"
+              >
+                {authedEmail ? (
+                  <>
+                    <Link href="/account#my-events" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      My events
+                    </Link>
+                    <Link href="/dashboard#scan-qr" role="menuitem" className={menuLinkClass(true)} onClick={closeMenus}>
+                      Scan QR
+                    </Link>
+                    <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Events &amp; analytics
+                    </Link>
+                  </>
+                ) : (
                   <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Events &amp; analytics
+                    Host dashboard
                   </Link>
-                </>
-              ) : (
-                <Link href="/dashboard" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                  Host dashboard
-                </Link>
-              )}
-            </NavDropdown>
+                )}
+              </NavDropdown>
+            </div>
 
-            <NavDropdown
-              label="User"
-              menuId={userMenuId}
-              open={openMenu === "user"}
-              onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
-              menuClassName="left-1/2 -translate-x-1/2"
-            >
-              {authedEmail ? (
-                <>
-                  <Link href="/account" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Account
-                  </Link>
-                  <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    My tickets
-                  </Link>
-                  <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Sample event
-                  </Link>
-                  <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Contact
-                  </Link>
-                  <div className="my-1 border-t border-white/[0.08]" role="separator" />
-                  <button type="button" role="menuitem" onClick={onSignOut} className={`${menuLinkClass()} inline-flex items-center gap-2`}>
-                    <LogOut className="h-4 w-4 opacity-70" aria-hidden />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    My tickets
-                  </Link>
-                  <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Sample event
-                  </Link>
-                  <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Contact
-                  </Link>
-                  <div className="my-1 border-t border-white/[0.08]" role="separator" />
-                  <Link href="/signup" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Register
-                  </Link>
-                  <Link href="/login" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
-                    Login
-                  </Link>
-                </>
-              )}
-            </NavDropdown>
+            <div onMouseEnter={() => setOpenMenu("user")} onMouseLeave={() => setOpenMenu((curr) => (curr === "user" ? null : curr))}>
+              <NavDropdown
+                label="User"
+                menuId={userMenuId}
+                open={openMenu === "user"}
+                onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
+                menuClassName="left-1/2 -translate-x-1/2"
+              >
+                {authedEmail ? (
+                  <>
+                    <Link href="/account" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Account
+                    </Link>
+                    <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      My tickets
+                    </Link>
+                    <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Sample event
+                    </Link>
+                    <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Contact
+                    </Link>
+                    <div className="my-1 border-t border-white/[0.08]" role="separator" />
+                    <button type="button" role="menuitem" onClick={onSignOut} className={`${menuLinkClass()} inline-flex items-center gap-2`}>
+                      <LogOut className="h-4 w-4 opacity-70" aria-hidden />
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/my-tickets" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      My tickets
+                    </Link>
+                    <Link href="/demo" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Sample event
+                    </Link>
+                    <Link href="/contact" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Contact
+                    </Link>
+                    <div className="my-1 border-t border-white/[0.08]" role="separator" />
+                    <Link href="/signup" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Register
+                    </Link>
+                    <Link href="/login" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
+                      Login
+                    </Link>
+                  </>
+                )}
+              </NavDropdown>
+            </div>
 
             <Link
               href="/create-event"
@@ -253,13 +257,22 @@ export function SiteHeader() {
                 </Link>
               </>
             ) : (
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
-              >
-                Host dashboard
-              </Link>
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.05] hover:text-white"
+                >
+                  Host dashboard
+                </Link>
+                <Link
+                  href={`/login?next=${encodeURIComponent("/dashboard#scan-qr")}`}
+                  onClick={() => setMobileOpen(false)}
+                  className="block rounded-lg px-2.5 py-2 text-sm font-semibold text-brand-green transition hover:bg-white/[0.05] hover:text-emerald-300"
+                >
+                  Scan QR
+                </Link>
+              </>
             )}
 
             <p className="px-2.5 pb-1 pt-4 text-[10px] font-bold uppercase tracking-wider text-[#4BFA94]">User</p>

@@ -58,7 +58,7 @@ export function SiteFooter() {
           <div>
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Company</p>
             <ul className="space-y-3 text-sm text-zinc-400">
-              <li><a href="mailto:partnerships@rage.events?subject=Business%20Inquiry%20-%20RAGE" className="transition hover:text-white">Work with us</a></li>
+              <li><Link href="/contact?topic=business" className="transition hover:text-white">Work with us</Link></li>
               <li><Link href="/terms" className="transition hover:text-white">Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="transition hover:text-white">Privacy Policy</Link></li>
             </ul>

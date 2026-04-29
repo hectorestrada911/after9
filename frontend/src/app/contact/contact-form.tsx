@@ -103,7 +103,7 @@ export function ContactForm() {
           maxLength={8000}
           rows={6}
           className={`${fieldClass} min-h-[9rem] resize-y`}
-          placeholder="How can we help? (at least a few words)"
+          placeholder="Tell us a little about your request."
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}

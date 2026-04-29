@@ -164,6 +164,7 @@ function FeedScreen({ progress }: { progress: MotionValue<number> }) {
 
 /* ─── phone screen 2: .edu verify ───────────────────────────────── */
 function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
+  const reduceMotion = useReducedMotion();
   const badgeScale = useTransform(progress, [0.32, 0.46], [0.6, 1]);
   const badgeOpacity = useTransform(progress, [0.32, 0.42], [0, 1]);
   const titleY = useTransform(progress, [0.36, 0.48], [16, 0]);
@@ -173,22 +174,14 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
 
   return (
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "56px 24px 24px" }}>
-      <motion.div
-        style={{
-          opacity: titleOpacity,
-          y: titleY,
-          width: "100%",
-          maxWidth: 210,
-          height: 54,
-          borderRadius: 12,
-          backgroundImage:
-            "linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.58)), url(https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=700&q=70)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          border: "1px solid rgba(255,255,255,0.12)",
-          marginBottom: 14,
-        }}
-      />
+      <motion.div style={{ opacity: formOpacity, y: formY, marginBottom: 10, display: "flex", gap: 6 }}>
+        <span style={{ fontSize: 8, color: "#4BFA94", border: "1px solid rgba(75,250,148,0.30)", background: "rgba(75,250,148,0.12)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          Campus verified
+        </span>
+        <span style={{ fontSize: 8, color: "#d4d4d8", border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.04)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          One-tap check
+        </span>
+      </motion.div>
       <motion.div
         style={{
           scale: badgeScale,
@@ -197,7 +190,10 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
           border: "1px solid rgba(75,250,148,0.3)",
           background: "rgba(75,250,148,0.08)",
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28,
+          boxShadow: "0 0 20px rgba(75,250,148,0.15)",
         }}
+        animate={reduceMotion ? undefined : { scale: [1, 1.04, 1] }}
+        transition={reduceMotion ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
       >
         🎓
       </motion.div>
@@ -205,26 +201,46 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
         .edu required
       </motion.p>
       <motion.p style={{ opacity: titleOpacity, y: titleY, marginTop: 8, fontSize: 18, fontWeight: 900, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>
-        Verify your<br />school email
+        Verify your email
       </motion.p>
-      <motion.p style={{ opacity: titleOpacity, y: titleY, marginTop: 10, fontSize: 11, color: "#52525b", textAlign: "center", lineHeight: 1.5 }}>
-        Only verified students can access<br />private events and buy tickets.
+      <motion.p style={{ opacity: titleOpacity, y: titleY, marginTop: 10, fontSize: 11, color: "#9ca3af", textAlign: "center", lineHeight: 1.5 }}>
+        Student-only access.
       </motion.p>
       <motion.div style={{ opacity: formOpacity, y: formY, marginTop: 20, width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ background: "#141414", border: "1px solid #262626", borderRadius: 16, padding: "12px 16px" }}>
-          <span style={{ fontSize: 11, color: "#3f3f46" }}>you@university.edu</span>
+        <div
+          style={{
+            background: "linear-gradient(180deg, rgba(20,20,20,0.95), rgba(12,12,12,0.95))",
+            border: "1px solid rgba(75,250,148,0.38)",
+            borderRadius: 16,
+            padding: "12px 16px",
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 16px rgba(75,250,148,0.14)",
+          }}
+        >
+          <span style={{ fontSize: 11, color: "#e5e7eb" }}>you@university.edu</span>
         </div>
-        <div style={{ background: "#4BFA94", borderRadius: 16, padding: "12px 16px", textAlign: "center" }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#000" }}>VERIFY &amp; GET IN</span>
+        <div style={{ position: "relative", background: "#63ffad", borderRadius: 16, padding: "12px 16px", textAlign: "center", overflow: "hidden", boxShadow: "0 10px 24px rgba(75,250,148,0.3)" }}>
+          <span style={{ position: "relative", zIndex: 2, fontSize: 11, fontWeight: 800, letterSpacing: "0.06em", color: "#000", textTransform: "uppercase" }}>
+            Verify &amp; get in
+          </span>
+          <motion.div
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              width: 56,
+              background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.26), rgba(255,255,255,0))",
+              transform: "skewX(-18deg)",
+            }}
+            animate={reduceMotion ? undefined : { x: [-80, 280] }}
+            transition={reduceMotion ? undefined : { duration: 3.2, repeat: Infinity, ease: "linear", repeatDelay: 1.2 }}
+          />
         </div>
       </motion.div>
-      <p style={{ marginTop: 14, fontSize: 10, color: "#3f3f46", textAlign: "center" }}>Any accredited .edu address works</p>
+      <p style={{ marginTop: 14, fontSize: 10, color: "#a1a1aa", textAlign: "center" }}>.edu only</p>
       <motion.div style={{ opacity: formOpacity, y: formY, marginTop: 10, display: "flex", gap: 6 }}>
-        <span style={{ fontSize: 8, color: "#4BFA94", border: "1px solid rgba(75,250,148,0.26)", background: "rgba(75,250,148,0.1)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 8, color: "#4BFA94", border: "1px solid rgba(75,250,148,0.30)", background: "rgba(75,250,148,0.12)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
           Verified in 8s
-        </span>
-        <span style={{ fontSize: 8, color: "#a1a1aa", border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.04)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-          Anti-bot check
         </span>
       </motion.div>
     </div>
@@ -431,13 +447,13 @@ export function HomeTopSection() {
 
   /* scene fades */
   const s1 = useTransform(progress, [0, 0.20, 0.30], [1, 1, 0]);
-  const s2 = useTransform(progress, [0.24, 0.34, 0.44, 0.54], [0, 1, 1, 0]);
-  const s3 = useTransform(progress, [0.46, 0.56, 1], [0, 1, 1]);
+  const s2 = useTransform(progress, [0.24, 0.34, 0.54, 0.64], [0, 1, 1, 0]);
+  const s3 = useTransform(progress, [0.56, 0.66, 1], [0, 1, 1]);
 
   /* phone screens */
   const p1 = useTransform(progress, [0, 0.22, 0.32], [1, 1, 0]);
-  const p2 = useTransform(progress, [0.26, 0.36, 0.46, 0.56], [0, 1, 1, 0]);
-  const p3 = useTransform(progress, [0.48, 0.58, 1], [0, 1, 1]);
+  const p2 = useTransform(progress, [0.26, 0.36, 0.56, 0.66], [0, 1, 1, 0]);
+  const p3 = useTransform(progress, [0.58, 0.68, 1], [0, 1, 1]);
 
   /*
    * Phone is VISIBLE on initial load — angled at bottom of screen like doorlist.

@@ -10,6 +10,7 @@ import {
   useReducedMotion,
   type MotionValue,
 } from "framer-motion";
+import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
 
 const cyclingPhrases = [
   "Your night.",
@@ -26,6 +27,7 @@ const scenes = [
     eyebrow: "Discover",
     line1: "Your campus.",
     line2: "Your night.",
+    cycleWords: ["Your night.", "Your vibe.", "Your scene."],
     body: "Every party, show, and event near you, curated by students, for students.",
     leftTag: "BUILT FOR\nCOLLEGE NIGHTS",
     rightTag: "TRUSTED AT\n500+ CAMPUSES",
@@ -35,6 +37,7 @@ const scenes = [
     eyebrow: ".edu verified",
     line1: "School email",
     line2: "only.",
+    cycleWords: ["only.", "verified.", "protected."],
     body: "Only verified students see private events and buy tickets. Real community, no randos.",
     leftTag: "BOTS\nNOT WELCOME",
     rightTag: ".EDU GATED\nBY DEFAULT",
@@ -44,6 +47,7 @@ const scenes = [
     eyebrow: "Door flow",
     line1: "Crowd in.",
     line2: "Friction out.",
+    cycleWords: ["Friction out.", "Scan in.", "Go fast."],
     body: "QR tickets on your phone, scanned at the door in seconds. Zero paper, zero lines.",
     leftTag: "SCAN.\nGO. DONE.",
     rightTag: "OFFLINE\nREADY",
@@ -556,7 +560,13 @@ export function HomeTopSection() {
                   {scene.eyebrow}
                 </p>
                 <h2 className="mt-2 w-[220px] text-2xl font-black uppercase leading-[0.92] tracking-[-0.03em] text-white lg:text-3xl">
-                  {scene.line1}<br />{scene.line2}
+                  {scene.line1}
+                  <br />
+                  <AnimatedTextCycle
+                    words={scene.cycleWords ?? [scene.line2]}
+                    interval={2200}
+                    className="text-2xl font-black uppercase tracking-[-0.03em] text-white lg:text-3xl"
+                  />
                 </h2>
                 <p className="mt-3 w-[200px] text-[12px] leading-relaxed text-zinc-500">
                   {scene.body}

@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -54,10 +54,38 @@ const scenes = [
 /* ─── phone screen 1: event feed ────────────────────────────────── */
 function FeedScreen({ progress }: { progress: MotionValue<number> }) {
   const items = [
-    { tag: "EVENT", tc: "#4BFA94",  title: "Campus Lights Fest",  meta: "Tonight · Main Stage",   votes: 156 },
-    { tag: "PARTY", tc: "#f2ef1d",  title: "Pre-game @ Theta 🏠", meta: "9PM · 2.3 mi away",      votes: 47  },
-    { tag: "RAVE",  tc: "#a855f7",  title: "Rooftop DJ Set ✦",    meta: "Fri · Riverside Deck",   votes: 89  },
-    { tag: ".EDU",  tc: "#4BFA94",  title: "Sophomore Mixer",     meta: "Sat · Student Union",    votes: 34  },
+    {
+      tag: "EVENT",
+      tc: "#4BFA94",
+      title: "Campus Lights Fest",
+      meta: "Tonight · Main Stage",
+      votes: 156,
+      img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=70",
+    },
+    {
+      tag: "PARTY",
+      tc: "#f2ef1d",
+      title: "Pre-game @ Theta 🏠",
+      meta: "9PM · 2.3 mi away",
+      votes: 47,
+      img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=70",
+    },
+    {
+      tag: "RAVE",
+      tc: "#a855f7",
+      title: "Rooftop DJ Set ✦",
+      meta: "Fri · Riverside Deck",
+      votes: 89,
+      img: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=300&q=70",
+    },
+    {
+      tag: ".EDU",
+      tc: "#4BFA94",
+      title: "Sophomore Mixer",
+      meta: "Sat · Student Union",
+      votes: 34,
+      img: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=300&q=70",
+    },
   ];
   const y0 = useTransform(progress, [0.020, 0.120], [22, 0]);
   const y1 = useTransform(progress, [0.045, 0.145], [22, 0]);
@@ -96,13 +124,25 @@ function FeedScreen({ progress }: { progress: MotionValue<number> }) {
               opacity: cardOpacities[i],
               background: "#141414",
               borderRadius: 14,
-              padding: "10px 12px",
+              padding: "8px 10px",
               display: "flex",
-              alignItems: "flex-start",
+              alignItems: "center",
               justifyContent: "space-between",
               gap: 8,
             }}
           >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                flexShrink: 0,
+                backgroundImage: `linear-gradient(160deg, rgba(0,0,0,0.15), rgba(0,0,0,0.45)), url(${item.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                border: "1px solid rgba(255,255,255,0.12)",
+              }}
+            />
             <div style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: "inline-block", background: item.tc + "22", color: item.tc, fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", borderRadius: 4, padding: "2px 5px" }}>
                 {item.tag}
@@ -135,6 +175,22 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "56px 24px 24px" }}>
       <motion.div
         style={{
+          opacity: titleOpacity,
+          y: titleY,
+          width: "100%",
+          maxWidth: 210,
+          height: 54,
+          borderRadius: 12,
+          backgroundImage:
+            "linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.58)), url(https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=700&q=70)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          border: "1px solid rgba(255,255,255,0.12)",
+          marginBottom: 14,
+        }}
+      />
+      <motion.div
+        style={{
           scale: badgeScale,
           opacity: badgeOpacity,
           width: 64, height: 64, borderRadius: 20,
@@ -163,6 +219,14 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
         </div>
       </motion.div>
       <p style={{ marginTop: 14, fontSize: 10, color: "#3f3f46", textAlign: "center" }}>Any accredited .edu address works</p>
+      <motion.div style={{ opacity: formOpacity, y: formY, marginTop: 10, display: "flex", gap: 6 }}>
+        <span style={{ fontSize: 8, color: "#4BFA94", border: "1px solid rgba(75,250,148,0.26)", background: "rgba(75,250,148,0.1)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          Verified in 8s
+        </span>
+        <span style={{ fontSize: 8, color: "#a1a1aa", border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.04)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          Anti-bot check
+        </span>
+      </motion.div>
     </div>
   );
 }
@@ -338,23 +402,42 @@ export function HomeTopSection() {
     return () => clearInterval(id);
   }, [reduceMotion]);
 
-  // Use section-scoped progress to reduce global scroll work/jitter.
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-  // Keep interactions tightly coupled to scroll so motion starts immediately.
-  const progress = scrollYProgress;
+  // Use a manual offsetTop-based calculation instead of useScroll({target,offset}).
+  // useScroll with target can mis-measure on certain layouts (Framer warns
+  // when the scroll container isn't non-static), so compute progress directly
+  // from window scrollY against the section's measured top + scrollable range.
+  const { scrollY } = useScroll();
+  const [sectionTop, setSectionTop] = useState(0);
+  const [sectionRange, setSectionRange] = useState(2400);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const recalc = () => {
+      setSectionTop(el.offsetTop);
+      setSectionRange(Math.max(1, el.offsetHeight - window.innerHeight));
+    };
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, []);
+
+  const progress = useTransform(
+    scrollY,
+    [sectionTop, sectionTop + sectionRange],
+    [0, 1],
+    { clamp: true }
+  );
 
   /* scene fades */
-  const s1 = useTransform(progress, [0, 0.26, 0.36], [1, 1, 0]);
-  const s2 = useTransform(progress, [0.30, 0.40, 0.58, 0.66], [0, 1, 1, 0]);
-  const s3 = useTransform(progress, [0.60, 0.70, 1], [0, 1, 1]);
+  const s1 = useTransform(progress, [0, 0.20, 0.30], [1, 1, 0]);
+  const s2 = useTransform(progress, [0.24, 0.34, 0.44, 0.54], [0, 1, 1, 0]);
+  const s3 = useTransform(progress, [0.46, 0.56, 1], [0, 1, 1]);
 
   /* phone screens */
-  const p1 = useTransform(progress, [0, 0.28, 0.38], [1, 1, 0]);
-  const p2 = useTransform(progress, [0.32, 0.42, 0.60, 0.68], [0, 1, 1, 0]);
-  const p3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
+  const p1 = useTransform(progress, [0, 0.22, 0.32], [1, 1, 0]);
+  const p2 = useTransform(progress, [0.26, 0.36, 0.46, 0.56], [0, 1, 1, 0]);
+  const p3 = useTransform(progress, [0.48, 0.58, 1], [0, 1, 1]);
 
   /*
    * Phone is VISIBLE on initial load — angled at bottom of screen like doorlist.
@@ -387,9 +470,9 @@ export function HomeTopSection() {
     <div
       ref={containerRef}
       className="relative bg-black"
-      style={{ minHeight: "320vh", contain: "layout paint", isolation: "isolate" }}
+      style={{ minHeight: "320vh" }}
     >
-      <div className="sticky top-0 h-screen" style={{ overflow: "clip", transform: "translateZ(0)" }}>
+      <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
 
         {/* ambient glows — radial gradients (no `filter: blur`) so we don't repaint on scroll */}
         <div

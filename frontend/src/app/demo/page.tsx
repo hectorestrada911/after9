@@ -18,7 +18,7 @@ export default function DemoPage() {
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/#browse-events"
+            href="/events/campus-lights-fest"
             className="pill-dark inline-flex h-12 items-center justify-center gap-2 px-7 text-[11px] font-semibold uppercase tracking-[0.16em]"
           >
             Browse live events <ArrowRight className="h-3.5 w-3.5" aria-hidden />

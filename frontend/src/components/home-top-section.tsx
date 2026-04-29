@@ -30,7 +30,7 @@ const scenes = [
     body: "Every party, show, and event near you, curated by students, for students.",
     leftTag: "BUILT FOR\nCOLLEGE NIGHTS",
     rightTag: "TRUSTED AT\n500+ CAMPUSES",
-    cta: { label: "Browse events", href: "/#browse-events" },
+    cta: { label: "Browse events", href: "/demo" },
   },
   {
     eyebrow: ".edu verified",
@@ -39,7 +39,7 @@ const scenes = [
     body: "Only verified students see private events and buy tickets. Real community, no randos.",
     leftTag: "BOTS\nNOT WELCOME",
     rightTag: ".EDU GATED\nBY DEFAULT",
-    cta: { label: "Browse events", href: "/#browse-events" },
+    cta: { label: "Browse events", href: "/demo" },
   },
   {
     eyebrow: "Door flow",

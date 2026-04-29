@@ -41,7 +41,7 @@ export function SiteFooter() {
           <div>
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#4BFA94]">Discover</p>
             <ul className="space-y-3 text-sm text-zinc-400">
-              <li><Link href="/" className="transition hover:text-white">Browse events</Link></li>
+              <li><Link href="/demo" className="transition hover:text-white">Browse events</Link></li>
               <li><Link href="/demo" className="transition hover:text-white">Sample event</Link></li>
             </ul>
           </div>
@@ -65,7 +65,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-12 flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 text-[11px] text-zinc-600 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} After9. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} RAGE. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-3">
             <p className="uppercase tracking-[0.18em]">Secure checkout · Mobile tickets · Fast door entry</p>
             <span className="hidden text-zinc-700 sm:inline">•</span>

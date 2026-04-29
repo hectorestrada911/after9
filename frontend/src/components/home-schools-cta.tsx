@@ -115,7 +115,7 @@ export function HomeSchoolsCta() {
                 Find your school
               </Link>
               <Link
-                href="/signup"
+                href="/demo"
                 className="inline-flex items-center rounded-full border border-white/20 px-9 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40"
                 style={{ height: 52 }}
               >

@@ -31,7 +31,7 @@ export function HomeTrendingRail({ events }: { events: HomeTrendingEvent[] }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section id="browse-events" className="relative overflow-hidden border-t border-white/[0.06] bg-black py-20 sm:py-28">
+    <section id="trending-events" className="relative overflow-hidden border-t border-white/[0.06] bg-black py-20 sm:py-28">
       {/* glow */}
       <div
         aria-hidden
@@ -58,7 +58,7 @@ export function HomeTrendingRail({ events }: { events: HomeTrendingEvent[] }) {
           </div>
           <motion.div whileHover={reduceMotion ? undefined : { y: -2 }} whileTap={reduceMotion ? undefined : { scale: 0.98 }}>
             <Link
-              href="/#browse-events"
+              href="/demo"
               className="inline-flex h-12 items-center self-start rounded-full border border-white/[0.18] px-7 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40 sm:self-end"
             >
               Browse all →

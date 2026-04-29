@@ -170,12 +170,14 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
 
 /* ─── phone screen 3: QR ticket ─────────────────────────────────── */
 function TicketScreen({ progress }: { progress: MotionValue<number> }) {
+  const reduceMotion = useReducedMotion();
   const qrScale = useTransform(progress, [0.64, 0.78], [0.7, 1]);
   const qrOpacity = useTransform(progress, [0.64, 0.74], [0, 1]);
   const headY = useTransform(progress, [0.62, 0.74], [12, 0]);
   const headOpacity = useTransform(progress, [0.62, 0.72], [0, 1]);
   const badgeY = useTransform(progress, [0.72, 0.84], [14, 0]);
   const badgeOpacity = useTransform(progress, [0.72, 0.82], [0, 1]);
+  const scanOpacity = useTransform(progress, [0.72, 0.78, 0.9, 1], [0, 1, 1, 0.3]);
 
   const qrRows = [
     "111111100001011111111",
@@ -234,6 +236,22 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
             <div key={i} style={{ background: cell === "1" ? "#f5f8ff" : "#0a1020", borderRadius: 0.8 }} />
           ))}
         </div>
+        <motion.div
+          aria-hidden
+          style={{
+            opacity: scanOpacity,
+            position: "absolute",
+            left: 12,
+            right: 12,
+            top: 12,
+            height: 3,
+            borderRadius: 999,
+            background: "linear-gradient(90deg, rgba(75,250,148,0), rgba(75,250,148,0.95), rgba(75,250,148,0))",
+            boxShadow: "0 0 10px rgba(75,250,148,0.7)",
+          }}
+          animate={reduceMotion ? undefined : { y: [0, 118, 0] }}
+          transition={reduceMotion ? undefined : { duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
+        />
       </motion.div>
       <motion.div style={{ opacity: badgeOpacity, y: badgeY, marginTop: 14, display: "flex", alignItems: "center", gap: 7, background: "rgba(75,250,148,0.12)", borderRadius: 999, padding: "7px 16px" }}>
         <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4BFA94" }} />

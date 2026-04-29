@@ -6,6 +6,8 @@ import { PhoneShell } from "@/components/home-top-section";
 
 /* ─── mini screen mockups ────────────────────────────────────────── */
 function CreateScreen() {
+  const coverImage =
+    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=700&q=80";
   return (
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", paddingTop: 56, padding: "56px 14px 14px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px 12px" }}>
@@ -13,11 +15,18 @@ function CreateScreen() {
         <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Create Event</span>
         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: "50%", background: "#4BFA94", fontSize: 11, color: "#000", fontWeight: 800 }}>✓</span>
       </div>
-      <div style={{ width: "100%", aspectRatio: "1", borderRadius: 14, background: "linear-gradient(135deg, #1a0a3a 0%, #3a0a1a 100%)", marginTop: 4, padding: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ background: "#fff", color: "#000", padding: "16px 24px", fontWeight: 900, fontSize: 18, letterSpacing: "-0.02em", borderRadius: 4, transform: "rotate(-4deg)" }}>
-          BIRTHDAY<br />PARTY
-        </div>
-      </div>
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "1",
+          borderRadius: 14,
+          backgroundImage: `linear-gradient(145deg, rgba(42,10,90,0.58) 0%, rgba(60,15,36,0.48) 100%), url(${coverImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          marginTop: 4,
+          boxShadow: "inset 0 -44px 70px rgba(0,0,0,0.5)",
+        }}
+      />
       <div style={{ marginTop: 12, padding: "10px 12px", background: "#141414", borderRadius: 10 }}>
         <p style={{ fontSize: 10, color: "#52525b", marginBottom: 2 }}>Title</p>
         <p style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>Birthday Party</p>
@@ -25,14 +34,34 @@ function CreateScreen() {
       <div style={{ marginTop: 8, padding: "10px 12px", background: "#141414", borderRadius: 10 }}>
         <p style={{ fontSize: 10, color: "#52525b" }}>Add Host *</p>
       </div>
+      <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
+        <span style={{ fontSize: 8, color: "#4BFA94", background: "rgba(75,250,148,0.12)", border: "1px solid rgba(75,250,148,0.28)", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          Draft saved
+        </span>
+        <span style={{ fontSize: 8, color: "#71717a", background: "#101010", border: "1px solid #222", borderRadius: 999, padding: "4px 8px", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          Step 2/4
+        </span>
+      </div>
     </div>
   );
 }
 
 function HomeFeedScreen() {
   const events = [
-    { date: "21", title: "Campus Lights", from: "linear-gradient(135deg, #4a1a8a 0%, #1a4a8a 100%)" },
-    { date: "21", title: "Theta Mixer", from: "linear-gradient(135deg, #6a2a4a 0%, #4a3a1a 100%)" },
+    {
+      date: "21",
+      title: "Campus Lights",
+      image:
+        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80",
+      tint: "linear-gradient(165deg, rgba(48,0,130,0.52) 0%, rgba(18,76,166,0.45) 100%)",
+    },
+    {
+      date: "21",
+      title: "Theta Mixer",
+      image:
+        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=700&q=80",
+      tint: "linear-gradient(165deg, rgba(120,24,54,0.5) 0%, rgba(84,52,24,0.42) 100%)",
+    },
   ];
   return (
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", padding: "56px 12px 12px" }}>
@@ -47,28 +76,65 @@ function HomeFeedScreen() {
       <p style={{ fontSize: 11, color: "#a1a1aa", fontWeight: 600, marginBottom: 8 }}>Your Events ›</p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         {events.map((e, i) => (
-          <div key={i} style={{ aspectRatio: "1", borderRadius: 12, background: e.from, position: "relative", overflow: "hidden", padding: 8 }}>
+          <div
+            key={i}
+            style={{
+              aspectRatio: "1",
+              borderRadius: 12,
+              backgroundImage: `${e.tint}, url(${e.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              position: "relative",
+              overflow: "hidden",
+              padding: 8,
+              boxShadow: "inset 0 -40px 60px rgba(0,0,0,0.35)",
+            }}
+          >
             <div style={{ display: "inline-block", background: "rgba(0,0,0,0.55)", borderRadius: 8, padding: "4px 7px", textAlign: "center" }}>
               <p style={{ fontSize: 14, fontWeight: 800, color: "#fff", lineHeight: 1 }}>{e.date}</p>
               <p style={{ fontSize: 7, color: "#fff", letterSpacing: "0.1em", marginTop: 1 }}>TUE</p>
             </div>
+            <p style={{ position: "absolute", left: 8, bottom: 7, fontSize: 8, color: "rgba(255,255,255,0.92)", letterSpacing: "0.03em", fontWeight: 700, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>
+              {e.title}
+            </p>
+            <p style={{ position: "absolute", right: 7, bottom: 7, fontSize: 7, color: "#d4d4d8", letterSpacing: "0.08em", fontWeight: 700 }}>LIVE</p>
           </div>
         ))}
       </div>
       <p style={{ fontSize: 10, color: "#52525b", marginTop: 6 }}>Après-Ski Colorado</p>
       <p style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>'80s in Aspen</p>
+      <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
+        <span style={{ fontSize: 8, color: "#4BFA94", background: "rgba(75,250,148,0.12)", border: "1px solid rgba(75,250,148,0.24)", borderRadius: 999, padding: "4px 7px", fontWeight: 700 }}>+18% RSVP</span>
+        <span style={{ fontSize: 8, color: "#a1a1aa", background: "#111", border: "1px solid #252525", borderRadius: 999, padding: "4px 7px", fontWeight: 700 }}>2.1K views</span>
+      </div>
     </div>
   );
 }
 
 function InviteScreen() {
+  const inviteImage =
+    "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=700&q=80";
   return (
     <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", padding: "56px 12px 12px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 11 }}>↓</span>
         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 12 }}>···</span>
       </div>
-      <div style={{ width: "100%", aspectRatio: "1", borderRadius: 14, background: "linear-gradient(135deg, #5a1a1a 0%, #2a0a0a 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div
+        style={{
+          width: "100%",
+          aspectRatio: "1",
+          borderRadius: 14,
+          backgroundImage: `linear-gradient(150deg, rgba(96,22,22,0.56) 0%, rgba(32,8,8,0.5) 100%), url(${inviteImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 16,
+          boxShadow: "inset 0 -50px 75px rgba(0,0,0,0.45)",
+        }}
+      >
         <p style={{ color: "#f2ef1d", fontWeight: 900, fontSize: 14, textAlign: "center", lineHeight: 1.1, letterSpacing: "0.02em" }}>
           CAMPUS<br />vs THETA<br /><span style={{ color: "#fff" }}>RAGE</span>
         </p>
@@ -84,6 +150,27 @@ function InviteScreen() {
       <div style={{ marginTop: 6, padding: "8px 10px", background: "#141414", borderRadius: 10 }}>
         <p style={{ fontSize: 10, color: "#fff", fontWeight: 600 }}>Invite Groups</p>
       </div>
+      <div style={{ marginTop: 8, height: 4, borderRadius: 999, background: "#191919", overflow: "hidden" }}>
+        <div style={{ width: "72%", height: "100%", borderRadius: 999, background: "linear-gradient(90deg, #1ea85a 0%, #4BFA94 100%)" }} />
+      </div>
+      <div
+        style={{
+          marginTop: 8,
+          padding: "8px 10px",
+          borderRadius: 999,
+          background: "rgba(75,250,148,0.12)",
+          border: "1px solid rgba(75,250,148,0.24)",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4BFA94" }} />
+        <p style={{ fontSize: 9, color: "#4BFA94", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          Sent 24 invites
+        </p>
+      </div>
+      <p style={{ marginTop: 5, fontSize: 8, color: "#71717a", letterSpacing: "0.04em" }}>17 opened · 6 accepted</p>
     </div>
   );
 }

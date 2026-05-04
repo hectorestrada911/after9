@@ -13,9 +13,12 @@ type NavDropdownProps = {
   onOpenChange: (nextOpen: boolean) => void; // eslint-disable-line no-unused-vars -- callback parameter names document the API
   children: ReactNode;
   menuClassName?: string;
+  /** Keeps hover menus open while moving from trigger into the panel (bridge padding below trigger). */
+  onHoverEnter?: () => void;
+  onHoverLeave?: () => void;
 };
 
-function NavDropdown({ label, menuId, open, onOpenChange, children, menuClassName }: NavDropdownProps) {
+function NavDropdown({ label, menuId, open, onOpenChange, children, menuClassName, onHoverEnter, onHoverLeave }: NavDropdownProps) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,7 +40,12 @@ function NavDropdown({ label, menuId, open, onOpenChange, children, menuClassNam
   }, [open, onOpenChange]);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div
+      ref={rootRef}
+      className="relative"
+      onMouseEnter={onHoverEnter}
+      onMouseLeave={onHoverLeave}
+    >
       <button
         type="button"
         id={`${menuId}-trigger`}
@@ -52,12 +60,16 @@ function NavDropdown({ label, menuId, open, onOpenChange, children, menuClassNam
       </button>
       {open && (
         <div
-          id={menuId}
-          role="menu"
-          aria-labelledby={`${menuId}-trigger`}
-          className={`absolute top-[calc(100%+8px)] z-50 min-w-[220px] rounded-xl border border-white/[0.1] bg-[#0a0a0a] py-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.04] ${menuClassName ?? "right-0"}`}
+          className={`absolute top-full z-50 min-w-[220px] pt-2 ${menuClassName ?? "right-0"}`}
         >
-          {children}
+          <div
+            id={menuId}
+            role="menu"
+            aria-labelledby={`${menuId}-trigger`}
+            className="rounded-xl border border-white/[0.1] bg-[#0a0a0a] py-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.04]"
+          >
+            {children}
+          </div>
         </div>
       )}
     </div>
@@ -139,14 +151,15 @@ export function SiteHeader() {
               Home
             </Link>
 
-            <div onMouseEnter={() => setOpenMenu("host")} onMouseLeave={() => setOpenMenu((curr) => (curr === "host" ? null : curr))}>
-              <NavDropdown
-                label="Host tools"
-                menuId={hostMenuId}
-                open={openMenu === "host"}
-                onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
-                menuClassName="left-1/2 -translate-x-1/2"
-              >
+            <NavDropdown
+              label="Host tools"
+              menuId={hostMenuId}
+              open={openMenu === "host"}
+              onOpenChange={(next) => setOpenMenu(next ? "host" : null)}
+              menuClassName="left-1/2 -translate-x-1/2"
+              onHoverEnter={() => setOpenMenu("host")}
+              onHoverLeave={() => setOpenMenu((curr) => (curr === "host" ? null : curr))}
+            >
                 {authedEmail ? (
                   <>
                     <Link href="/account#my-events" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
@@ -164,17 +177,17 @@ export function SiteHeader() {
                     Host dashboard
                   </Link>
                 )}
-              </NavDropdown>
-            </div>
+            </NavDropdown>
 
-            <div onMouseEnter={() => setOpenMenu("user")} onMouseLeave={() => setOpenMenu((curr) => (curr === "user" ? null : curr))}>
-              <NavDropdown
-                label="User"
-                menuId={userMenuId}
-                open={openMenu === "user"}
-                onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
-                menuClassName="left-1/2 -translate-x-1/2"
-              >
+            <NavDropdown
+              label="User"
+              menuId={userMenuId}
+              open={openMenu === "user"}
+              onOpenChange={(next) => setOpenMenu(next ? "user" : null)}
+              menuClassName="left-1/2 -translate-x-1/2"
+              onHoverEnter={() => setOpenMenu("user")}
+              onHoverLeave={() => setOpenMenu((curr) => (curr === "user" ? null : curr))}
+            >
                 {authedEmail ? (
                   <>
                     <Link href="/account" role="menuitem" className={menuLinkClass()} onClick={closeMenus}>
@@ -227,8 +240,7 @@ export function SiteHeader() {
                     </Link>
                   </>
                 )}
-              </NavDropdown>
-            </div>
+            </NavDropdown>
 
             <Link
               href="/create-event"

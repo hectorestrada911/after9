@@ -211,10 +211,10 @@ export function HomeAppShowcase() {
               Create an event
             </Link>
             <Link
-              href="/signup"
+              href="/login"
               className="inline-flex h-12 items-center rounded-full border border-white/[0.18] px-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40"
             >
-              Get the app →
+              Login →
             </Link>
           </div>
         </motion.div>

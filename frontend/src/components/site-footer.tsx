@@ -25,10 +25,10 @@ export function SiteFooter() {
             </p>
             <div className="mt-6 flex gap-2">
               <Link
-                href="/signup"
+                href="/login"
                 className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[10px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200"
               >
-                Get the app
+                Login
               </Link>
               <Link
                 href="/create-event"

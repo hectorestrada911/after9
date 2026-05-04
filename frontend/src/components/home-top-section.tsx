@@ -535,11 +535,11 @@ export function HomeTopSection() {
             Every party, show, and event near you, curated by students, for students.
           </p>
           <Link
-            href="/signup"
+            href="/create-event"
             className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
             style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
           >
-            Get the app
+            Create event
           </Link>
         </motion.div>
 

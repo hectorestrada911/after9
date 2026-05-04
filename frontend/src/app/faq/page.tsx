@@ -82,10 +82,10 @@ export default function FaqPage() {
 
           <div className="mt-10 grid gap-3 sm:grid-cols-2">
             <Link
-              href="/signup"
+              href="/login"
               className="inline-flex h-12 items-center justify-center rounded-full bg-[#4BFA94] px-6 text-[11px] font-bold uppercase tracking-[0.15em] text-black transition hover:bg-emerald-300"
             >
-              Get the app
+              Login
             </Link>
             <Link
               href="/create-event"

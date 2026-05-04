@@ -95,16 +95,16 @@ export function HomeFaqSection() {
 
         <div className="mt-10 flex flex-wrap gap-4">
           <Link
-            href="/signup"
+            href="/create-event"
             className="inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
           >
-            Get the app
+            Create event
           </Link>
           <Link
-            href="/faq"
+            href="/signup"
             className="inline-flex h-12 items-center rounded-full border border-white/[0.18] px-8 text-[11px] font-semibold uppercase tracking-[0.16em] text-white transition hover:border-white/40"
           >
-            Full FAQ
+            Register
           </Link>
         </div>
       </div>

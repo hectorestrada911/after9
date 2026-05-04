@@ -856,9 +856,9 @@ export function HomeTopSection() {
         {/* ── MOBILE / TABLET: scene headline above phone (lg+ use side columns instead) ── */}
         <motion.div
           style={{ opacity: digestMount }}
-          className="pointer-events-none absolute inset-x-0 top-[max(4.5rem,8svh)] z-[11] hidden max-lg:block"
+          className="pointer-events-none absolute inset-x-0 z-[11] hidden max-lg:block max-lg:top-[calc(env(safe-area-inset-top)+4.25rem)]"
         >
-          <div className="relative mx-auto min-h-[7.5rem] w-full max-w-md px-5">
+          <div className="relative mx-auto min-h-0 w-full max-w-md px-5 sm:min-h-[5.5rem]">
             {scenes.map((scene, i) => (
               <motion.div
                 key={scene.eyebrow}
@@ -914,7 +914,7 @@ export function HomeTopSection() {
         {/* ── HERO HEADLINE — visible on load, fades as side text takes over ── */}
         <motion.div
           style={{ opacity: heroOpacity, y: heroY }}
-          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[10vh] text-center"
+          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[clamp(5.25rem,9svh,7.5rem)] text-center lg:pt-[10vh]"
         >
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">
             Discover

@@ -4,26 +4,18 @@ import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Fingerprint, Mic2, ShieldCheck, ShoppingBag, Sparkles } from "lucide-react";
+import { ChevronLeft, KeyRound, Lock, Mail, Shield, UserRound } from "lucide-react";
 import {
-  AuthAmbient,
   AuthDivider,
-  AuthFormPanel,
-  AuthGradientFrame,
   AuthPageSkeleton,
-  AuthPrimaryButton,
   GoogleAuthButton,
-  authFieldClass,
-  authHeroContainer,
-  authHeroItem,
-  badgeContainer,
-  badgeItem,
+  authGreenFieldClass,
   useAuthMotion,
 } from "@/components/auth-shell";
+import { EduVerifyShieldIcon } from "@/components/edu-verify-shield-icon";
 import { mapAuthActionError, mapAuthCallbackError } from "@/lib/auth-errors";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { readEventDraft, safeNextPath } from "@/lib/event-draft";
-import { Input } from "@/components/ui";
 import { flushUi } from "@/lib/flush-ui";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +41,10 @@ function LoginForm() {
   }, []);
 
   async function signInWithGoogle() {
-    flushUi(() => { setLoading(true); setError(null); });
+    flushUi(() => {
+      setLoading(true);
+      setError(null);
+    });
     const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(effectiveNext)}`;
     const { error: oauthErr } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
     if (oauthErr) {
@@ -137,73 +132,80 @@ function LoginForm() {
     }
     setPasswordResetSent(false);
     setError(null);
-    // Reuse the success area style; this is intentionally explicit.
     setPasswordResetSent(true);
   }
 
   const signupHref = `/signup?next=${encodeURIComponent(effectiveNext)}`;
+  const verifyEduHref = `/verify-edu?next=${encodeURIComponent(effectiveNext)}`;
+
+  const inputInnerClass =
+    "min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-white outline-none ring-0 placeholder:text-zinc-600";
 
   return (
-    <main className="container-page relative min-h-[100dvh] min-w-0 overflow-hidden py-16 sm:py-24">
-      <AuthAmbient variant="login" />
-      <AuthGradientFrame reduceMotion={reduceMotion}>
-        <motion.div variants={authHeroContainer} initial={reduceMotion ? "show" : "hidden"} animate="show">
-          <motion.div
-            variants={authHeroItem}
-            className="mb-4 h-1.5 w-24 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 shadow-[0_0_28px_-4px_rgba(75,250,148,0.65)]"
-          />
-          <motion.p
-            variants={authHeroItem}
-            className="inline-flex rounded-full border border-white/[0.14] bg-white/[0.04] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-          >
-            Welcome back
-          </motion.p>
-          <motion.h1 variants={authHeroItem} className="mt-4 heading-display-fluid">
-            <span className="block text-zinc-50">Account</span>
-            <span className="mt-1 block bg-gradient-to-r from-brand-green via-emerald-200 to-teal-200 bg-clip-text text-transparent">login</span>
-          </motion.h1>
-          <motion.p variants={authHeroItem} className="mt-4 text-base leading-relaxed text-zinc-400">
-            Access tickets, orders, and host tools in one calm place.
-          </motion.p>
-          {hasEventDraft ? (
-            <motion.p
-              variants={authHeroItem}
-              className="mt-3 rounded-xl border border-brand-green/30 bg-brand-green/[0.12] px-3 py-2.5 text-sm leading-snug text-zinc-100 shadow-[0_0_0_1px_rgba(75,250,148,0.12)_inset]"
-            >
-              Draft found. Logging in will take you back to event publishing.
-            </motion.p>
-          ) : null}
-        </motion.div>
+    <main className="relative min-h-[100dvh] bg-discover-ink text-zinc-100">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 0%, rgba(75,250,148,0.12), transparent 55%), radial-gradient(circle at 80% 90%, rgba(59,130,246,0.06), transparent 45%)",
+        }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-md px-5 pb-16 pt-6 sm:px-6 sm:pt-10">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-300"
+        >
+          <ChevronLeft className="h-4 w-4" aria-hidden />
+          Back
+        </Link>
 
         <motion.div
-          className="mt-5 grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-wide text-zinc-400"
-          variants={badgeContainer}
-          initial={reduceMotion ? "show" : "hidden"}
-          animate="show"
+          initial={reduceMotion ? undefined : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mt-8"
         >
-          {(
-            [
-              { label: "Buyer" as const, Icon: ShoppingBag },
-              { label: "Host" as const, Icon: Mic2 },
-              { label: "One account" as const, Icon: Fingerprint },
-            ] as const
-          ).map(({ label, Icon }) => (
-            <motion.span
-              key={label}
-              variants={badgeItem}
-              className="flex flex-col items-center justify-center gap-1 rounded-xl border border-white/[0.1] bg-white/[0.03] px-2 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] sm:flex-row sm:gap-1.5"
-            >
-              <Icon className="h-3.5 w-3.5 shrink-0 text-brand-green/85" aria-hidden />
-              {label}
-            </motion.span>
-          ))}
-        </motion.div>
+          <div className="flex flex-wrap justify-center gap-2">
+            <span className="rounded-full border border-brand-green/35 bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-green">
+              Encrypted session
+            </span>
+            <span className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
+              Google or password
+            </span>
+          </div>
 
-        <AuthFormPanel>
-          {urlError ? <p className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{urlError}</p> : null}
+          <div className="mt-8 flex justify-center">
+            <div className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-3xl border border-brand-green/30 bg-brand-green/[0.08] shadow-[0_0_32px_rgba(75,250,148,0.2)]">
+              <EduVerifyShieldIcon size={52} />
+            </div>
+          </div>
 
-          <GoogleAuthButton onClick={() => void signInWithGoogle()} loading={loading} />
-          <div className="my-3">
+          <p className="mt-6 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">Secure access</p>
+          <h1 className="mt-2 text-center text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">
+            Log in to your <span className="bg-gradient-to-r from-brand-green via-emerald-200 to-teal-200 bg-clip-text text-transparent">account</span>
+          </h1>
+          <p className="mx-auto mt-3 max-w-sm text-center text-sm leading-relaxed text-zinc-400">
+            Tickets, host tools, and check-in in one place.
+          </p>
+
+          {urlError ? (
+            <p className="mt-8 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">{urlError}</p>
+          ) : null}
+
+          {hasEventDraft ? (
+            <p className="mt-6 rounded-2xl border border-brand-green/25 bg-brand-green/[0.08] px-4 py-3 text-center text-sm leading-relaxed text-zinc-200">
+              Draft found. After you sign in, we&apos;ll take you back to finish publishing your event.
+            </p>
+          ) : null}
+
+          <div className="mt-10 space-y-3">
+            <GoogleAuthButton
+              onClick={() => void signInWithGoogle()}
+              loading={loading}
+              className="rounded-xl border border-white/15 bg-white/[0.04] py-3.5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]"
+            />
             <AuthDivider />
           </div>
 
@@ -212,46 +214,65 @@ function LoginForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={panelTransition}
             onSubmit={onPasswordSubmit}
-            className="mt-1 space-y-3"
+            className="mt-6 space-y-4"
           >
-            <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
-              <ShieldCheck className="h-3.5 w-3.5 text-brand-green/70" aria-hidden />
-              Email and password
-            </p>
             {justSignedUp ? (
-              <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
+              <p className="rounded-2xl border border-brand-green/25 bg-brand-green/[0.08] px-4 py-3 text-sm leading-relaxed text-zinc-100">
                 {verified
                   ? "Email confirmed. Log in now and we will continue to your prefilled event."
                   : "Account created. Check your inbox, verify your email, then log in to continue to your prefilled event."}
               </p>
             ) : null}
-            <Input
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              inputMode="email"
-              dir="ltr"
-              className={cn(authFieldClass, "text-left [unicode-bidi:plaintext]")}
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              dir="ltr"
-              className={cn(authFieldClass, "text-left [unicode-bidi:plaintext]")}
-              required
-            />
+
+            <div>
+              <label htmlFor="login-email" className="mb-1.5 block text-xs font-semibold text-zinc-400">
+                Email
+              </label>
+              <div className={cn(authGreenFieldClass, "cursor-text")}>
+                <Mail className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden />
+                <input
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputInnerClass}
+                  required
+                />
+              </div>
+              <p className="mt-2 flex gap-2 text-xs leading-relaxed text-zinc-500">
+                <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-600" aria-hidden />
+                <span>We use your email only for sign-in and account notices—no spam.</span>
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="login-password" className="mb-1.5 block text-xs font-semibold text-zinc-400">
+                Password
+              </label>
+              <div className={cn(authGreenFieldClass, "cursor-text")}>
+                <Lock className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden />
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder="••••••••"
+                  className={inputInnerClass}
+                  required
+                />
+              </div>
+            </div>
+
             <AnimatePresence>
               {error ? (
                 <motion.p
@@ -266,19 +287,29 @@ function LoginForm() {
                 </motion.p>
               ) : null}
             </AnimatePresence>
+
             {error?.includes("Email not verified yet") ? (
               <button
                 type="button"
                 onClick={() => void resendVerificationEmail()}
-                className="w-full rounded-full border border-brand-green/35 bg-brand-green/10 py-2 text-center text-xs font-semibold uppercase tracking-wide text-brand-green transition hover:bg-brand-green/20"
+                className="w-full rounded-xl border border-brand-green/35 bg-brand-green/10 py-2.5 text-center text-xs font-bold uppercase tracking-[0.1em] text-brand-green transition hover:bg-brand-green/20"
                 disabled={loading}
               >
                 Resend verification email
               </button>
             ) : null}
-            <AuthPrimaryButton type="submit" loading={loading} disabled={loading}>
-              {loading ? "Logging in…" : "Login"}
-            </AuthPrimaryButton>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-brand-green via-[#7dffc0] to-emerald-400 px-4 py-3.5 text-sm font-extrabold text-black shadow-[0_14px_40px_-14px_rgba(75,250,148,0.65)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? "Logging in…" : "Log in"}
+              </button>
+              <p className="mt-2 text-center text-xs text-zinc-500">Same account for buyers, hosts, and door check-in.</p>
+            </div>
+
             <button
               type="button"
               onClick={() => void sendPasswordReset()}
@@ -287,39 +318,89 @@ function LoginForm() {
             >
               Forgot password?
             </button>
+
             {passwordResetSent ? (
-              <p className="rounded-xl border border-brand-green/30 bg-brand-green/10 px-3 py-2 text-sm text-zinc-100">
+              <p className="rounded-2xl border border-brand-green/25 bg-brand-green/[0.08] px-4 py-3 text-sm leading-relaxed text-zinc-100">
                 Email sent. Check your inbox for the next step.
               </p>
             ) : null}
           </motion.form>
-        </AuthFormPanel>
 
-        <p className="mt-6 text-sm text-zinc-400">
-          New here?{" "}
-          <Link
-            className="font-bold text-zinc-100 underline decoration-brand-green/50 underline-offset-4 transition hover:text-white hover:decoration-brand-green"
-            href={signupHref}
-          >
-            Create account
-          </Link>
-        </p>
-        <p className="mt-3 inline-flex items-center gap-1.5 text-xs text-zinc-500">
-          <Sparkles className="h-3.5 w-3.5 text-brand-green/80" aria-hidden />
-          One login for tickets, dashboard, and check-in tools.
-        </p>
-        <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-          By signing in, you agree to our{" "}
-          <Link href="/terms" className="underline underline-offset-2 transition hover:text-zinc-300">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="underline underline-offset-2 transition hover:text-zinc-300">
-            Privacy Policy
-          </Link>
-          .
-        </p>
-      </AuthGradientFrame>
+          <div className="mt-12">
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">Why sign in</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+            <ul className="mt-6 space-y-5">
+              <li className="flex gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-green/25 bg-brand-green/[0.06]">
+                  <Shield className="h-4 w-4 text-brand-green" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-white">Trusted access</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">Modern auth and encrypted transport for every session.</p>
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-green/25 bg-brand-green/[0.06]">
+                  <KeyRound className="h-4 w-4 text-brand-green" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-white">One login</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">Tickets, payouts, and host tools share a single account.</p>
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-green/25 bg-brand-green/[0.06]">
+                  <UserRound className="h-4 w-4 text-brand-green" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-white">Your privacy</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-500">We never sell your email. Control notifications anytime.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <p className="mt-10 text-center text-sm text-zinc-400">
+            New here?{" "}
+            <Link
+              href={signupHref}
+              className="font-bold text-white underline decoration-brand-green/50 underline-offset-4 transition hover:decoration-brand-green"
+            >
+              Create account
+            </Link>
+          </p>
+
+          <p className="mt-4 text-center text-xs text-zinc-500">
+            Student?{" "}
+            <Link href={verifyEduHref} className="font-semibold text-brand-green underline-offset-2 hover:underline">
+              Verify your .edu email
+            </Link>
+          </p>
+
+          <p className="mt-4 text-center text-xs text-zinc-500">
+            Questions?{" "}
+            <Link href="/faq" className="font-semibold text-zinc-300 underline-offset-2 hover:text-white hover:underline">
+              Read the FAQ
+            </Link>
+            .
+          </p>
+
+          <p className="mt-6 text-center text-xs leading-relaxed text-zinc-500">
+            By signing in, you agree to our{" "}
+            <Link href="/terms" className="underline underline-offset-2 transition hover:text-zinc-300">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline underline-offset-2 transition hover:text-zinc-300">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </motion.div>
+      </div>
     </main>
   );
 }

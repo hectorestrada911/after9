@@ -11,10 +11,8 @@ import { safeNextPath } from "@/lib/event-draft";
 import { mapAuthActionError } from "@/lib/auth-errors";
 import { trackProductEvent } from "@/lib/product-analytics";
 import { flushUi } from "@/lib/flush-ui";
+import { authGreenFieldClass } from "@/components/auth-shell";
 import { cn } from "@/lib/utils";
-
-const fieldClass =
-  "flex w-full items-center gap-3 rounded-xl border border-brand-green/35 bg-discover-card px-3.5 py-3 text-left text-sm text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_0_20px_rgba(75,250,148,0.1)] outline-none ring-0 transition placeholder:text-zinc-600 focus:border-brand-green/60 focus:shadow-[0_0_24px_rgba(75,250,148,0.18)]";
 
 export function VerifyEduClient() {
   const reduceMotion = useReducedMotion();
@@ -129,7 +127,7 @@ export function VerifyEduClient() {
                 <label htmlFor="edu-email" className="mb-1.5 block text-xs font-semibold text-zinc-400">
                   Your .edu email
                 </label>
-                <div className={cn(fieldClass, "cursor-text")}>
+                <div className={cn(authGreenFieldClass, "cursor-text")}>
                   <Mail className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden />
                   <input
                     id="edu-email"

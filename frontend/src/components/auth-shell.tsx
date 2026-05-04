@@ -10,6 +10,10 @@ export const authEase = [0.22, 1, 0.36, 1] as const;
 export const authFieldClass =
   "h-12 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 text-[15px] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] placeholder:text-zinc-500 transition-[border-color,box-shadow] duration-200 focus:border-brand-green/50 focus:outline-none focus:ring-2 focus:ring-brand-green/20";
 
+/** Icon row inputs (matches /verify-edu). Use `focus-within` so the wrapper highlights when the inner input is focused. */
+export const authGreenFieldClass =
+  "flex w-full items-center gap-3 rounded-xl border border-brand-green/35 bg-discover-card px-3.5 py-3 text-left text-sm text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_0_20px_rgba(75,250,148,0.1)] outline-none ring-0 transition placeholder:text-zinc-600 focus-within:border-brand-green/60 focus-within:shadow-[0_0_24px_rgba(75,250,148,0.18)]";
+
 export const badgeContainer: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
@@ -204,7 +208,7 @@ export function AuthFormPanel({ children, className }: { children: ReactNode; cl
   );
 }
 
-export function GoogleAuthButton({ onClick, loading }: { onClick: () => void; loading?: boolean }) {
+export function GoogleAuthButton({ onClick, loading, className }: { onClick: () => void; loading?: boolean; className?: string }) {
   const reduceMotion = useReducedMotion();
   return (
     <motion.div
@@ -216,7 +220,10 @@ export function GoogleAuthButton({ onClick, loading }: { onClick: () => void; lo
         type="button"
         onClick={onClick}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-3 rounded-full border border-white/[0.12] bg-white/[0.05] px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50"
+        className={cn(
+          "flex w-full items-center justify-center gap-3 rounded-full border border-white/[0.12] bg-white/[0.05] px-4 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
       >
         <svg viewBox="0 0 48 48" className="h-4 w-4 shrink-0" aria-hidden>
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />

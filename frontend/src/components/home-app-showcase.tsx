@@ -9,7 +9,7 @@ function CreateScreen() {
   const coverImage =
     "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=700&q=80";
   return (
-    <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", paddingTop: 56, padding: "56px 14px 14px" }}>
+    <div style={{ position: "absolute", inset: 0, background: "#000", paddingTop: 56, padding: "56px 14px 14px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px 12px" }}>
         <span style={{ fontSize: 16, color: "#fff" }}>←</span>
         <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Create Event</span>
@@ -47,65 +47,209 @@ function CreateScreen() {
 }
 
 function HomeFeedScreen() {
-  const events = [
+  const tabs = ["Trending", "Near Me", ".edu Only", "Music", "Sports"];
+  const cards = [
     {
-      date: "21",
-      title: "Campus Lights",
-      image:
-        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80",
-      tint: "linear-gradient(165deg, rgba(48,0,130,0.52) 0%, rgba(18,76,166,0.45) 100%)",
+      tag: "EVENT",
+      tc: "#4BFA94",
+      tagBg: "rgba(75,250,148,0.22)",
+      title: "Campus Lights Fest",
+      meta: "Tonight · Main Stage",
+      going: 156,
+      img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=70",
     },
     {
-      date: "21",
-      title: "Theta Mixer",
-      image:
-        "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=700&q=80",
-      tint: "linear-gradient(165deg, rgba(120,24,54,0.5) 0%, rgba(84,52,24,0.42) 100%)",
+      tag: "PARTY",
+      tc: "#facc15",
+      tagBg: "rgba(250,204,21,0.18)",
+      title: "Pre-game @ Theta 🏠",
+      meta: "9PM · 2.3 mi away",
+      going: 47,
+      img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=70",
     },
   ];
   return (
-    <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", padding: "56px 12px 12px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <span style={{ fontSize: 18, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>RAGE</span>
-        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: "50%", background: "rgba(255,255,255,0.06)", color: "#fff" }}>
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-          </svg>
-        </span>
+    <div style={{ position: "absolute", inset: 0, background: "#000", paddingTop: 56, display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "2px 12px 8px" }}>
+        <span style={{ fontSize: 19, fontWeight: 900, letterSpacing: "-0.03em", color: "#fff" }}>Discover</span>
+        <div style={{ position: "relative", width: 28, height: 28, borderRadius: 999, border: "1px solid rgba(255,255,255,0.14)", overflow: "hidden", background: "linear-gradient(145deg,#3f3f46,#18181b)" }}>
+          <span
+            style={{
+              position: "absolute",
+              right: 0,
+              bottom: 0,
+              width: 9,
+              height: 9,
+              borderRadius: "50%",
+              background: "#4BFA94",
+              border: "2px solid #000",
+            }}
+          />
+        </div>
       </div>
-      <p style={{ fontSize: 11, color: "#a1a1aa", fontWeight: 600, marginBottom: 8 }}>Your Events ›</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-        {events.map((e, i) => (
+      <div style={{ display: "flex", gap: 6, padding: "0 12px 8px" }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            background: "#2c2c2e",
+            borderRadius: 20,
+            padding: "7px 10px",
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#737373" strokeWidth={2.4}>
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <span style={{ fontSize: 10, color: "#737373" }}>Search events near you...</span>
+        </div>
+        <div
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 11,
+            background: "#2c2c2e",
+            border: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+          aria-hidden
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" strokeWidth={2}>
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+        </div>
+      </div>
+      <div className="no-scrollbar" style={{ display: "flex", gap: 14, padding: "0 12px 6px", overflowX: "auto", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        {tabs.map((t, i) => (
+          <span
+            key={t}
+            style={{
+              flexShrink: 0,
+              fontSize: 10,
+              fontWeight: i === 0 ? 700 : 500,
+              color: i === 0 ? "#4BFA94" : "#52525b",
+              borderBottom: i === 0 ? "2px solid #4BFA94" : "2px solid transparent",
+              paddingBottom: 5,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+      <div className="no-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "7px 12px 46px", display: "flex", flexDirection: "column", gap: 7 }}>
+        {cards.map((item, i) => (
           <div
             key={i}
             style={{
-              aspectRatio: "1",
-              borderRadius: 12,
-              backgroundImage: `${e.tint}, url(${e.image})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              position: "relative",
-              overflow: "hidden",
-              padding: 8,
-              boxShadow: "inset 0 -40px 60px rgba(0,0,0,0.35)",
+              background: "#1c1c1e",
+              borderRadius: 14,
+              padding: "8px 8px 8px 7px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            <div style={{ display: "inline-block", background: "rgba(0,0,0,0.55)", borderRadius: 8, padding: "4px 7px", textAlign: "center" }}>
-              <p style={{ fontSize: 14, fontWeight: 800, color: "#fff", lineHeight: 1 }}>{e.date}</p>
-              <p style={{ fontSize: 7, color: "#fff", letterSpacing: "0.1em", marginTop: 1 }}>TUE</p>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                flexShrink: 0,
+                backgroundImage: `linear-gradient(160deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)), url(${item.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            />
+            <div style={{ flex: 1, minWidth: 0, position: "relative", paddingRight: 18 }}>
+              <div style={{ position: "absolute", top: -1, right: 0, color: "#52525b" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+                </svg>
+              </div>
+              <span
+                style={{
+                  display: "inline-block",
+                  background: item.tagBg,
+                  color: item.tc,
+                  fontSize: 7,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  borderRadius: 5,
+                  padding: "2px 5px",
+                }}
+              >
+                {item.tag}
+              </span>
+              <p style={{ margin: "3px 0 1px", fontSize: 11, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{item.title}</p>
+              <p style={{ fontSize: 9, color: "#737373" }}>{item.meta}</p>
             </div>
-            <p style={{ position: "absolute", left: 8, bottom: 7, fontSize: 8, color: "rgba(255,255,255,0.92)", letterSpacing: "0.03em", fontWeight: 700, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>
-              {e.title}
-            </p>
-            <p style={{ position: "absolute", right: 7, bottom: 7, fontSize: 7, color: "#d4d4d8", letterSpacing: "0.08em", fontWeight: 700 }}>LIVE</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flexShrink: 0, gap: 1 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#4BFA94" }}>{item.going}</span>
+              <span style={{ fontSize: 7, fontWeight: 600, color: "#52525b" }}>Going</span>
+              <span style={{ color: "#3f3f46", fontSize: 10 }} aria-hidden>
+                ›
+              </span>
+            </div>
           </div>
         ))}
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(75,250,148,0.12) 0%, rgba(24,24,27,0.95) 55%)",
+            borderRadius: 14,
+            padding: "9px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            border: "1px solid rgba(75,250,148,0.22)",
+          }}
+        >
+          <div style={{ fontSize: 18, flexShrink: 0 }} aria-hidden>
+            🎓
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: "#fff" }}>.edu only events</p>
+            <p style={{ margin: "2px 0 0", fontSize: 8, color: "#a1a1aa", lineHeight: 1.35 }}>Verify your .edu to unlock exclusive drops.</p>
+          </div>
+          <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: "0.05em", textTransform: "uppercase", color: "#000", background: "#4BFA94", borderRadius: 8, padding: "7px 8px", flexShrink: 0 }}>
+            Verify
+          </span>
+        </div>
       </div>
-      <p style={{ fontSize: 10, color: "#52525b", marginTop: 6 }}>Après-Ski Colorado</p>
-      <p style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>'80s in Aspen</p>
-      <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
-        <span style={{ fontSize: 8, color: "#4BFA94", background: "rgba(75,250,148,0.12)", border: "1px solid rgba(75,250,148,0.24)", borderRadius: 999, padding: "4px 7px", fontWeight: 700 }}>+18% RSVP</span>
-        <span style={{ fontSize: 8, color: "#a1a1aa", background: "#111", border: "1px solid #252525", borderRadius: 999, padding: "4px 7px", fontWeight: 700 }}>2.1K views</span>
+      <div style={{ position: "absolute", left: 6, right: 6, bottom: 20, pointerEvents: "none" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            background: "rgba(10,10,10,0.94)",
+            borderRadius: 16,
+            border: "1px solid rgba(255,255,255,0.07)",
+            padding: "6px 2px 8px",
+          }}
+        >
+          {[
+            { label: "Discover", icon: "◎", active: true },
+            { label: "Saved", icon: "♡", active: false },
+            { label: "Events", icon: "▦", active: false },
+            { label: "Msgs", icon: "✉", active: false },
+            { label: "You", icon: "◉", active: false },
+          ].map((tab) => (
+            <div key={tab.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, minWidth: 36 }}>
+              <span style={{ fontSize: 11, color: tab.active ? "#4BFA94" : "#52525b" }} aria-hidden>
+                {tab.icon}
+              </span>
+              <span style={{ fontSize: 7, fontWeight: tab.active ? 700 : 500, color: tab.active ? "#4BFA94" : "#52525b" }}>{tab.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -115,7 +259,7 @@ function InviteScreen() {
   const inviteImage =
     "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=700&q=80";
   return (
-    <div style={{ position: "absolute", inset: 0, background: "#0a0a0a", padding: "56px 12px 12px" }}>
+    <div style={{ position: "absolute", inset: 0, background: "#000", padding: "56px 12px 12px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 11 }}>↓</span>
         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 12 }}>···</span>

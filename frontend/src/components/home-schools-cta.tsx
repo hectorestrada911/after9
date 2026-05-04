@@ -108,11 +108,11 @@ export function HomeSchoolsCta() {
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <Link
-                href="/signup"
+                href="/verify-edu"
                 className="inline-flex h-13 items-center rounded-full bg-white px-9 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-zinc-200"
                 style={{ height: 52 }}
               >
-                Find your school
+                Verify your .edu
               </Link>
               <Link
                 href="/demo"

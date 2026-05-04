@@ -69,7 +69,8 @@ export default function FaqPage() {
             {faqs.map((item) => (
               <details
                 key={item.q}
-                className="group rounded-2xl border border-white/[0.1] bg-white/[0.02] px-5 py-4 transition hover:border-white/[0.18] hover:bg-white/[0.03]"
+                id={item.q.includes("school email") ? "faq-edu-email" : undefined}
+                className="group scroll-mt-28 rounded-2xl border border-white/[0.1] bg-white/[0.02] px-5 py-4 transition hover:border-white/[0.18] hover:bg-white/[0.03]"
               >
                 <summary className="cursor-pointer list-none pr-8 text-sm font-semibold text-white marker:hidden sm:text-base">
                   {item.q}

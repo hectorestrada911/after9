@@ -25,6 +25,12 @@ const config: Config = {
           green: "#4BFA94",
           blue: "#0000FE",
         },
+        /** Product UI tokens (Discover / verify surfaces) */
+        discover: {
+          ink: "#000000",
+          card: "#1c1c1e",
+          search: "#2c2c2e",
+        },
       },
       letterSpacing: {
         tightest: "-0.04em",

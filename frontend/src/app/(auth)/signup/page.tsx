@@ -258,6 +258,16 @@ function SignupForm() {
           <Sparkles className="h-3.5 w-3.5 text-brand-green/80" aria-hidden />
           One account unlocks buyer tickets and host tools.
         </p>
+        <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+          Prefer a magic link with your school email?{" "}
+          <Link
+            href={`/verify-edu?next=${encodeURIComponent(hostIntent ? hostNext : next)}`}
+            className="font-semibold text-brand-green underline-offset-2 transition hover:text-emerald-300 hover:underline"
+          >
+            Verify with .edu
+          </Link>
+          .
+        </p>
         <p className="mt-3 text-xs leading-relaxed text-zinc-500">
           By continuing, you agree to our{" "}
           <Link href="/terms" className="underline underline-offset-2 transition hover:text-zinc-300">

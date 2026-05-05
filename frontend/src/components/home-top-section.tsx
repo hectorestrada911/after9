@@ -62,47 +62,322 @@ const DISCOVER_CARD = "#1c1c1e";
 const DISCOVER_SEARCH = "#2c2c2e";
 const SIGNAL = "#4BFA94";
 
-/* ─── phone screen 1: event feed (Discover) ─────────────────────── */
-function FeedScreen({ progress }: { progress: MotionValue<number> }) {
-  const tabs = ["Trending", "Near Me", ".edu Only", "Music", "Sports", "Art"];
-  const items = [
-    {
-      tag: "EVENT",
-      tc: SIGNAL,
-      tagBg: "rgba(75,250,148,0.22)",
-      title: "Campus Lights Fest",
-      meta: "Tonight · Main Stage",
-      going: 156,
-      img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=70",
-    },
-    {
-      tag: "PARTY",
-      tc: "#facc15",
-      tagBg: "rgba(250,204,21,0.18)",
-      title: "Pre-game @ Theta 🏠",
-      meta: "9PM · 2.3 mi away",
-      going: 47,
-      img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=70",
-    },
-    {
-      tag: "RAVE",
-      tc: "#c084fc",
-      tagBg: "rgba(192,132,252,0.18)",
-      title: "Rooftop DJ Set ✦",
-      meta: "Fri · Riverside Deck",
-      going: 89,
-      img: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=300&q=70",
-    },
-    {
-      tag: ".EDU",
-      tc: SIGNAL,
-      tagBg: "rgba(75,250,148,0.22)",
-      title: "Sophomore Mixer",
-      meta: "Sat · Student Union",
-      going: 34,
-      img: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=300&q=70",
-    },
-  ];
+const FEED_TABS = ["Trending", "Near Me", ".edu Only", "Music", "Sports", "Art"] as const;
+const FEED_ITEMS = [
+  {
+    tag: "EVENT",
+    tc: SIGNAL,
+    tagBg: "rgba(75,250,148,0.22)",
+    title: "Campus Lights Fest",
+    meta: "Tonight · Main Stage",
+    going: 156,
+    img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=70",
+  },
+  {
+    tag: "PARTY",
+    tc: "#facc15",
+    tagBg: "rgba(250,204,21,0.18)",
+    title: "Pre-game @ Theta 🏠",
+    meta: "9PM · 2.3 mi away",
+    going: 47,
+    img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=70",
+  },
+  {
+    tag: "RAVE",
+    tc: "#c084fc",
+    tagBg: "rgba(192,132,252,0.18)",
+    title: "Rooftop DJ Set ✦",
+    meta: "Fri · Riverside Deck",
+    going: 89,
+    img: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=300&q=70",
+  },
+  {
+    tag: ".EDU",
+    tc: SIGNAL,
+    tagBg: "rgba(75,250,148,0.22)",
+    title: "Sophomore Mixer",
+    meta: "Sat · Student Union",
+    going: 34,
+    img: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=300&q=70",
+  },
+] as const;
+
+/** Mobile / narrow: skip scroll-scrubbed card motion (saves many compositor layers per scroll tick). */
+function FeedScreenStatic() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        background: DISCOVER_BG,
+        paddingTop: 56,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "2px 14px 10px" }}>
+        <span style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-0.03em", color: "#fff" }}>Discover</span>
+        <div style={{ position: "relative", width: 32, height: 32, borderRadius: 999, overflow: "hidden", border: "1px solid rgba(255,255,255,0.14)" }}>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "linear-gradient(145deg, #3f3f46 0%, #18181b 100%)",
+            }}
+          />
+          <span
+            style={{
+              position: "absolute",
+              right: 0,
+              bottom: 0,
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: SIGNAL,
+              border: "2px solid #000",
+              boxShadow: "0 0 0 1px rgba(75,250,148,0.35)",
+            }}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 12px 10px" }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: DISCOVER_SEARCH,
+            borderRadius: 22,
+            padding: "9px 12px",
+            minWidth: 0,
+            border: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#737373" strokeWidth={2.4}>
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <span style={{ fontSize: 11, color: "#737373", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            Search events near you...
+          </span>
+        </div>
+        <button
+          type="button"
+          aria-hidden
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: DISCOVER_SEARCH,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" strokeWidth={2}>
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+        </button>
+      </div>
+
+      <div
+        className="no-scrollbar"
+        style={{
+          display: "flex",
+          gap: 18,
+          padding: "0 12px 8px",
+          overflowX: "auto",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {FEED_TABS.map((t, i) => (
+          <span
+            key={t}
+            style={{
+              flexShrink: 0,
+              fontSize: 11,
+              fontWeight: i === 0 ? 700 : 500,
+              color: i === 0 ? SIGNAL : "#52525b",
+              borderBottom: i === 0 ? `2px solid ${SIGNAL}` : "2px solid transparent",
+              paddingBottom: 6,
+            }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+
+      <div className="no-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "8px 12px 52px", display: "flex", flexDirection: "column", gap: 8 }}>
+        {FEED_ITEMS.map((item, i) => (
+          <div
+            key={i}
+            style={{
+              background: DISCOVER_CARD,
+              borderRadius: 16,
+              padding: "9px 10px 9px 9px",
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              border: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "0 8px 20px -14px rgba(0,0,0,0.65)",
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                flexShrink: 0,
+                backgroundImage: `linear-gradient(160deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)), url(${item.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            />
+            <div style={{ flex: 1, minWidth: 0, position: "relative", paddingRight: 22 }}>
+              <div style={{ position: "absolute", top: -2, right: 0, color: "#52525b" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+                </svg>
+              </div>
+              <span
+                style={{
+                  display: "inline-block",
+                  background: item.tagBg,
+                  color: item.tc,
+                  fontSize: 8,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  borderRadius: 6,
+                  padding: "2px 6px",
+                }}
+              >
+                {item.tag}
+              </span>
+              <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 700, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
+              <p style={{ fontSize: 10, color: "#737373" }}>{item.meta}</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0, paddingRight: 2 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: SIGNAL, letterSpacing: "-0.02em" }}>{item.going}</span>
+              <span style={{ fontSize: 8, fontWeight: 600, color: "#52525b", textTransform: "capitalize", letterSpacing: "0.04em" }}>Going</span>
+              <span style={{ marginTop: 2, color: "#3f3f46", fontSize: 11, lineHeight: 1 }} aria-hidden>
+                ›
+              </span>
+            </div>
+          </div>
+        ))}
+
+        <div
+          style={{
+            background: "linear-gradient(135deg, rgba(75,250,148,0.12) 0%, rgba(24,24,27,0.95) 55%)",
+            borderRadius: 16,
+            padding: "11px 12px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            border: "1px solid rgba(75,250,148,0.22)",
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              background: "rgba(75,250,148,0.14)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              flexShrink: 0,
+            }}
+            aria-hidden
+          >
+            🎓
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em" }}>.edu only events</p>
+            <p style={{ margin: "3px 0 0", fontSize: 9, color: "#a1a1aa", lineHeight: 1.35 }}>
+              Verify your .edu email to unlock exclusive events and access.
+            </p>
+          </div>
+          <span
+            style={{
+              flexShrink: 0,
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "#000",
+              background: SIGNAL,
+              borderRadius: 10,
+              padding: "8px 10px",
+              boxShadow: "0 6px 16px -8px rgba(75,250,148,0.45)",
+            }}
+          >
+            Verify
+          </span>
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 22,
+          padding: "0 8px",
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-around",
+            background: "rgba(10,10,10,0.92)",
+            borderRadius: 18,
+            border: "1px solid rgba(255,255,255,0.07)",
+            padding: "8px 4px 10px",
+            boxShadow: "0 -12px 32px rgba(0,0,0,0.45)",
+          }}
+        >
+          {[
+            { label: "Discover", active: true, icon: "◎" },
+            { label: "Saved", active: false, icon: "♡" },
+            { label: "My Events", active: false, icon: "▦" },
+            { label: "Messages", active: false, icon: "✉" },
+            { label: "Profile", active: false, icon: "◉" },
+          ].map((tab) => (
+            <div key={tab.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, minWidth: 44 }}>
+              <span style={{ fontSize: 13, color: tab.active ? SIGNAL : "#52525b", lineHeight: 1 }} aria-hidden>
+                {tab.icon}
+              </span>
+              <span
+                style={{
+                  fontSize: 8,
+                  fontWeight: tab.active ? 700 : 500,
+                  color: tab.active ? SIGNAL : "#52525b",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {tab.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── phone screen 1: event feed (Discover) — scroll-driven motion (desktop) ─ */
+function FeedScreenAnimated({ progress }: { progress: MotionValue<number> }) {
   const y0 = useTransform(progress, [0.020, 0.120], [22, 0]);
   const y1 = useTransform(progress, [0.045, 0.145], [22, 0]);
   const y2 = useTransform(progress, [0.070, 0.170], [22, 0]);
@@ -210,7 +485,7 @@ function FeedScreen({ progress }: { progress: MotionValue<number> }) {
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {tabs.map((t, i) => (
+        {FEED_TABS.map((t, i) => (
           <span
             key={t}
             style={{
@@ -229,7 +504,7 @@ function FeedScreen({ progress }: { progress: MotionValue<number> }) {
 
       {/* scrollable list */}
       <div className="no-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "8px 12px 52px", display: "flex", flexDirection: "column", gap: 8 }}>
-        {items.map((item, i) => (
+        {FEED_ITEMS.map((item, i) => (
           <motion.div
             key={i}
             style={{
@@ -397,9 +672,15 @@ function FeedScreen({ progress }: { progress: MotionValue<number> }) {
   );
 }
 
+function FeedScreen({ progress, lowPower }: { progress: MotionValue<number>; lowPower: boolean }) {
+  if (lowPower) return <FeedScreenStatic />;
+  return <FeedScreenAnimated progress={progress} />;
+}
+
 /* ─── phone screen 2: .edu verify (matches marketing verify mockups) ─ */
-function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
+function VerifyScreen({ progress, lowPower = false }: { progress: MotionValue<number>; lowPower?: boolean }) {
   const reduceMotion = useReducedMotion();
+  const pauseLoop = Boolean(reduceMotion || lowPower);
   const badgeScale = useTransform(progress, [0.32, 0.46], [0.6, 1]);
   const badgeOpacity = useTransform(progress, [0.32, 0.42], [0, 1]);
   const titleY = useTransform(progress, [0.36, 0.48], [14, 0]);
@@ -443,8 +724,8 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
               justifyContent: "center",
               boxShadow: "0 0 24px rgba(75,250,148,0.16)",
             }}
-            animate={reduceMotion ? undefined : { scale: [1, 1.03, 1] }}
-            transition={reduceMotion ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            animate={pauseLoop ? undefined : { scale: [1, 1.03, 1] }}
+            transition={pauseLoop ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
           >
             <EduVerifyShieldIcon size={40} />
           </motion.div>
@@ -526,8 +807,8 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
                 background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.28), rgba(255,255,255,0))",
                 transform: "skewX(-16deg)",
               }}
-              animate={reduceMotion ? undefined : { x: [-60, 220] }}
-              transition={reduceMotion ? undefined : { duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+              animate={pauseLoop ? undefined : { x: [-60, 220] }}
+              transition={pauseLoop ? undefined : { duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
             />
           </div>
           <p style={{ margin: "8px 0 0", fontSize: 8, color: "#52525b", textAlign: "center" }}>.edu addresses only</p>
@@ -591,8 +872,9 @@ function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
 }
 
 /* ─── phone screen 3: QR ticket ─────────────────────────────────── */
-function TicketScreen({ progress }: { progress: MotionValue<number> }) {
+function TicketScreen({ progress, lowPower = false }: { progress: MotionValue<number>; lowPower?: boolean }) {
   const reduceMotion = useReducedMotion();
+  const pauseLoop = Boolean(reduceMotion || lowPower);
   const qrScale = useTransform(progress, [0.64, 0.78], [0.7, 1]);
   const qrOpacity = useTransform(progress, [0.64, 0.74], [0, 1]);
   const headY = useTransform(progress, [0.62, 0.74], [12, 0]);
@@ -671,8 +953,8 @@ function TicketScreen({ progress }: { progress: MotionValue<number> }) {
             background: "linear-gradient(90deg, rgba(75,250,148,0), rgba(75,250,148,0.95), rgba(75,250,148,0))",
             boxShadow: "0 0 10px rgba(75,250,148,0.7)",
           }}
-          animate={reduceMotion ? undefined : { y: [0, 118, 0] }}
-          transition={reduceMotion ? undefined : { duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
+          animate={pauseLoop ? undefined : { y: [0, 118, 0] }}
+          transition={pauseLoop ? undefined : { duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
       <motion.div style={{ opacity: badgeOpacity, y: badgeY, marginTop: 14, display: "flex", alignItems: "center", gap: 7, background: "rgba(75,250,148,0.12)", borderRadius: 999, padding: "7px 16px" }}>
@@ -754,6 +1036,16 @@ export function HomeTopSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const [phraseIdx, setPhraseIdx] = useState(0);
+  /** Max-lg: drop 3D phone + in-feed scroll motion (big win on mobile GPUs). */
+  const [narrowViewport, setNarrowViewport] = useState(false);
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setNarrowViewport(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  const phoneLowPower = Boolean(narrowViewport || reduceMotion);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -1014,26 +1306,55 @@ export function HomeTopSection() {
 
         {/* ── PHONE — visible on load at angle, rises and straightens on scroll ── */}
         <div className="absolute bottom-0 left-1/2 z-[5]" style={{ transform: "translateX(-50%)" }}>
-          <motion.div
-            aria-hidden
-            style={{
-              opacity: glowOpacity,
-              position: "absolute",
-              bottom: 0,
-              left: "50%",
-              width: 560, height: 560,
-              translate: "-50% 20%",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(75,250,148,0.22), transparent 62%)",
-              pointerEvents: "none",
-              willChange: "opacity",
-            }}
-          />
-          <div style={{ perspective: "1500px", transform: "translateZ(0)" }}>
+          {phoneLowPower ? (
+            <div
+              aria-hidden
+              style={{
+                opacity: 0.52,
+                position: "absolute",
+                bottom: 0,
+                left: "50%",
+                width: 420,
+                height: 420,
+                transform: "translate(-50%, 22%)",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(75,250,148,0.18), transparent 62%)",
+                pointerEvents: "none",
+              }}
+            />
+          ) : (
             <motion.div
+              aria-hidden
+              style={{
+                opacity: glowOpacity,
+                position: "absolute",
+                bottom: 0,
+                left: "50%",
+                width: 560,
+                height: 560,
+                translate: "-50% 20%",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(75,250,148,0.22), transparent 62%)",
+                pointerEvents: "none",
+                willChange: "opacity",
+              }}
+            />
+          )}
+          <div
+            style={
+              phoneLowPower
+                ? { transform: "translateZ(0)" }
+                : { perspective: "1500px", transform: "translateZ(0)" }
+            }
+          >
+            <motion.div
+              className="origin-bottom [contain:paint]"
               style={
-                reduceMotion
-                  ? { transform: "translateZ(0)" }
+                phoneLowPower
+                  ? {
+                      y: phoneY,
+                      willChange: "transform",
+                    }
                   : {
                       y: phoneY,
                       rotateX: phoneRotateX,
@@ -1045,15 +1366,15 @@ export function HomeTopSection() {
                     }
               }
             >
-              <PhoneShell>
+              <PhoneShell w={phoneLowPower ? 268 : 300} h={phoneLowPower ? 556 : 620}>
                 <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
-                  <FeedScreen progress={progress} />
+                  <FeedScreen progress={progress} lowPower={phoneLowPower} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
-                  <VerifyScreen progress={progress} />
+                  <VerifyScreen progress={progress} lowPower={phoneLowPower} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
-                  <TicketScreen progress={progress} />
+                  <TicketScreen progress={progress} lowPower={phoneLowPower} />
                 </motion.div>
               </PhoneShell>
             </motion.div>

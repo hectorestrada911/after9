@@ -126,7 +126,12 @@ export function SiteHeader() {
         style={{ background: "linear-gradient(90deg, transparent 0%, rgba(75,250,148,0.45) 50%, transparent 100%)" }}
       />
       <div className="container-page flex h-[3.25rem] min-w-0 items-center justify-between gap-3 sm:h-16 sm:gap-6">
-        <Link href="/" className="flex shrink-0 items-center" onClick={closeMenus}>
+        <Link
+          href="/"
+          title="RAGE home"
+          className="flex shrink-0 items-center rounded-lg outline-none transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-brand-green/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[#030303]"
+          onClick={closeMenus}
+        >
           <Image src="/rage-logo.png" alt="RAGE" width={160} height={48} className="h-8 w-auto object-contain sm:h-10" priority loading="eager" />
         </Link>
 

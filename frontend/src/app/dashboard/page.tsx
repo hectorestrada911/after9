@@ -1,12 +1,37 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CheckCircle2, Download, ShoppingBag, Sparkles, Ticket, Zap } from "lucide-react";
-import { Card, EmptyState, StatCard } from "@/components/ui";
-import { centsToDollars } from "@/lib/utils";
+import {
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  DollarSign,
+  Download,
+  ExternalLink,
+  Plus,
+  ScanLine,
+  ShoppingBag,
+  Sparkles,
+  Ticket,
+  TrendingUp,
+  UserRound,
+  Zap,
+} from "lucide-react";
+import { EmptyState } from "@/components/ui";
+import { centsToDollars, cn } from "@/lib/utils";
+import { coerceEventVisibility, eventVisibilityLabel } from "@/lib/event-visibility";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 import CopyEventLink from "@/components/copy-event-link";
 import SalesChart from "@/components/sales-chart";
 import DashboardAuthFallback from "@/components/dashboard-auth-fallback";
 import HostPayoutCta from "@/components/host-payout-cta";
+
+/** Best-effort initials from a name or email. */
+function initialsFor(name: string | null | undefined, email: string | null | undefined): string {
+  const source = (name?.trim() || email?.split("@")[0] || "G").trim();
+  const parts = source.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return "G";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[1]![0]!).toUpperCase();
+}
 
 function formatEventDate(isoDate: string) {
   const d = new Date(`${isoDate}T12:00:00`);
@@ -50,12 +75,15 @@ export default async function DashboardPage() {
     date: string;
     ticket_price: number;
     tickets_available: number;
+    image_url: string | null;
+    visibility: string | null;
+    sales_enabled: boolean | null;
   };
   type EventRowWithArchive = EventRowBase & { archived_at: string | null };
 
   const eventsWithArchive = await supabase
     .from("events")
-    .select("id,slug,title,date,ticket_price,tickets_available,archived_at")
+    .select("id,slug,title,date,ticket_price,tickets_available,image_url,visibility,sales_enabled,archived_at")
     .eq("host_id", userId)
     .order("date", { ascending: true });
 
@@ -64,7 +92,7 @@ export default async function DashboardPage() {
     eventsWithArchive.error && eventsWithArchive.error.message.toLowerCase().includes("archived_at")
       ? await supabase
           .from("events")
-          .select("id,slug,title,date,ticket_price,tickets_available")
+          .select("id,slug,title,date,ticket_price,tickets_available,image_url,visibility,sales_enabled")
           .eq("host_id", userId)
           .order("date", { ascending: true })
       : null;
@@ -103,41 +131,73 @@ export default async function DashboardPage() {
 
   return (
     <main className="container-page min-w-0 py-10 sm:py-14">
-      <Link href="/account" className="inline-flex text-xs font-semibold uppercase tracking-wider text-zinc-500 transition hover:text-white">
-        ← Account hub
+      <Link
+        href="/account"
+        className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 transition hover:text-white"
+      >
+        <span aria-hidden>←</span> Account hub
       </Link>
-      <div className="mb-10 mt-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted">Host workspace</p>
-          <h1 className="mt-3 display-section-fluid">{"Events & analytics"}</h1>
-        </div>
-        <Link href="/dashboard/events/new" className="inline-flex pill-dark h-12 px-6 text-sm">
-          CREATE EVENT <ArrowUpRight size={16} />
-        </Link>
-      </div>
 
-      <section id="scan-qr" className="mb-8 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4 scroll-mt-28">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Quick access</p>
-            <p className="mt-1 text-sm text-zinc-300">At the door? Open your scanner in one tap, or jump to your event list.</p>
+      {/* Hero zone — eyebrow + headline + subline + primary/secondary CTAs */}
+      <header className="mb-10 mt-4 flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand-green/80">Host workspace</p>
+          <h1 className="mt-2 text-3xl font-black uppercase tracking-tight text-white sm:text-[2.4rem]">
+            Events &amp; <span className="bg-gradient-to-r from-brand-green via-emerald-200 to-teal-200 bg-clip-text text-transparent">analytics</span>
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-zinc-400">
+            Sell tickets, scan at the door, and pay yourself — all in one place.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
+          <Link
+            href="/dashboard/storefront"
+            className="inline-flex h-11 items-center rounded-full border border-white/15 bg-white/[0.04] px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-200 transition hover:border-white/35 hover:text-white"
+          >
+            Storefront
+          </Link>
+          <Link
+            href="/dashboard/events/new"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-gradient-to-r from-brand-green via-[#7dffc0] to-emerald-400 px-5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-black shadow-[0_14px_36px_-14px_rgba(75,250,148,0.65)] transition hover:brightness-105"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} aria-hidden /> Create event
+          </Link>
+        </div>
+      </header>
+
+      {/* Quick access — promoted with icon row + clearer button hierarchy */}
+      <section
+        id="scan-qr"
+        className="mb-6 scroll-mt-28 overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] via-white/[0.02] to-transparent shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
+      >
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex items-start gap-3 sm:items-center">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-brand-green/30 bg-brand-green/[0.08] text-brand-green shadow-[0_0_20px_-10px_rgba(75,250,148,0.6)]">
+              <Zap className="h-4 w-4" strokeWidth={2} aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-green/80">Quick access</p>
+              <p className="mt-0.5 text-sm text-zinc-200">
+                At the door? Open your scanner in one tap, or jump to your event list.
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Link
               href={scannerHref}
-              className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-[11px] font-extrabold uppercase tracking-[0.12em] text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
             >
-              Start scanner now
+              <ScanLine className="h-4 w-4" strokeWidth={2} aria-hidden /> Start scanner
             </Link>
             <Link
               href="/dashboard/storefront"
-              className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
+              className="inline-flex h-10 items-center rounded-full border border-white/15 bg-white/[0.04] px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white transition hover:border-white/35 hover:bg-white/[0.08]"
             >
               Storefront
             </Link>
             <Link
               href="#my-events"
-              className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10"
+              className="inline-flex h-10 items-center rounded-full border border-white/15 bg-white/[0.04] px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white transition hover:border-white/35 hover:bg-white/[0.08]"
             >
               My events
             </Link>
@@ -234,185 +294,330 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total revenue"
-          value={`$${centsToDollars(revenue)}`}
-          className="border-white/[0.1] bg-zinc-950/60"
-          valueClassName="text-white"
-        />
-        <StatCard
-          label="Tickets sold"
-          value={ticketsSold}
-          className="border-white/[0.1] bg-zinc-950/60"
-          valueClassName="text-white"
-        />
-        <StatCard
-          label="Upcoming events"
-          value={activeEvents.length}
-          className="border-white/[0.1] bg-zinc-950/60"
-          valueClassName="text-white"
-        />
-        <StatCard
-          label="Checked-in guests"
-          value={checkedIn ?? 0}
-          className="border-white/[0.1] bg-zinc-950/60"
-          valueClassName="text-white"
-        />
+      <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {(
+          [
+            {
+              label: "Total revenue",
+              value: `$${centsToDollars(revenue)}`,
+              hint: ticketsSold > 0 ? `From ${ticketsSold} ticket${ticketsSold === 1 ? "" : "s"}` : "Awaiting first sale",
+              Icon: DollarSign,
+              accent: true,
+            },
+            {
+              label: "Tickets sold",
+              value: ticketsSold.toLocaleString(),
+              hint: activeEvents.length > 0 ? `Across ${activeEvents.length} event${activeEvents.length === 1 ? "" : "s"}` : "No live events yet",
+              Icon: Ticket,
+              accent: false,
+            },
+            {
+              label: "Upcoming events",
+              value: activeEvents.length.toLocaleString(),
+              hint: archivedEvents.length > 0 ? `${archivedEvents.length} archived` : "Live + scheduled",
+              Icon: CalendarDays,
+              accent: false,
+            },
+            {
+              label: "Checked-in guests",
+              value: (checkedIn ?? 0).toLocaleString(),
+              hint: ticketsSold > 0 ? `${Math.min(100, Math.round(((checkedIn ?? 0) / Math.max(ticketsSold, 1)) * 100))}% of sold` : "Door scans appear here",
+              Icon: ScanLine,
+              accent: false,
+            },
+          ] as const
+        ).map(({ label, value, hint, Icon, accent }) => (
+          <div
+            key={label}
+            className={cn(
+              "relative overflow-hidden rounded-2xl border bg-zinc-950/60 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+              accent ? "border-brand-green/25" : "border-white/[0.08]",
+            )}
+          >
+            {accent ? (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{ background: "radial-gradient(circle at 100% 0%, rgba(75,250,148,0.10), transparent 55%)" }}
+              />
+            ) : null}
+            <div className="relative flex items-start justify-between gap-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">{label}</p>
+              <span
+                className={cn(
+                  "grid h-8 w-8 place-items-center rounded-lg border",
+                  accent ? "border-brand-green/30 bg-brand-green/10 text-brand-green" : "border-white/[0.08] bg-white/[0.03] text-zinc-400",
+                )}
+              >
+                <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+              </span>
+            </div>
+            <p
+              className={cn(
+                "relative mt-3 text-[2rem] font-black tabular-nums leading-none tracking-tight sm:text-[2.25rem]",
+                accent ? "text-white" : "text-zinc-50",
+              )}
+            >
+              {value}
+            </p>
+            {hint ? <p className="relative mt-2 text-[11px] leading-relaxed text-zinc-500">{hint}</p> : null}
+          </div>
+        ))}
       </section>
 
       <section className="mt-10">
-        <Card className="border-zinc-800 bg-zinc-950 p-6 text-white">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Recent orders</h2>
-            <p className="text-xs text-zinc-500">Every completed checkout appears here.</p>
-          </div>
+        <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-zinc-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <header className="flex flex-col gap-2 border-b border-white/[0.06] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-brand-green/70" strokeWidth={1.75} aria-hidden />
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">Recent orders</h2>
+              {recentOrders.length > 0 ? (
+                <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-zinc-400">
+                  {recentOrders.length}
+                </span>
+              ) : null}
+            </div>
+            <p className="text-[11px] text-zinc-500">Every completed checkout appears here.</p>
+          </header>
           {recentOrders.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-zinc-700 py-14 text-center">
-              <ShoppingBag className="mx-auto h-10 w-10 text-zinc-600" aria-hidden />
-              <p className="mt-4 text-lg font-bold text-white">No orders yet</p>
+            <div className="px-5 py-14 text-center sm:px-6">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+                <ShoppingBag className="h-6 w-6 text-zinc-500" strokeWidth={1.5} aria-hidden />
+              </div>
+              <p className="mt-4 text-base font-semibold text-white">No orders yet</p>
               <p className="mt-1 text-sm text-zinc-500">When someone buys a ticket, it will show up here.</p>
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="divide-y divide-white/[0.05]">
               {recentOrders.map((order) => (
-                <li
-                  key={order.id}
-                  className="flex flex-col gap-1 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-bold text-white">{order.buyer_name}</p>
-                    <p className="text-xs text-zinc-500">{order.buyer_email}</p>
+                <li key={order.id} className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.02] sm:px-6">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/[0.1] bg-white/[0.04] text-[11px] font-bold uppercase tracking-wide text-zinc-300">
+                    {initialsFor(order.buyer_name, order.buyer_email)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-white">{order.buyer_name || "Guest"}</p>
+                    <p className="truncate text-[11px] text-zinc-500">{order.buyer_email}</p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 sm:text-right">
-                    <span className="text-zinc-400">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</span>
-                    <span className="font-bold text-white">${centsToDollars(order.total_amount)}</span>
+                  <div className="flex shrink-0 items-center gap-3 text-right">
+                    <span className="hidden text-[11px] text-zinc-500 sm:inline">
+                      {order.quantity} ticket{order.quantity === 1 ? "" : "s"}
+                    </span>
+                    <span className="text-[13px] font-bold tabular-nums text-white">${centsToDollars(order.total_amount)}</span>
                   </div>
                 </li>
               ))}
             </ul>
           )}
-        </Card>
+        </div>
       </section>
 
-      <section id="my-events" className="mt-10 space-y-3 scroll-mt-28">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-muted">Your events</h2>
+      <section id="my-events" className="mt-10 scroll-mt-28">
+        <header className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-brand-green/70" strokeWidth={1.75} aria-hidden />
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">Your events</h2>
+            {activeEvents.length > 0 ? (
+              <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-zinc-400">
+                {activeEvents.length}
+              </span>
+            ) : null}
+          </div>
+        </header>
         {activeEvents.length === 0 ? (
           <EmptyState
             title="No events yet"
             subtitle="Create your first event to start selling tickets."
-            className="border-white/[0.16] bg-zinc-950/50"
+            className="border-white/[0.1] bg-zinc-950/40"
             titleClassName="text-white"
             subtitleClassName="text-zinc-400"
           />
         ) : (
-          activeEvents.map((event) => {
-            const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
-            const pct = Math.min(Math.round((sold / Math.max(event.tickets_available, 1)) * 100), 100);
-            return (
-              <Card key={event.id} className="border-white/[0.1] bg-zinc-950/60 text-white transition hover:border-white/25">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <Link href={`/dashboard/events/${event.id}`} className="text-lg font-bold tracking-tight transition hover:text-brand-green">
-                      {event.title}
-                    </Link>
-                    <p className="text-sm text-zinc-400">{formatEventDate(event.date)}</p>
+          <ul className="space-y-3">
+            {activeEvents.map((event) => {
+              const sold = (orders ?? []).filter((o) => o.event_id === event.id).reduce((s, o) => s + o.quantity, 0);
+              const cap = Math.max(event.tickets_available, 1);
+              const pct = Math.min(Math.round((sold / cap) * 100), 100);
+              const salesOn = event.sales_enabled !== false;
+              const visLabel = eventVisibilityLabel(coerceEventVisibility(event.visibility));
+              return (
+                <li
+                  key={event.id}
+                  className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:border-white/[0.16]"
+                >
+                  {event.image_url ? (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.07]"
+                      style={{ backgroundImage: `url(${event.image_url})` }}
+                    />
+                  ) : null}
+                  <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
+                    <div className="flex shrink-0 items-center gap-4">
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/[0.1] bg-zinc-900">
+                        {event.image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- host-uploaded URLs vary per project
+                          <img src={event.image_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-zinc-600">
+                            <CalendarDays className="h-5 w-5" aria-hidden />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/dashboard/events/${event.id}`}
+                          className="text-base font-bold tracking-tight text-white transition hover:text-brand-green sm:text-lg"
+                        >
+                          {event.title}
+                        </Link>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                            salesOn
+                              ? "border-brand-green/35 bg-brand-green/10 text-brand-green"
+                              : "border-zinc-500/30 bg-zinc-700/20 text-zinc-300",
+                          )}
+                        >
+                          <span className={cn("h-1.5 w-1.5 rounded-full", salesOn ? "bg-brand-green" : "bg-zinc-400")} />
+                          {salesOn ? "Sales on" : "Sales off"}
+                        </span>
+                        <span className="rounded-full border border-white/15 bg-white/[0.05] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                          {visLabel}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[13px] text-zinc-400">{formatEventDate(event.date)}</p>
+                      <div className="mt-3">
+                        <div className="mb-1 flex justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                          <span>Sales progress</span>
+                          <span className="tabular-nums text-zinc-400">
+                            {sold} / {event.tickets_available} · {pct}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800/80">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="relative flex flex-wrap items-center gap-2 border-t border-white/[0.06] bg-black/20 px-4 py-3 sm:px-5">
                     <Link
-                      className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_24px_-12px_rgba(75,250,148,0.75)] transition hover:brightness-110"
+                      className="inline-flex h-9 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-3.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110"
                       href={`/dashboard/events/${event.id}`}
                     >
                       Event hub
                     </Link>
                     <Link
-                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white transition hover:border-white/35 hover:bg-white/[0.08]"
                       href={`/events/${event.slug}`}
                     >
-                      View
+                      View <ExternalLink className="h-3 w-3 opacity-80" strokeWidth={2} aria-hidden />
                     </Link>
                     <Link
-                      className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white transition hover:border-white/35 hover:bg-white/[0.08]"
                       href={`/dashboard/events/${event.id}/check-in`}
                     >
-                      Scan QR
+                      <ScanLine className="h-3.5 w-3.5" strokeWidth={2} aria-hidden /> Scan QR
                     </Link>
                     <CopyEventLink slug={event.slug} variant="dark" />
                   </div>
-                </div>
-                <div className="mt-5">
-                  <div className="mb-1.5 flex justify-between text-xs font-medium text-zinc-400">
-                    <span>Sales progress</span>
-                    <span>{pct}%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                    <div className="h-full bg-gradient-to-r from-brand-green via-emerald-300 to-cyan-300" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              </Card>
-            );
-          })
+                </li>
+              );
+            })}
+          </ul>
         )}
       </section>
 
       {archivedEvents.length > 0 ? (
-        <section className="mt-8 space-y-3">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Archived events</h2>
-          {archivedEvents.map((event) => (
-            <Card key={event.id} className="border-white/[0.08] bg-zinc-950/40 text-white">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <Link href={`/dashboard/events/${event.id}`} className="text-base font-bold tracking-tight transition hover:text-brand-green">
+        <section className="mt-8">
+          <header className="mb-3 flex items-center gap-2">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-400">Archived events</h2>
+            <span className="rounded-full bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-zinc-500">
+              {archivedEvents.length}
+            </span>
+          </header>
+          <ul className="space-y-2">
+            {archivedEvents.map((event) => (
+              <li
+                key={event.id}
+                className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-zinc-950/40 px-4 py-3 opacity-90 transition-colors hover:border-white/[0.12]"
+              >
+                <div className="min-w-0">
+                  <Link href={`/dashboard/events/${event.id}`} className="truncate text-[13px] font-bold text-white transition hover:text-brand-green">
                     {event.title}
                   </Link>
-                  <p className="text-xs text-zinc-500">{formatEventDate(event.date)}</p>
+                  <p className="text-[11px] text-zinc-500">{formatEventDate(event.date)}</p>
                 </div>
-                <span className="inline-flex rounded-full border border-zinc-500/30 bg-zinc-700/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-500/25 bg-zinc-700/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-zinc-500" />
                   Archived
                 </span>
-              </div>
-            </Card>
-          ))}
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 
       <section className="mt-12 space-y-4">
-        <Card className="border-white/[0.1] bg-zinc-950/60 text-white">
-          <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-zinc-400">Sales analytics</h2>
-          <SalesChart data={salesData} />
-        </Card>
-        <Card className="border-white/[0.1] bg-zinc-950/60 text-white">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Recent attendees</h2>
+        <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-zinc-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <header className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4 sm:px-6">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-brand-green/70" strokeWidth={1.75} aria-hidden />
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">Sales analytics</h2>
+            </div>
+            <span className="text-[11px] text-zinc-500">Tickets sold per event</span>
+          </header>
+          <div className="p-5 sm:p-6">
+            <SalesChart data={salesData} />
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border border-white/[0.08] bg-zinc-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <header className="flex flex-col gap-2 border-b border-white/[0.06] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="flex items-center gap-2">
+              <UserRound className="h-4 w-4 text-brand-green/70" strokeWidth={1.75} aria-hidden />
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">Recent attendees</h2>
+              {attendeeRows.length > 0 ? (
+                <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-zinc-400">
+                  {attendeeRows.length}
+                </span>
+              ) : null}
+            </div>
             <Link
-              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.03] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/[0.08]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white transition hover:border-white/35 hover:bg-white/[0.08]"
               href="/api/attendees/csv"
             >
-              <Download size={14} /> Download CSV
+              <Download className="h-3.5 w-3.5" strokeWidth={2} aria-hidden /> Download CSV
             </Link>
-          </div>
+          </header>
           {attendeeRows.length === 0 ? (
-            <p className="text-sm text-zinc-400">No ticket purchases yet.</p>
-          ) : (
-            <div className="space-y-2">
-              {attendeeRows.map((order) => (
-                <div
-                  key={order.id}
-                  className="flex flex-col gap-2 rounded-xl border border-white/[0.1] bg-zinc-900/50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-bold text-white">{order.buyer_name}</p>
-                    <p className="break-all text-zinc-400">{order.buyer_email}</p>
-                  </div>
-                  <div className="sm:text-right">
-                    <p className="font-bold text-white">{order.quantity} ticket{order.quantity > 1 ? "s" : ""}</p>
-                    <p className="text-zinc-400">${centsToDollars(order.total_amount)}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="px-5 py-12 text-center sm:px-6">
+              <p className="text-sm text-zinc-500">No ticket purchases yet.</p>
             </div>
+          ) : (
+            <ul className="divide-y divide-white/[0.05]">
+              {attendeeRows.map((order) => (
+                <li key={order.id} className="flex items-center gap-3 px-5 py-3.5 sm:px-6">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/[0.1] bg-white/[0.04] text-[11px] font-bold uppercase tracking-wide text-zinc-300">
+                    {initialsFor(order.buyer_name, order.buyer_email)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-white">{order.buyer_name || "Guest"}</p>
+                    <p className="truncate text-[11px] text-zinc-500">{order.buyer_email}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-[13px] font-bold tabular-nums text-white">${centsToDollars(order.total_amount)}</p>
+                    <p className="text-[11px] text-zinc-500">{order.quantity} ticket{order.quantity === 1 ? "" : "s"}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
-        </Card>
+        </div>
       </section>
     </main>
   );

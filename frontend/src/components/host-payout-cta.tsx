@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AlertTriangle, ArrowUpRight, CheckCircle2, Wallet } from "lucide-react";
 import EmbeddedStripeOnboarding from "@/components/embedded-stripe-onboarding";
 import { flushUi } from "@/lib/flush-ui";
+import { cn } from "@/lib/utils";
 
 type PayoutStatus = {
   hasAccount: boolean;
@@ -97,41 +99,85 @@ export default function HostPayoutCta() {
   const ready = Boolean(status?.onboarded && status?.payoutsEnabled);
 
   return (
-    <section id="host-payouts" className="mb-8 scroll-mt-28 rounded-2xl border border-white/[0.1] bg-zinc-950/60 p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Host payouts</p>
-          <p className="mt-1 text-sm text-zinc-300">
-            {ready ? "Withdraw your funds from Stripe dashboard." : "Set up Stripe Connect once to unlock withdrawals."}
-          </p>
-          {!ready ? (
-            <p className="mt-1 text-xs text-zinc-500">
-              One-time setup: Stripe verifies identity and payout details so we can send earnings securely.
+    <section
+      id="host-payouts"
+      className={cn(
+        "mb-6 scroll-mt-28 overflow-hidden rounded-3xl border bg-gradient-to-br shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+        ready
+          ? "border-brand-green/20 from-brand-green/[0.08] via-white/[0.02] to-transparent"
+          : "border-white/[0.08] from-white/[0.04] via-white/[0.02] to-transparent",
+      )}
+    >
+      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex items-start gap-3 sm:items-center">
+          <span
+            className={cn(
+              "grid h-10 w-10 shrink-0 place-items-center rounded-xl border shadow-[0_0_20px_-10px_rgba(75,250,148,0.6)]",
+              ready
+                ? "border-brand-green/35 bg-brand-green/[0.1] text-brand-green"
+                : "border-white/15 bg-white/[0.04] text-zinc-300",
+            )}
+          >
+            <Wallet className="h-4 w-4" strokeWidth={2} aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className={cn("text-[10px] font-bold uppercase tracking-[0.18em]", ready ? "text-brand-green/80" : "text-zinc-500")}>
+                Host payouts
+              </p>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                  ready
+                    ? "border-brand-green/35 bg-brand-green/10 text-brand-green"
+                    : "border-amber-400/30 bg-amber-400/10 text-amber-200",
+                )}
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", ready ? "bg-brand-green" : "bg-amber-300")} />
+                {ready ? "Ready" : status === null ? "Checking…" : "Action needed"}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-zinc-200">
+              {ready ? "Withdraw your earnings to your linked bank — usually arrives in 1–2 business days." : "Set up Stripe Connect once to unlock withdrawals."}
             </p>
-          ) : null}
+            {!ready ? (
+              <p className="mt-1 text-xs text-zinc-500">
+                One-time setup: Stripe verifies identity and payout details so we can send earnings securely.
+              </p>
+            ) : null}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
           <button
             type="button"
             disabled={loading}
             onClick={openPayoutSetup}
-            className="inline-flex h-10 items-center rounded-full border border-white/20 bg-white/[0.06] px-4 text-xs font-bold uppercase tracking-wide text-white transition hover:border-white/45 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-10 items-center rounded-full border border-white/15 bg-white/[0.04] px-4 text-[11px] font-bold uppercase tracking-[0.12em] text-white transition hover:border-white/35 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {loading ? "Opening..." : ready ? "Payout settings" : "Set up payouts"}
+            {loading ? "Opening…" : ready ? "Payout settings" : "Set up payouts"}
           </button>
           <button
             type="button"
             disabled={loading || !ready}
             onClick={withdrawNow}
-            className="inline-flex h-10 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-4 text-[11px] font-extrabold uppercase tracking-[0.12em] text-black shadow-[0_0_22px_-12px_rgba(75,250,148,0.7)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Withdraw
+            Withdraw <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
           </button>
         </div>
       </div>
+
+      {ready ? (
+        <div className="flex items-center gap-2 border-t border-white/[0.06] bg-black/20 px-5 py-3 text-[11px] text-zinc-400 sm:px-6">
+          <CheckCircle2 className="h-3.5 w-3.5 text-brand-green" strokeWidth={2} aria-hidden />
+          Stripe Connect verified. Earnings transfer securely to your linked account.
+        </div>
+      ) : null}
+
       {error ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <p className="text-xs font-medium text-red-400">{error}</p>
+        <div className="flex flex-wrap items-center gap-2 border-t border-red-500/15 bg-red-500/[0.06] px-5 py-3 text-xs sm:px-6">
+          <AlertTriangle className="h-3.5 w-3.5 text-red-400" strokeWidth={2} aria-hidden />
+          <p className="font-medium text-red-300">{error}</p>
           {errorAction ? (
             <a
               href={errorAction.url}

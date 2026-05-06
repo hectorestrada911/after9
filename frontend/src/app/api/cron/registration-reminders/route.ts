@@ -7,7 +7,9 @@ export const dynamic = "force-dynamic";
  * Vercel Cron (GET) or manual run: Resend reminders to users who registered
  * but have not confirmed their email. Secured with CRON_SECRET.
  *
- * Configure in Vercel: add `CRON_SECRET`, enable cron from vercel.json.
+ * vercel.json uses UTC: `0 2 * * *` ≈ 7:00 PM America/Los_Angeles during PDT. In winter (PST),
+ * 7 PM local ≈ `0 3 * * *` — change the schedule if you want 7 PM year-round.
+ * For an immediate test, `curl` this URL with `Authorization: Bearer <CRON_SECRET>`.
  */
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET?.trim();

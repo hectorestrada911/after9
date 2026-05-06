@@ -1,4 +1,3 @@
-import type { User } from "@supabase/supabase-js";
 import { getResendMailEnv } from "@/lib/resend-config";
 import { getSupabaseServiceRoleClient } from "@/lib/supabase-service";
 import { sendCreateEventReminderEmail } from "@/lib/transactional-email";
@@ -18,7 +17,14 @@ function createEventReminderMax(): number {
   return Number.isFinite(n) && n > 0 ? Math.min(24, Math.floor(n)) : 6;
 }
 
-function getUserMeta(user: User): Record<string, unknown> {
+type AuthUserLite = {
+  id: string;
+  email?: string | null;
+  is_anonymous?: boolean;
+  user_metadata?: Record<string, unknown> | null;
+};
+
+function getUserMeta(user: AuthUserLite): Record<string, unknown> {
   const raw = user.user_metadata;
   if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
     return { ...raw } as Record<string, unknown>;
@@ -27,8 +33,8 @@ function getUserMeta(user: User): Record<string, unknown> {
 }
 
 /**
- * Verified users with a profile who have never created an event (no rows in `events` for their host_id).
- * Resend nudges to publish a first night; cooldown + max count in user_metadata.
+ * All registered (non-anonymous) users with an email.
+ * Sends Resend create-event nudges with cooldown + max count in user_metadata.
  */
 export async function runCreateEventReminders(): Promise<{
   scanned: number;
@@ -62,53 +68,15 @@ export async function runCreateEventReminders(): Promise<{
     const users = data.users;
     scanned += users.length;
 
-    const confirmed = users.filter((u) => u.email && u.email_confirmed_at && !u.is_anonymous);
-    if (confirmed.length === 0) {
+    const recipients = users.filter((u) => u.email && !u.is_anonymous);
+    if (recipients.length === 0) {
       if (users.length < perPage) break;
       page += 1;
       continue;
     }
 
-    const ids = confirmed.map((u) => u.id);
-    const { data: eventRows, error: evErr } = await admin.from("events").select("host_id").in("host_id", ids);
-    if (evErr) {
-      failed += confirmed.length;
-      if (users.length < perPage) break;
-      page += 1;
-      continue;
-    }
-
-    const hostsWithEvents = new Set((eventRows ?? []).map((r) => r.host_id));
-    const withoutEvents = confirmed.filter((u) => !hostsWithEvents.has(u.id));
-    if (withoutEvents.length === 0) {
-      skipped += confirmed.length;
-      if (users.length < perPage) break;
-      page += 1;
-      continue;
-    }
-
-    const wids = withoutEvents.map((u) => u.id);
-    const { data: profiles, error: pErr } = await admin
-      .from("profiles")
-      .select("id, organizer_name, full_name")
-      .in("id", wids);
-
-    if (pErr || !profiles?.length) {
-      skipped += withoutEvents.length;
-      if (users.length < perPage) break;
-      page += 1;
-      continue;
-    }
-
-    const profileById = new Map(profiles.map((p) => [p.id, p]));
-
-    for (const user of withoutEvents) {
+    for (const user of recipients) {
       const email = user.email!.trim().toLowerCase();
-      const profile = profileById.get(user.id);
-      if (!profile) {
-        skipped++;
-        continue;
-      }
 
       const meta = getUserMeta(user);
       const lastRaw = meta.last_create_event_reminder_at;
@@ -129,7 +97,10 @@ export async function runCreateEventReminders(): Promise<{
 
       eligible++;
 
-      const displayName = (profile.organizer_name || profile.full_name || "").trim();
+      const displayName =
+        (typeof meta.full_name === "string" && meta.full_name.trim()) ||
+        (typeof meta.name === "string" && meta.name.trim()) ||
+        "";
       const result = await sendCreateEventReminderEmail({ to: email, displayName });
       if (!result.ok) {
         failed++;

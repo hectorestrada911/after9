@@ -9,6 +9,7 @@ import {
   useTransform,
   useReducedMotion,
   useMotionValue,
+  useMotionValueEvent,
   type MotionValue,
 } from "framer-motion";
 import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
@@ -896,13 +897,32 @@ export function PhoneShell({ children, w = 300, h = 620, trimChrome }: { childre
   );
 }
 
-/* ─── MOBILE hero (no scroll-bound transforms) ──────────────────────
- * On phones we render a flat, scroll-free hero:
- *   - Hero copy + CTA in normal flow
- *   - Single Discover screen on the phone, entered once via whileInView (IntersectionObserver)
- *   - VerifyScreen / TicketScreen are NOT mounted, so their per-frame useTransform calls don't run
- *   - No sticky 320vh trap, so the rest of the page scrolls normally
- * Result: zero per-scroll-frame work for the hero phone on mobile.
+/* ─── MOBILE hero (full scroll story, minimal per-frame work) ───────
+ *
+ * Goals: keep the desktop "phone enters, scenes swap, screens swap" story,
+ * but eliminate the work that made mobile feel laggy.
+ *
+ * What we kept:
+ *   - Phone entrance animation (one-shot whileInView, NOT scroll-bound)
+ *   - Three scenes that scroll-swap above the phone (cheap opacity-only)
+ *   - Phone screen swap (Feed → Verify → Ticket) tied to scroll thresholds
+ *
+ * What we changed vs. the desktop path so it's smooth on phones:
+ *   1. Phone position is NOT bound to scrollY. It enters once via
+ *      IntersectionObserver, then sits static. So the heavy phone subtree
+ *      never gets re-composited per scroll frame.
+ *   2. Active screen is React state driven by a discrete-stepped derived
+ *      MotionValue. setState only fires twice per scroll (at the two
+ *      threshold crossings), not every frame.
+ *   3. Each screen renders with a STATIC MotionValue parked at its
+ *      "fully shown" progress, so the useTransform calls inside Verify /
+ *      Ticket fire ONCE at mount and never re-evaluate. Crossfades are
+ *      handled by CSS opacity transitions on the wrapper, not per-frame.
+ *   4. No 3D perspective, no rotateX/Y/Z, no scale. Just one entrance
+ *      translateY + opacity, then static.
+ *
+ * Net per scroll frame: ~5 opacity-only style writes (hero + 3 scenes +
+ * heroY). Phone subtree: 0 work.
  */
 function MobileTopSection({
   phraseIdx,
@@ -911,73 +931,190 @@ function MobileTopSection({
   phraseIdx: number;
   reduceMotion: boolean;
 }) {
-  const dummyProgress = useMotionValue(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const [sectionTop, setSectionTop] = useState(0);
+  const [sectionRange, setSectionRange] = useState(1800);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const recalc = () => {
+      setSectionTop(el.offsetTop);
+      setSectionRange(Math.max(1, el.offsetHeight - window.innerHeight));
+    };
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, []);
+
+  const progress = useTransform(scrollY, [sectionTop, sectionTop + sectionRange], [0, 1], { clamp: true });
+
+  /* Scroll-bound MotionValues — opacity-only on small text elements.
+   * No transforms on the phone, no transforms on heavy DOM.
+   */
+  const heroOpacity = useTransform(progress, [0, 0.10, 0.22], [1, 1, 0]);
+  const heroY = useTransform(progress, [0.10, 0.22], [0, -22]);
+  const s1 = useTransform(progress, [0.14, 0.22, 0.32, 0.40], [0, 1, 1, 0]);
+  const s2 = useTransform(progress, [0.36, 0.46, 0.56, 0.66], [0, 1, 1, 0]);
+  const s3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
+
+  /* Discrete derived motion value: only "changes" when crossing a threshold,
+   * so useMotionValueEvent fires at most twice during the entire scroll. */
+  const screenIdx = useTransform(progress, (v) => (v >= 0.64 ? 2 : v >= 0.38 ? 1 : 0));
+  const [activeScreen, setActiveScreen] = useState(0);
+  useMotionValueEvent(screenIdx, "change", (val) => setActiveScreen(val as number));
+  /* Sync once on mount in case the user lands mid-scroll. */
+  useEffect(() => {
+    setActiveScreen(screenIdx.get() as number);
+  }, [screenIdx]);
+
+  /* Static "fully shown" progress per screen — internal useTransform fires
+   * once at mount and never recomputes since the source never changes. */
+  const feedStaticProgress = useMotionValue(0.18);
+  const verifyStaticProgress = useMotionValue(0.58);
+  const ticketStaticProgress = useMotionValue(0.85);
+
+  const sceneOps = [s1, s2, s3];
 
   return (
-    <section className="relative overflow-hidden bg-black">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 12% 22%, rgba(75,250,148,0.08), transparent 38%), radial-gradient(circle at 88% 90%, rgba(0,0,254,0.05), transparent 40%)",
-        }}
-      />
-
-      <div className="relative z-10 flex flex-col items-center px-6 pb-4 pt-[clamp(5rem,9svh,7rem)] text-center">
-        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">Discover</p>
-        <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl">
-          Your campus.
-          <br />
-          <span className="relative inline-block overflow-hidden" style={{ minWidth: "8ch" }}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={phraseIdx}
-                className="inline-block bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent"
-                initial={{ y: "60%", opacity: 0 }}
-                animate={{ y: "0%", opacity: 1 }}
-                exit={{ y: "-60%", opacity: 0 }}
-                transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
-                {cyclingPhrases[phraseIdx]}
-              </motion.span>
-            </AnimatePresence>
-          </span>
-        </h1>
-        <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
-          Every party, show, and event near you, curated by students, for students.
-        </p>
-        <Link
-          href="/create-event"
-          className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
-          style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
-        >
-          Create event
-        </Link>
-      </div>
-
-      <div className="relative z-[5] mt-4 flex justify-center px-6 pb-14">
+    <div ref={containerRef} className="relative bg-black" style={{ minHeight: "280vh" }}>
+      <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
+        {/* ambient glows — fully static, no scroll work */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-2 mx-auto h-72 w-[28rem] max-w-full"
+          className="pointer-events-none absolute inset-0"
           style={{
-            background: "radial-gradient(circle, rgba(75,250,148,0.18), transparent 62%)",
+            background:
+              "radial-gradient(circle at 12% 22%, rgba(75,250,148,0.07), transparent 38%), radial-gradient(circle at 88% 90%, rgba(0,0,254,0.05), transparent 40%)",
           }}
         />
+
+        {/* Hero — single opacity + y motion pair */}
         <motion.div
-          initial={reduceMotion ? false : { y: 64, opacity: 0 }}
-          whileInView={reduceMotion ? undefined : { y: 0, opacity: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative"
-          style={{ willChange: "transform, opacity" }}
+          style={{ opacity: heroOpacity, y: heroY }}
+          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[clamp(5.25rem,9svh,7.5rem)] text-center"
         >
-          <PhoneShell w={280} h={580} trimChrome>
-            <FeedScreen progress={dummyProgress} mobileLight />
-          </PhoneShell>
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">Discover</p>
+          <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl">
+            Your campus.
+            <br />
+            <span className="relative inline-block overflow-hidden" style={{ minWidth: "8ch" }}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={phraseIdx}
+                  className="inline-block bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent"
+                  initial={{ y: "60%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={{ y: "-60%", opacity: 0 }}
+                  transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  {cyclingPhrases[phraseIdx]}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+          </h1>
+          <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
+            Every party, show, and event near you, curated by students, for students.
+          </p>
+          <Link
+            href="/create-event"
+            className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
+            style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
+          >
+            Create event
+          </Link>
         </motion.div>
+
+        {/* Scene labels above phone — three abs-positioned blocks, opacity-only */}
+        <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] z-[11]">
+          <div className="relative mx-auto min-h-[6rem] w-full max-w-md px-5">
+            {scenes.map((scene, i) => (
+              <motion.div
+                key={scene.eyebrow}
+                className="pointer-events-auto absolute inset-x-0 top-0 flex flex-col items-center text-center"
+                style={{ opacity: sceneOps[i] }}
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-[#4BFA94]">{scene.eyebrow}</p>
+                <h2 className="mt-1.5 text-2xl font-black uppercase leading-[0.92] tracking-[-0.03em] text-white sm:text-3xl">
+                  {scene.line1}
+                  <br />
+                  <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">{scene.line2}</span>
+                </h2>
+                <Link
+                  href={scene.cta.href}
+                  className="mt-3 inline-flex h-10 items-center rounded-full bg-[#4BFA94] px-6 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-emerald-300"
+                  style={{ boxShadow: "0 0 20px -4px rgba(75,250,148,0.45)" }}
+                >
+                  {scene.cta.label}
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Phone — whileInView entrance, then completely static. */}
+        <div className="absolute bottom-0 left-1/2 z-[5]" style={{ transform: "translateX(-50%)" }}>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              bottom: 0,
+              left: "50%",
+              width: 460,
+              height: 460,
+              translate: "-50% 22%",
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(75,250,148,0.18), transparent 62%)",
+            }}
+          />
+          <motion.div
+            initial={reduceMotion ? false : { y: 220, opacity: 0 }}
+            whileInView={reduceMotion ? undefined : { y: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.05 }}
+            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              willChange: "transform, opacity",
+              backfaceVisibility: "hidden",
+              transform: "translate3d(0,0,0)",
+            }}
+          >
+            <PhoneShell w={280} h={580} trimChrome>
+              {/* All three screens mounted with static MotionValues. CSS opacity transitions handle the swap. */}
+              <div
+                className="absolute inset-0 transition-opacity duration-300 ease-out"
+                style={{ opacity: activeScreen === 0 ? 1 : 0, willChange: "opacity" }}
+              >
+                <FeedScreen progress={feedStaticProgress} mobileLight />
+              </div>
+              <div
+                className="absolute inset-0 transition-opacity duration-300 ease-out"
+                style={{ opacity: activeScreen === 1 ? 1 : 0, willChange: "opacity" }}
+              >
+                <VerifyScreen progress={verifyStaticProgress} ambientOff />
+              </div>
+              <div
+                className="absolute inset-0 transition-opacity duration-300 ease-out"
+                style={{ opacity: activeScreen === 2 ? 1 : 0, willChange: "opacity" }}
+              >
+                <TicketScreen progress={ticketStaticProgress} ambientOff />
+              </div>
+            </PhoneShell>
+          </motion.div>
+        </div>
+
+        {/* progress dots — driven by activeScreen state, CSS-only transitions */}
+        <div className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-1.5 w-1.5 rounded-full bg-[#4BFA94] transition-opacity duration-200"
+              style={{ opacity: activeScreen === i ? 1 : 0.25 }}
+            />
+          ))}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
 

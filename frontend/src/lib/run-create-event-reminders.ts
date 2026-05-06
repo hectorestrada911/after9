@@ -6,15 +6,23 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** `0` = no cooldown (send on every cron run). Unset defaults to 0 for small lists / broadcast mode. */
 function createEventReminderCooldownMs(): number {
-  const hours = Number(process.env.CREATE_EVENT_REMINDER_COOLDOWN_HOURS);
-  const h = Number.isFinite(hours) && hours > 0 ? hours : 168;
-  return h * 3600_000;
+  const raw = process.env.CREATE_EVENT_REMINDER_COOLDOWN_HOURS?.trim();
+  if (raw === undefined || raw === "") return 0;
+  const hours = Number(raw);
+  if (!Number.isFinite(hours) || hours < 0) return 0;
+  if (hours === 0) return 0;
+  return hours * 3600_000;
 }
 
+/** `0` = no max (never skip due to prior sends). Unset defaults to 0. */
 function createEventReminderMax(): number {
-  const n = Number(process.env.CREATE_EVENT_REMINDER_MAX);
-  return Number.isFinite(n) && n > 0 ? Math.min(24, Math.floor(n)) : 6;
+  const raw = process.env.CREATE_EVENT_REMINDER_MAX?.trim();
+  if (raw === undefined || raw === "") return 0;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
 }
 
 type AuthUserLite = {
@@ -34,7 +42,7 @@ function getUserMeta(user: AuthUserLite): Record<string, unknown> {
 
 /**
  * All registered (non-anonymous) users with an email.
- * Sends Resend create-event nudges with cooldown + max count in user_metadata.
+ * Sends Resend create-event nudges. Optional cooldown + max via env (`0` disables each).
  */
 export async function runCreateEventReminders(): Promise<{
   scanned: number;
@@ -82,12 +90,12 @@ export async function runCreateEventReminders(): Promise<{
       const lastRaw = meta.last_create_event_reminder_at;
       const count = typeof meta.create_event_reminder_count === "number" ? meta.create_event_reminder_count : 0;
 
-      if (count >= maxReminders) {
+      if (maxReminders > 0 && count >= maxReminders) {
         skipped++;
         continue;
       }
 
-      if (typeof lastRaw === "string") {
+      if (cooldownMs > 0 && typeof lastRaw === "string") {
         const last = Date.parse(lastRaw);
         if (!Number.isNaN(last) && Date.now() - last < cooldownMs) {
           skipped++;
@@ -108,19 +116,23 @@ export async function runCreateEventReminders(): Promise<{
         continue;
       }
 
-      const { error: upErr } = await admin.auth.admin.updateUserById(user.id, {
-        user_metadata: {
-          ...meta,
-          last_create_event_reminder_at: new Date().toISOString(),
-          create_event_reminder_count: count + 1,
-        },
-      });
+      if (cooldownMs > 0 || maxReminders > 0) {
+        const { error: upErr } = await admin.auth.admin.updateUserById(user.id, {
+          user_metadata: {
+            ...meta,
+            last_create_event_reminder_at: new Date().toISOString(),
+            create_event_reminder_count: count + 1,
+          },
+        });
 
-      if (upErr) {
-        failed++;
-      } else {
-        sent++;
+        if (upErr) {
+          failed++;
+          await sleep(400);
+          continue;
+        }
       }
+
+      sent++;
 
       await sleep(400);
     }

@@ -125,6 +125,59 @@ export async function sendVerificationResendNudgeEmail(params: { to: string }): 
   return { ok: true };
 }
 
+/**
+ * Scheduled reminder for users who signed up but have not confirmed email yet (cron + Resend).
+ * `confirmUrl` should be a Supabase magic link when available, otherwise the login page.
+ */
+export async function sendUnverifiedRegistrationReminderEmail(params: {
+  to: string;
+  confirmUrl: string;
+}): Promise<SendResult> {
+  const env = getResendMailEnv();
+  if (!env) return { ok: false, reason: "config", message: "RESEND_API_KEY or RESEND_FROM_EMAIL missing." };
+
+  const name = escapeHtml(displayNameFromEmail(params.to));
+  const resend = new Resend(env.apiKey);
+  const loginUrl = `${env.appUrl}/login`;
+  const createUrl = `${env.appUrl}/create-event`;
+
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Hi ${name},</p>
+    <p style="margin:0 0 14px;">You started a <strong style="color:#ffffff;">RAGE</strong> account — your spot is saved. Finish confirming your email and you can publish a night in minutes: flyer, tickets, and QR check-in in one flow.</p>
+    <p style="margin:0 0 10px;color:rgba(255,255,255,0.72);font-weight:800;letter-spacing:0.08em;text-transform:uppercase;font-size:11px;">Why hosts finish this step</p>
+    <ul style="margin:0;padding:0 0 0 18px;color:rgba(255,255,255,0.78);">
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Fast publish</strong> — get your guest link live without extra tools.</li>
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Clean door</strong> — Scan QR keeps the line moving.</li>
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Built for college nights</strong> — student-first, mobile-first.</li>
+    </ul>
+    ${ragePrimaryButton("Confirm & open RAGE", params.confirmUrl)}
+    ${rageSecondaryLink("Go to sign in", loginUrl)}
+    <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,0.55);">Button not working? Open <a href="${escapeHtml(loginUrl)}" style="color:#4BFA94;font-weight:700;text-decoration:none;">${escapeHtml(loginUrl)}</a> and use <strong style="color:#ffffff;">Resend verification</strong>.</p>
+    ${rageSecondaryLink("After you’re in: create an event", createUrl)}
+    <p style="margin:16px 0 0;font-size:12px;line-height:1.6;color:rgba(255,255,255,0.45);">If you didn’t sign up for RAGE, you can ignore this.</p>
+  `;
+
+  const html = rageEmailDocument({
+    preheader: "Finish confirming your email — then publish your first night on RAGE.",
+    title: "Your account is waiting",
+    bodyHtml,
+  });
+
+  const textName = displayNameFromEmail(params.to);
+  const { error } = await resend.emails.send({
+    from: env.from,
+    to: [params.to],
+    replyTo: env.supportInbox,
+    subject: "Finish your RAGE signup — one tap to confirm",
+    html,
+    text: `Hi ${textName},\n\nYou started a RAGE account. Confirm your email to finish signup:\n${params.confirmUrl}\n\nSign in or resend verification: ${loginUrl}\n\nCreate an event (after you verify): ${createUrl}\n\n— RAGE`,
+    tags: [{ name: "type", value: "unverified_registration_reminder" }],
+  });
+
+  if (error) return { ok: false, reason: "send", message: error.message };
+  return { ok: true };
+}
+
 export type TicketLine = { ticketCode: string; qrDataUrl: string | null };
 
 async function sleep(ms: number) {

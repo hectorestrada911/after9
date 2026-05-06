@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/registration-reminders",
+      "schedule": "0 15 * * *"
+    }
+  ]
+}

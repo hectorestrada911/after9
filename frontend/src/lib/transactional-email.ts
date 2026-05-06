@@ -66,6 +66,65 @@ export async function sendHostWelcomeEmail(params: { to: string; displayName: st
   return { ok: true };
 }
 
+function displayNameFromEmail(email: string): string {
+  const local = email.split("@")[0]?.trim() ?? "";
+  if (!local) return "there";
+  const cleaned = local.replace(/[._+-]+/g, " ").trim();
+  if (!cleaned) return "there";
+  return cleaned
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/**
+ * Sent right after a user successfully triggers “Resend verification” — companion to Supabase’s
+ * confirmation email. Motivates finishing signup and creating a first event (Resend).
+ */
+export async function sendVerificationResendNudgeEmail(params: { to: string }): Promise<SendResult> {
+  const env = getResendMailEnv();
+  if (!env) return { ok: false, reason: "config", message: "RESEND_API_KEY or RESEND_FROM_EMAIL missing." };
+
+  const name = escapeHtml(displayNameFromEmail(params.to));
+  const resend = new Resend(env.apiKey);
+  const loginUrl = `${env.appUrl}/login`;
+  const createUrl = `${env.appUrl}/create-event`;
+
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Hi ${name},</p>
+    <p style="margin:0 0 14px;">We just sent a <strong style="color:#ffffff;">fresh confirmation link</strong> to this inbox. Tap it once — then your account unlocks and you can move fast.</p>
+    <p style="margin:0 0 14px;color:rgba(255,255,255,0.78);">Here’s what happens next (and why hosts don’t wait): your flyer, your story, tickets live in minutes — and a clean QR check-in at the door so the night feels professional, not chaotic.</p>
+    <p style="margin:0 0 10px;color:rgba(255,255,255,0.72);font-weight:800;letter-spacing:0.08em;text-transform:uppercase;font-size:11px;">You’re one step from your first night</p>
+    <ul style="margin:0;padding:0 0 0 18px;color:rgba(255,255,255,0.78);">
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Confirm</strong> using the email that just arrived.</li>
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Publish</strong> your event — buyers get mobile tickets instantly.</li>
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Run the door</strong> with Scan QR when it’s showtime.</li>
+    </ul>
+    ${ragePrimaryButton("Confirm, then open RAGE", loginUrl)}
+    ${rageSecondaryLink("Preview the create flow (after you verify)", createUrl)}
+    <p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:rgba(255,255,255,0.55);">If you didn’t request this, you can ignore this note — your account stays as-is.</p>
+  `;
+
+  const html = rageEmailDocument({
+    preheader: "Confirm your email — then publish your first event in minutes.",
+    title: "You’re one tap away",
+    bodyHtml,
+  });
+
+  const { error } = await resend.emails.send({
+    from: env.from,
+    to: [params.to],
+    replyTo: env.supportInbox,
+    subject: "You’re one tap away — then let’s host your first night on RAGE",
+    html,
+    text: `Hi ${displayNameFromEmail(params.to)},\n\nWe just sent a fresh confirmation link to this inbox. Tap it once to unlock your account.\n\nThen create your first event: ${createUrl}\n\nSign in: ${loginUrl}\n\n— RAGE`,
+    tags: [{ name: "type", value: "verification_resend_nudge" }],
+  });
+
+  if (error) return { ok: false, reason: "send", message: error.message };
+  return { ok: true };
+}
+
 export type TicketLine = { ticketCode: string; qrDataUrl: string | null };
 
 async function sleep(ms: number) {

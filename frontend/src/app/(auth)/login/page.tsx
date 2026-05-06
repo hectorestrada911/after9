@@ -133,6 +133,11 @@ function LoginForm() {
     setPasswordResetSent(false);
     setError(null);
     setPasswordResetSent(true);
+    void fetch("/api/auth/verification-resend-nudge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: trimmed }),
+    }).catch(() => {});
   }
 
   const signupHref = `/signup?next=${encodeURIComponent(effectiveNext)}`;

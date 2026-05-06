@@ -8,8 +8,6 @@ import {
   useScroll,
   useTransform,
   useReducedMotion,
-  useMotionValue,
-  useMotionValueEvent,
   type MotionValue,
 } from "framer-motion";
 import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
@@ -64,51 +62,47 @@ const DISCOVER_CARD = "#1c1c1e";
 const DISCOVER_SEARCH = "#2c2c2e";
 const SIGNAL = "#4BFA94";
 
-const discoverFeedItems = [
-  {
-    tag: "EVENT",
-    tc: SIGNAL,
-    tagBg: "rgba(75,250,148,0.22)",
-    title: "Campus Lights Fest",
-    meta: "Tonight · Main Stage",
-    going: 156,
-    photo: "photo-1514525253161-7a46d19cd819",
-  },
-  {
-    tag: "PARTY",
-    tc: "#facc15",
-    tagBg: "rgba(250,204,21,0.18)",
-    title: "Pre-game @ Theta 🏠",
-    meta: "9PM · 2.3 mi away",
-    going: 47,
-    photo: "photo-1492684223066-81342ee5ff30",
-  },
-  {
-    tag: "RAVE",
-    tc: "#c084fc",
-    tagBg: "rgba(192,132,252,0.18)",
-    title: "Rooftop DJ Set ✦",
-    meta: "Fri · Riverside Deck",
-    going: 89,
-    photo: "photo-1470229722913-7c0e2dbbafd3",
-  },
-  {
-    tag: ".EDU",
-    tc: SIGNAL,
-    tagBg: "rgba(75,250,148,0.22)",
-    title: "Sophomore Mixer",
-    meta: "Sat · Student Union",
-    going: 34,
-    photo: "photo-1511632765486-a01980e01a18",
-  },
-] as const;
-
-function discoverThumb(photo: string, w: number) {
-  return `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=${w}&q=60`;
-}
-
-/** Scroll-scrubbed cards — desktop only (many MotionValues per scroll frame). */
-function DiscoverFeedCardsAnimated({ progress }: { progress: MotionValue<number> }) {
+/* ─── phone screen 1: event feed (Discover) ─────────────────────── */
+function FeedScreen({ progress }: { progress: MotionValue<number> }) {
+  const tabs = ["Trending", "Near Me", ".edu Only", "Music", "Sports", "Art"];
+  const items = [
+    {
+      tag: "EVENT",
+      tc: SIGNAL,
+      tagBg: "rgba(75,250,148,0.22)",
+      title: "Campus Lights Fest",
+      meta: "Tonight · Main Stage",
+      going: 156,
+      img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=70",
+    },
+    {
+      tag: "PARTY",
+      tc: "#facc15",
+      tagBg: "rgba(250,204,21,0.18)",
+      title: "Pre-game @ Theta 🏠",
+      meta: "9PM · 2.3 mi away",
+      going: 47,
+      img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=70",
+    },
+    {
+      tag: "RAVE",
+      tc: "#c084fc",
+      tagBg: "rgba(192,132,252,0.18)",
+      title: "Rooftop DJ Set ✦",
+      meta: "Fri · Riverside Deck",
+      going: 89,
+      img: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=300&q=70",
+    },
+    {
+      tag: ".EDU",
+      tc: SIGNAL,
+      tagBg: "rgba(75,250,148,0.22)",
+      title: "Sophomore Mixer",
+      meta: "Sat · Student Union",
+      going: 34,
+      img: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=300&q=70",
+    },
+  ];
   const y0 = useTransform(progress, [0.020, 0.120], [22, 0]);
   const y1 = useTransform(progress, [0.045, 0.145], [22, 0]);
   const y2 = useTransform(progress, [0.070, 0.170], [22, 0]);
@@ -121,248 +115,6 @@ function DiscoverFeedCardsAnimated({ progress }: { progress: MotionValue<number>
   const o3 = useTransform(progress, [0.095, 0.195], [0, 1]);
   const cardYs = [y0, y1, y2, y3];
   const cardOpacities = [o0, o1, o2, o3];
-
-  return (
-    <>
-      {discoverFeedItems.map((item, i) => (
-        <motion.div
-          key={i}
-          style={{
-            y: cardYs[i],
-            opacity: cardOpacities[i],
-            background: DISCOVER_CARD,
-            borderRadius: 16,
-            padding: "9px 10px 9px 9px",
-            display: "flex",
-            alignItems: "center",
-            gap: 9,
-            border: "1px solid rgba(255,255,255,0.06)",
-            boxShadow: "0 12px 28px -18px rgba(0,0,0,0.85)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              flexShrink: 0,
-              backgroundImage: `linear-gradient(160deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)), url(${discoverThumb(item.photo, 300)})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
-          />
-          <div style={{ flex: 1, minWidth: 0, position: "relative", paddingRight: 22 }}>
-            <div style={{ position: "absolute", top: -2, right: 0, color: "#52525b" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-              </svg>
-            </div>
-            <span
-              style={{
-                display: "inline-block",
-                background: item.tagBg,
-                color: item.tc,
-                fontSize: 8,
-                fontWeight: 800,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                borderRadius: 6,
-                padding: "2px 6px",
-              }}
-            >
-              {item.tag}
-            </span>
-            <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 700, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
-            <p style={{ fontSize: 10, color: "#737373" }}>{item.meta}</p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0, paddingRight: 2 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: SIGNAL, letterSpacing: "-0.02em" }}>{item.going}</span>
-            <span style={{ fontSize: 8, fontWeight: 600, color: "#52525b", textTransform: "capitalize", letterSpacing: "0.04em" }}>Going</span>
-            <span style={{ marginTop: 2, color: "#3f3f46", fontSize: 11, lineHeight: 1 }} aria-hidden>
-              ›
-            </span>
-          </div>
-        </motion.div>
-      ))}
-
-      <motion.div
-        style={{
-          y: yEdu,
-          opacity: oEdu,
-          background: "linear-gradient(135deg, rgba(75,250,148,0.12) 0%, rgba(24,24,27,0.95) 55%)",
-          borderRadius: 16,
-          padding: "11px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          border: "1px solid rgba(75,250,148,0.22)",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: "rgba(75,250,148,0.14)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 20,
-            flexShrink: 0,
-          }}
-          aria-hidden
-        >
-          🎓
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em" }}>.edu only events</p>
-          <p style={{ margin: "3px 0 0", fontSize: 9, color: "#a1a1aa", lineHeight: 1.35 }}>
-            Verify your .edu email to unlock exclusive events and access.
-          </p>
-        </div>
-        <span
-          style={{
-            flexShrink: 0,
-            fontSize: 9,
-            fontWeight: 800,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            color: "#000",
-            background: SIGNAL,
-            borderRadius: 10,
-            padding: "8px 10px",
-            boxShadow: "0 8px 20px -8px rgba(75,250,148,0.55)",
-          }}
-        >
-          Verify
-        </span>
-      </motion.div>
-    </>
-  );
-}
-
-/** Static cards + smaller thumbs — mobile scroll (no scroll-bound MotionValues). */
-function DiscoverFeedCardsStatic() {
-  return (
-    <>
-      {discoverFeedItems.map((item, i) => (
-        <div
-          key={i}
-          style={{
-            background: DISCOVER_CARD,
-            borderRadius: 16,
-            padding: "9px 10px 9px 9px",
-            display: "flex",
-            alignItems: "center",
-            gap: 9,
-            border: "1px solid rgba(255,255,255,0.06)",
-            boxShadow: "0 12px 28px -18px rgba(0,0,0,0.85)",
-            contentVisibility: "auto",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              flexShrink: 0,
-              backgroundImage: `linear-gradient(160deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)), url(${discoverThumb(item.photo, 200)})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
-          />
-          <div style={{ flex: 1, minWidth: 0, position: "relative", paddingRight: 22 }}>
-            <div style={{ position: "absolute", top: -2, right: 0, color: "#52525b" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-              </svg>
-            </div>
-            <span
-              style={{
-                display: "inline-block",
-                background: item.tagBg,
-                color: item.tc,
-                fontSize: 8,
-                fontWeight: 800,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                borderRadius: 6,
-                padding: "2px 6px",
-              }}
-            >
-              {item.tag}
-            </span>
-            <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 700, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
-            <p style={{ fontSize: 10, color: "#737373" }}>{item.meta}</p>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0, paddingRight: 2 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: SIGNAL, letterSpacing: "-0.02em" }}>{item.going}</span>
-            <span style={{ fontSize: 8, fontWeight: 600, color: "#52525b", textTransform: "capitalize", letterSpacing: "0.04em" }}>Going</span>
-            <span style={{ marginTop: 2, color: "#3f3f46", fontSize: 11, lineHeight: 1 }} aria-hidden>
-              ›
-            </span>
-          </div>
-        </div>
-      ))}
-      <div
-        style={{
-          background: "linear-gradient(135deg, rgba(75,250,148,0.12) 0%, rgba(24,24,27,0.95) 55%)",
-          borderRadius: 16,
-          padding: "11px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          border: "1px solid rgba(75,250,148,0.22)",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: "rgba(75,250,148,0.14)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 20,
-            flexShrink: 0,
-          }}
-          aria-hidden
-        >
-          🎓
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em" }}>.edu only events</p>
-          <p style={{ margin: "3px 0 0", fontSize: 9, color: "#a1a1aa", lineHeight: 1.35 }}>
-            Verify your .edu email to unlock exclusive events and access.
-          </p>
-        </div>
-        <span
-          style={{
-            flexShrink: 0,
-            fontSize: 9,
-            fontWeight: 800,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            color: "#000",
-            background: SIGNAL,
-            borderRadius: 10,
-            padding: "8px 10px",
-            boxShadow: "0 8px 20px -8px rgba(75,250,148,0.55)",
-          }}
-        >
-          Verify
-        </span>
-      </div>
-    </>
-  );
-}
-
-/* ─── phone screen 1: event feed (Discover) ─────────────────────── */
-function FeedScreen({ progress, mobileLight }: { progress: MotionValue<number>; mobileLight?: boolean }) {
-  const tabs = ["Trending", "Near Me", ".edu Only", "Music", "Sports", "Art"];
 
   return (
     <div
@@ -475,9 +227,122 @@ function FeedScreen({ progress, mobileLight }: { progress: MotionValue<number>; 
         ))}
       </div>
 
-      {/* scrollable list — on narrow viewports skip per-card scroll MotionValues for smoother main-thread scroll */}
+      {/* scrollable list */}
       <div className="no-scrollbar" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "8px 12px 52px", display: "flex", flexDirection: "column", gap: 8 }}>
-        {mobileLight ? <DiscoverFeedCardsStatic /> : <DiscoverFeedCardsAnimated progress={progress} />}
+        {items.map((item, i) => (
+          <motion.div
+            key={i}
+            style={{
+              y: cardYs[i],
+              opacity: cardOpacities[i],
+              background: DISCOVER_CARD,
+              borderRadius: 16,
+              padding: "9px 10px 9px 9px",
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              border: "1px solid rgba(255,255,255,0.06)",
+              boxShadow: "0 12px 28px -18px rgba(0,0,0,0.85)",
+            }}
+          >
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                flexShrink: 0,
+                backgroundImage: `linear-gradient(160deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)), url(${item.img})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            />
+            <div style={{ flex: 1, minWidth: 0, position: "relative", paddingRight: 22 }}>
+              <div style={{ position: "absolute", top: -2, right: 0, color: "#52525b" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+                </svg>
+              </div>
+              <span
+                style={{
+                  display: "inline-block",
+                  background: item.tagBg,
+                  color: item.tc,
+                  fontSize: 8,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  borderRadius: 6,
+                  padding: "2px 6px",
+                }}
+              >
+                {item.tag}
+              </span>
+              <p style={{ margin: "4px 0 2px", fontSize: 12, fontWeight: 700, color: "#fff", lineHeight: 1.25 }}>{item.title}</p>
+              <p style={{ fontSize: 10, color: "#737373" }}>{item.meta}</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0, paddingRight: 2 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: SIGNAL, letterSpacing: "-0.02em" }}>{item.going}</span>
+              <span style={{ fontSize: 8, fontWeight: 600, color: "#52525b", textTransform: "capitalize", letterSpacing: "0.04em" }}>Going</span>
+              <span style={{ marginTop: 2, color: "#3f3f46", fontSize: 11, lineHeight: 1 }} aria-hidden>
+                ›
+              </span>
+            </div>
+          </motion.div>
+        ))}
+
+        <motion.div
+          style={{
+            y: yEdu,
+            opacity: oEdu,
+            background: "linear-gradient(135deg, rgba(75,250,148,0.12) 0%, rgba(24,24,27,0.95) 55%)",
+            borderRadius: 16,
+            padding: "11px 12px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            border: "1px solid rgba(75,250,148,0.22)",
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              background: "rgba(75,250,148,0.14)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              flexShrink: 0,
+            }}
+            aria-hidden
+          >
+            🎓
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em" }}>.edu only events</p>
+            <p style={{ margin: "3px 0 0", fontSize: 9, color: "#a1a1aa", lineHeight: 1.35 }}>
+              Verify your .edu email to unlock exclusive events and access.
+            </p>
+          </div>
+          <span
+            style={{
+              flexShrink: 0,
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "#000",
+              background: SIGNAL,
+              borderRadius: 10,
+              padding: "8px 10px",
+              boxShadow: "0 8px 20px -8px rgba(75,250,148,0.55)",
+            }}
+          >
+            Verify
+          </span>
+        </motion.div>
       </div>
 
       {/* bottom tab bar */}
@@ -533,9 +398,8 @@ function FeedScreen({ progress, mobileLight }: { progress: MotionValue<number>; 
 }
 
 /* ─── phone screen 2: .edu verify (matches marketing verify mockups) ─ */
-function VerifyScreen({ progress, ambientOff }: { progress: MotionValue<number>; ambientOff?: boolean }) {
+function VerifyScreen({ progress }: { progress: MotionValue<number> }) {
   const reduceMotion = useReducedMotion();
-  const idleDecor = Boolean(ambientOff || reduceMotion);
   const badgeScale = useTransform(progress, [0.32, 0.46], [0.6, 1]);
   const badgeOpacity = useTransform(progress, [0.32, 0.42], [0, 1]);
   const titleY = useTransform(progress, [0.36, 0.48], [14, 0]);
@@ -579,8 +443,8 @@ function VerifyScreen({ progress, ambientOff }: { progress: MotionValue<number>;
               justifyContent: "center",
               boxShadow: "0 0 24px rgba(75,250,148,0.16)",
             }}
-            animate={idleDecor ? undefined : { scale: [1, 1.03, 1] }}
-            transition={idleDecor ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduceMotion ? undefined : { scale: [1, 1.03, 1] }}
+            transition={reduceMotion ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
           >
             <EduVerifyShieldIcon size={40} />
           </motion.div>
@@ -662,8 +526,8 @@ function VerifyScreen({ progress, ambientOff }: { progress: MotionValue<number>;
                 background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.28), rgba(255,255,255,0))",
                 transform: "skewX(-16deg)",
               }}
-              animate={idleDecor ? undefined : { x: [-60, 220] }}
-              transition={idleDecor ? undefined : { duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+              animate={reduceMotion ? undefined : { x: [-60, 220] }}
+              transition={reduceMotion ? undefined : { duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
             />
           </div>
           <p style={{ margin: "8px 0 0", fontSize: 8, color: "#52525b", textAlign: "center" }}>.edu addresses only</p>
@@ -727,9 +591,8 @@ function VerifyScreen({ progress, ambientOff }: { progress: MotionValue<number>;
 }
 
 /* ─── phone screen 3: QR ticket ─────────────────────────────────── */
-function TicketScreen({ progress, ambientOff }: { progress: MotionValue<number>; ambientOff?: boolean }) {
+function TicketScreen({ progress }: { progress: MotionValue<number> }) {
   const reduceMotion = useReducedMotion();
-  const idleDecor = Boolean(ambientOff || reduceMotion);
   const qrScale = useTransform(progress, [0.64, 0.78], [0.7, 1]);
   const qrOpacity = useTransform(progress, [0.64, 0.74], [0, 1]);
   const headY = useTransform(progress, [0.62, 0.74], [12, 0]);
@@ -808,8 +671,8 @@ function TicketScreen({ progress, ambientOff }: { progress: MotionValue<number>;
             background: "linear-gradient(90deg, rgba(75,250,148,0), rgba(75,250,148,0.95), rgba(75,250,148,0))",
             boxShadow: "0 0 10px rgba(75,250,148,0.7)",
           }}
-          animate={idleDecor ? undefined : { y: [0, 118, 0] }}
-          transition={idleDecor ? undefined : { duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion ? undefined : { y: [0, 118, 0] }}
+          transition={reduceMotion ? undefined : { duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
       <motion.div style={{ opacity: badgeOpacity, y: badgeY, marginTop: 14, display: "flex", alignItems: "center", gap: 7, background: "rgba(75,250,148,0.12)", borderRadius: 999, padding: "7px 16px" }}>
@@ -822,7 +685,7 @@ function TicketScreen({ progress, ambientOff }: { progress: MotionValue<number>;
 }
 
 /* ─── titanium phone shell ──────────────────────────────────────── */
-export function PhoneShell({ children, w = 300, h = 620, trimChrome }: { children: ReactNode; w?: number; h?: number; trimChrome?: boolean }) {
+export function PhoneShell({ children, w = 300, h = 620 }: { children: ReactNode; w?: number; h?: number }) {
   const frameW = 7;
   const innerR = 50;
   const frameR = 58;
@@ -872,18 +735,7 @@ export function PhoneShell({ children, w = 300, h = 620, trimChrome }: { childre
         {/* Dynamic island */}
         <div style={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 118, height: 32, borderRadius: 20, background: "#000", zIndex: 30, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
           <div style={{ position: "relative", width: 8, height: 8, borderRadius: "50%", background: "radial-gradient(circle at 30% 30%, #1a4a6e 0%, #0a1828 55%, #000 100%)", boxShadow: "inset 0 0 1px rgba(120,180,220,0.45)" }}>
-            <div
-              style={{
-                position: "absolute",
-                top: 1,
-                left: 1,
-                width: 2.5,
-                height: 2.5,
-                borderRadius: "50%",
-                background: "rgba(180,220,255,0.65)",
-                ...(trimChrome ? {} : { filter: "blur(0.3px)" }),
-              }}
-            />
+            <div style={{ position: "absolute", top: 1, left: 1, width: 2.5, height: 2.5, borderRadius: "50%", background: "rgba(180,220,255,0.65)", filter: "blur(0.3px)" }} />
           </div>
           <div style={{ width: 6, height: 6, borderRadius: "50%", background: "radial-gradient(circle at 35% 35%, #2a2a2c 0%, #050505 70%)", boxShadow: "inset 0 0 1px rgba(255,255,255,0.08)" }} />
         </div>
@@ -897,242 +749,11 @@ export function PhoneShell({ children, w = 300, h = 620, trimChrome }: { childre
   );
 }
 
-/* ─── MOBILE hero (full scroll story, minimal per-frame work) ───────
- *
- * Goals: keep the desktop "phone enters, scenes swap, screens swap" story,
- * but eliminate the work that made mobile feel laggy.
- *
- * What we kept:
- *   - Phone entrance animation (one-shot whileInView, NOT scroll-bound)
- *   - Three scenes that scroll-swap above the phone (cheap opacity-only)
- *   - Phone screen swap (Feed → Verify → Ticket) tied to scroll thresholds
- *
- * What we changed vs. the desktop path so it's smooth on phones:
- *   1. Phone position is NOT bound to scrollY. It enters once via
- *      IntersectionObserver, then sits static. So the heavy phone subtree
- *      never gets re-composited per scroll frame.
- *   2. Active screen is React state driven by a discrete-stepped derived
- *      MotionValue. setState only fires twice per scroll (at the two
- *      threshold crossings), not every frame.
- *   3. Each screen renders with a STATIC MotionValue parked at its
- *      "fully shown" progress, so the useTransform calls inside Verify /
- *      Ticket fire ONCE at mount and never re-evaluate. Crossfades are
- *      handled by CSS opacity transitions on the wrapper, not per-frame.
- *   4. No 3D perspective, no rotateX/Y/Z, no scale. Just one entrance
- *      translateY + opacity, then static.
- *
- * Net per scroll frame: ~5 opacity-only style writes (hero + 3 scenes +
- * heroY). Phone subtree: 0 work.
- */
-function MobileTopSection({
-  phraseIdx,
-  reduceMotion,
-}: {
-  phraseIdx: number;
-  reduceMotion: boolean;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll();
-  const [sectionTop, setSectionTop] = useState(0);
-  const [sectionRange, setSectionRange] = useState(1800);
-
-  useLayoutEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const recalc = () => {
-      setSectionTop(el.offsetTop);
-      setSectionRange(Math.max(1, el.offsetHeight - window.innerHeight));
-    };
-    recalc();
-    window.addEventListener("resize", recalc);
-    return () => window.removeEventListener("resize", recalc);
-  }, []);
-
-  const progress = useTransform(scrollY, [sectionTop, sectionTop + sectionRange], [0, 1], { clamp: true });
-
-  /* Scroll-bound MotionValues — opacity-only on small text elements.
-   * No transforms on the phone, no transforms on heavy DOM.
-   */
-  const heroOpacity = useTransform(progress, [0, 0.10, 0.22], [1, 1, 0]);
-  const heroY = useTransform(progress, [0.10, 0.22], [0, -22]);
-  const s1 = useTransform(progress, [0.14, 0.22, 0.32, 0.40], [0, 1, 1, 0]);
-  const s2 = useTransform(progress, [0.36, 0.46, 0.56, 0.66], [0, 1, 1, 0]);
-  const s3 = useTransform(progress, [0.62, 0.72, 1], [0, 1, 1]);
-
-  /* Discrete derived motion value: only "changes" when crossing a threshold,
-   * so useMotionValueEvent fires at most twice during the entire scroll. */
-  const screenIdx = useTransform(progress, (v) => (v >= 0.64 ? 2 : v >= 0.38 ? 1 : 0));
-  const [activeScreen, setActiveScreen] = useState(0);
-  useMotionValueEvent(screenIdx, "change", (val) => setActiveScreen(val as number));
-  /* Sync once on mount in case the user lands mid-scroll. */
-  useEffect(() => {
-    setActiveScreen(screenIdx.get() as number);
-  }, [screenIdx]);
-
-  /* Static "fully shown" progress per screen — internal useTransform fires
-   * once at mount and never recomputes since the source never changes. */
-  const feedStaticProgress = useMotionValue(0.18);
-  const verifyStaticProgress = useMotionValue(0.58);
-  const ticketStaticProgress = useMotionValue(0.85);
-
-  const sceneOps = [s1, s2, s3];
-
-  return (
-    <div ref={containerRef} className="relative bg-black" style={{ minHeight: "280vh" }}>
-      <div className="sticky top-0 h-screen" style={{ overflow: "clip" }}>
-        {/* ambient glows — fully static, no scroll work */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 12% 22%, rgba(75,250,148,0.07), transparent 38%), radial-gradient(circle at 88% 90%, rgba(0,0,254,0.05), transparent 40%)",
-          }}
-        />
-
-        {/* Hero — single opacity + y motion pair */}
-        <motion.div
-          style={{ opacity: heroOpacity, y: heroY }}
-          className="absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[clamp(5.25rem,9svh,7.5rem)] text-center"
-        >
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">Discover</p>
-          <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl">
-            Your campus.
-            <br />
-            <span className="relative inline-block overflow-hidden" style={{ minWidth: "8ch" }}>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={phraseIdx}
-                  className="inline-block bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent"
-                  initial={{ y: "60%", opacity: 0 }}
-                  animate={{ y: "0%", opacity: 1 }}
-                  exit={{ y: "-60%", opacity: 0 }}
-                  transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
-                >
-                  {cyclingPhrases[phraseIdx]}
-                </motion.span>
-              </AnimatePresence>
-            </span>
-          </h1>
-          <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
-            Every party, show, and event near you, curated by students, for students.
-          </p>
-          <Link
-            href="/create-event"
-            className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
-            style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
-          >
-            Create event
-          </Link>
-        </motion.div>
-
-        {/* Scene labels above phone — three abs-positioned blocks, opacity-only */}
-        <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] z-[11]">
-          <div className="relative mx-auto min-h-[6rem] w-full max-w-md px-5">
-            {scenes.map((scene, i) => (
-              <motion.div
-                key={scene.eyebrow}
-                className="pointer-events-auto absolute inset-x-0 top-0 flex flex-col items-center text-center"
-                style={{ opacity: sceneOps[i] }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-[#4BFA94]">{scene.eyebrow}</p>
-                <h2 className="mt-1.5 text-2xl font-black uppercase leading-[0.92] tracking-[-0.03em] text-white sm:text-3xl">
-                  {scene.line1}
-                  <br />
-                  <span className="bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent">{scene.line2}</span>
-                </h2>
-                <Link
-                  href={scene.cta.href}
-                  className="mt-3 inline-flex h-10 items-center rounded-full bg-[#4BFA94] px-6 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition hover:bg-emerald-300"
-                  style={{ boxShadow: "0 0 20px -4px rgba(75,250,148,0.45)" }}
-                >
-                  {scene.cta.label}
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Phone — whileInView entrance, then completely static. */}
-        <div className="absolute bottom-0 left-1/2 z-[5]" style={{ transform: "translateX(-50%)" }}>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute"
-            style={{
-              bottom: 0,
-              left: "50%",
-              width: 460,
-              height: 460,
-              translate: "-50% 22%",
-              borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(75,250,148,0.18), transparent 62%)",
-            }}
-          />
-          <motion.div
-            initial={reduceMotion ? false : { y: 220, opacity: 0 }}
-            whileInView={reduceMotion ? undefined : { y: 0, opacity: 1 }}
-            viewport={{ once: true, amount: 0.05 }}
-            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              willChange: "transform, opacity",
-              backfaceVisibility: "hidden",
-              transform: "translate3d(0,0,0)",
-            }}
-          >
-            <PhoneShell w={280} h={580} trimChrome>
-              {/* All three screens mounted with static MotionValues. CSS opacity transitions handle the swap. */}
-              <div
-                className="absolute inset-0 transition-opacity duration-300 ease-out"
-                style={{ opacity: activeScreen === 0 ? 1 : 0, willChange: "opacity" }}
-              >
-                <FeedScreen progress={feedStaticProgress} mobileLight />
-              </div>
-              <div
-                className="absolute inset-0 transition-opacity duration-300 ease-out"
-                style={{ opacity: activeScreen === 1 ? 1 : 0, willChange: "opacity" }}
-              >
-                <VerifyScreen progress={verifyStaticProgress} ambientOff />
-              </div>
-              <div
-                className="absolute inset-0 transition-opacity duration-300 ease-out"
-                style={{ opacity: activeScreen === 2 ? 1 : 0, willChange: "opacity" }}
-              >
-                <TicketScreen progress={ticketStaticProgress} ambientOff />
-              </div>
-            </PhoneShell>
-          </motion.div>
-        </div>
-
-        {/* progress dots — driven by activeScreen state, CSS-only transitions */}
-        <div className="absolute bottom-8 right-8 z-20 flex flex-col gap-2">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-1.5 w-1.5 rounded-full bg-[#4BFA94] transition-opacity duration-200"
-              style={{ opacity: activeScreen === i ? 1 : 0.25 }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── main component ─────────────────────────────────────────────── */
 export function HomeTopSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const [phraseIdx, setPhraseIdx] = useState(0);
-  /** Narrow viewports: cheaper phone (no 3D) + no scroll-scrubbed cards + no idle micro-animations inside the mock. */
-  const [mobileLight, setMobileLight] = useState(false);
-
-  useLayoutEffect(() => {
-    const mq = window.matchMedia("(max-width: 1023px)");
-    const sync = () => setMobileLight(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -1185,9 +806,6 @@ export function HomeTopSection() {
   const phoneRotateX = useTransform(progress, [0, 0.28, 1],   [-10, 0, 2]);
   const phoneRotateY = useTransform(progress, [0, 0.28, 0.7, 1], [-8, 0, -5, -10]);
   const phoneRotateZ = useTransform(progress, [0, 0.28, 1],   [-6, 0, 3]);
-  const phoneScale = useTransform(progress, [0, 0.28, 1], [0.92, 1, 1]);
-  /** 2D-only phone path (no perspective / rotateX/Y) — much cheaper on mobile GPUs while scrolling. */
-  const flatPhone = Boolean(mobileLight && !reduceMotion);
 
   /* hero headline visible immediately, fades out as side text appears */
   const heroOpacity = useTransform(progress, [0, 0.22, 0.40], [1, 1, 0]);
@@ -1214,10 +832,6 @@ export function HomeTopSection() {
 
   const sceneOps = [s1, s2, s3];
   const phoneOps = [p1, p2, p3];
-
-  if (mobileLight) {
-    return <MobileTopSection phraseIdx={phraseIdx} reduceMotion={Boolean(reduceMotion)} />;
-  }
 
   return (
     <div
@@ -1415,38 +1029,31 @@ export function HomeTopSection() {
               willChange: "opacity",
             }}
           />
-          <div style={reduceMotion || flatPhone ? { transform: "translateZ(0)" } : { perspective: "1500px", transform: "translateZ(0)" }}>
+          <div style={{ perspective: "1500px", transform: "translateZ(0)" }}>
             <motion.div
               style={
                 reduceMotion
                   ? { transform: "translateZ(0)" }
-                  : flatPhone
-                    ? {
-                        y: phoneY,
-                        scale: phoneScale,
-                        willChange: "transform",
-                        backfaceVisibility: "hidden",
-                      }
-                    : {
-                        y: phoneY,
-                        rotateX: phoneRotateX,
-                        rotateY: phoneRotateY,
-                        rotateZ: phoneRotateZ,
-                        willChange: "transform",
-                        backfaceVisibility: "hidden",
-                        transformStyle: "preserve-3d",
-                      }
+                  : {
+                      y: phoneY,
+                      rotateX: phoneRotateX,
+                      rotateY: phoneRotateY,
+                      rotateZ: phoneRotateZ,
+                      willChange: "transform",
+                      backfaceVisibility: "hidden",
+                      transformStyle: "preserve-3d",
+                    }
               }
             >
-              <PhoneShell trimChrome={Boolean(mobileLight || reduceMotion)}>
+              <PhoneShell>
                 <motion.div style={{ opacity: phoneOps[0], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
-                  <FeedScreen progress={progress} mobileLight={Boolean(mobileLight || reduceMotion)} />
+                  <FeedScreen progress={progress} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[1], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
-                  <VerifyScreen progress={progress} ambientOff={Boolean(mobileLight || reduceMotion)} />
+                  <VerifyScreen progress={progress} />
                 </motion.div>
                 <motion.div style={{ opacity: phoneOps[2], position: "absolute", inset: 0, willChange: "opacity", transform: "translateZ(0)" }}>
-                  <TicketScreen progress={progress} ambientOff={Boolean(mobileLight || reduceMotion)} />
+                  <TicketScreen progress={progress} />
                 </motion.div>
               </PhoneShell>
             </motion.div>
@@ -1469,7 +1076,7 @@ export function HomeTopSection() {
             Scroll
           </span>
           <motion.div
-            animate={reduceMotion || mobileLight ? undefined : { y: [0, 7, 0] }}
+            animate={reduceMotion ? undefined : { y: [0, 7, 0] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
             className="h-5 w-px rounded-full bg-zinc-600"
           />

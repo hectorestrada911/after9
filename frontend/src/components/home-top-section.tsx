@@ -8,6 +8,7 @@ import {
   useScroll,
   useTransform,
   useReducedMotion,
+  useMotionValue,
   type MotionValue,
 } from "framer-motion";
 import AnimatedTextCycle from "@/components/ui/animated-text-cycle";
@@ -895,6 +896,91 @@ export function PhoneShell({ children, w = 300, h = 620, trimChrome }: { childre
   );
 }
 
+/* ─── MOBILE hero (no scroll-bound transforms) ──────────────────────
+ * On phones we render a flat, scroll-free hero:
+ *   - Hero copy + CTA in normal flow
+ *   - Single Discover screen on the phone, entered once via whileInView (IntersectionObserver)
+ *   - VerifyScreen / TicketScreen are NOT mounted, so their per-frame useTransform calls don't run
+ *   - No sticky 320vh trap, so the rest of the page scrolls normally
+ * Result: zero per-scroll-frame work for the hero phone on mobile.
+ */
+function MobileTopSection({
+  phraseIdx,
+  reduceMotion,
+}: {
+  phraseIdx: number;
+  reduceMotion: boolean;
+}) {
+  const dummyProgress = useMotionValue(0);
+
+  return (
+    <section className="relative overflow-hidden bg-black">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at 12% 22%, rgba(75,250,148,0.08), transparent 38%), radial-gradient(circle at 88% 90%, rgba(0,0,254,0.05), transparent 40%)",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col items-center px-6 pb-4 pt-[clamp(5rem,9svh,7rem)] text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#4BFA94]">Discover</p>
+        <h1 className="mt-3 text-5xl font-black uppercase leading-[0.88] tracking-[-0.04em] text-white sm:text-6xl">
+          Your campus.
+          <br />
+          <span className="relative inline-block overflow-hidden" style={{ minWidth: "8ch" }}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={phraseIdx}
+                className="inline-block bg-gradient-to-r from-[#4BFA94] to-emerald-300 bg-clip-text text-transparent"
+                initial={{ y: "60%", opacity: 0 }}
+                animate={{ y: "0%", opacity: 1 }}
+                exit={{ y: "-60%", opacity: 0 }}
+                transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                {cyclingPhrases[phraseIdx]}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+        </h1>
+        <p className="mt-5 max-w-[280px] text-sm leading-relaxed text-zinc-500">
+          Every party, show, and event near you, curated by students, for students.
+        </p>
+        <Link
+          href="/create-event"
+          className="mt-7 inline-flex h-12 items-center rounded-full bg-[#4BFA94] px-8 text-[11px] font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-300"
+          style={{ boxShadow: "0 0 32px -6px rgba(75,250,148,0.6)" }}
+        >
+          Create event
+        </Link>
+      </div>
+
+      <div className="relative z-[5] mt-4 flex justify-center px-6 pb-14">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-2 mx-auto h-72 w-[28rem] max-w-full"
+          style={{
+            background: "radial-gradient(circle, rgba(75,250,148,0.18), transparent 62%)",
+          }}
+        />
+        <motion.div
+          initial={reduceMotion ? false : { y: 64, opacity: 0 }}
+          whileInView={reduceMotion ? undefined : { y: 0, opacity: 1 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="relative"
+          style={{ willChange: "transform, opacity" }}
+        >
+          <PhoneShell w={280} h={580} trimChrome>
+            <FeedScreen progress={dummyProgress} mobileLight />
+          </PhoneShell>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── main component ─────────────────────────────────────────────── */
 export function HomeTopSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -991,6 +1077,10 @@ export function HomeTopSection() {
 
   const sceneOps = [s1, s2, s3];
   const phoneOps = [p1, p2, p3];
+
+  if (mobileLight) {
+    return <MobileTopSection phraseIdx={phraseIdx} reduceMotion={Boolean(reduceMotion)} />;
+  }
 
   return (
     <div

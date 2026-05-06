@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/registration-reminders",
-      "schedule": "10 2 * * *"
+      "schedule": "25 4 * * *"
     },
     {
       "path": "/api/cron/create-event-reminders",
-      "schedule": "10 2 * * *"
+      "schedule": "25 4 * * *"
     }
   ]
 }

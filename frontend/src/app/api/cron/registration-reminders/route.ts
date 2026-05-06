@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
  * Vercel Cron (GET) or manual run: Resend reminders to users who registered
  * but have not confirmed their email. Secured with CRON_SECRET.
  *
- * vercel.json uses UTC: `0 2 * * *` ≈ 7:00 PM America/Los_Angeles during PDT. In winter (PST),
- * 7 PM local ≈ `0 3 * * *` — change the schedule if you want 7 PM year-round.
+ * vercel.json uses UTC: `25 4 * * *` ≈ 9:25 PM America/Los_Angeles during PDT (UTC-7).
+ * In winter (PST, UTC-8), 9:25 PM local ≈ `25 5 * * *` — adjust for exact local time year-round.
  * For an immediate test, `curl` this URL with `Authorization: Bearer <CRON_SECRET>`.
  */
 export async function GET(request: NextRequest) {

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 /**
  * Vercel Cron (GET): Resend create-event reminders to all registered users
  * (non-anonymous auth accounts with an email address).
- * Same UTC window as registration-reminders: `0 2 * * *` ≈ 7:00 PM America/Los_Angeles during PDT.
+ * Same UTC window as registration-reminders: `25 4 * * *` ≈ 9:25 PM America/Los_Angeles during PDT.
  * Same CRON_SECRET as other cron routes.
  */
 export async function GET(request: NextRequest) {

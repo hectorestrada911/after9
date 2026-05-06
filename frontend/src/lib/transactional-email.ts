@@ -178,6 +178,51 @@ export async function sendUnverifiedRegistrationReminderEmail(params: {
   return { ok: true };
 }
 
+/** Reminder for verified hosts who have not published any event yet (cron + Resend). */
+export async function sendCreateEventReminderEmail(params: { to: string; displayName: string }): Promise<SendResult> {
+  const env = getResendMailEnv();
+  if (!env) return { ok: false, reason: "config", message: "RESEND_API_KEY or RESEND_FROM_EMAIL missing." };
+
+  const name = escapeHtml(params.displayName.trim() || displayNameFromEmail(params.to));
+  const resend = new Resend(env.apiKey);
+  const createUrl = `${env.appUrl}/create-event`;
+  const dashboardUrl = `${env.appUrl}/dashboard`;
+
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Hi ${name},</p>
+    <p style="margin:0 0 14px;">You’re verified on <strong style="color:#ffffff;">RAGE</strong> — the fastest next step is to put your first night on the map. Flyer, story, tickets, and QR check-in are built into one flow so you’re not juggling five apps the week of the party.</p>
+    <p style="margin:0 0 10px;color:rgba(255,255,255,0.72);font-weight:800;letter-spacing:0.08em;text-transform:uppercase;font-size:11px;">What you’ll have in minutes</p>
+    <ul style="margin:0;padding:0 0 0 18px;color:rgba(255,255,255,0.78);">
+      <li style="margin:8px 0;">A shareable event page buyers can trust.</li>
+      <li style="margin:8px 0;">Mobile tickets with QR codes — no PDF chaos.</li>
+      <li style="margin:8px 0;"><strong style="color:#ffffff;">Scan QR</strong> at the door so the line moves.</li>
+    </ul>
+    ${ragePrimaryButton("Create your first event", createUrl)}
+    ${rageSecondaryLink("Open your dashboard", dashboardUrl)}
+    <p style="margin:16px 0 0;font-size:12px;line-height:1.6;color:rgba(255,255,255,0.45);">Not planning to host? You can ignore this — we’ll only nudge occasionally.</p>
+  `;
+
+  const html = rageEmailDocument({
+    preheader: "Publish your first night on RAGE — flyer, tickets, and door check-in in one place.",
+    title: "Ready to run your first night?",
+    bodyHtml,
+  });
+
+  const plainName = params.displayName.trim() || displayNameFromEmail(params.to);
+  const { error } = await resend.emails.send({
+    from: env.from,
+    to: [params.to],
+    replyTo: env.supportInbox,
+    subject: "Your first RAGE event is still one session away",
+    html,
+    text: `Hi ${plainName},\n\nYou’re set up on RAGE — create your first event here:\n${createUrl}\n\nDashboard: ${dashboardUrl}\n\n— RAGE`,
+    tags: [{ name: "type", value: "create_event_reminder" }],
+  });
+
+  if (error) return { ok: false, reason: "send", message: error.message };
+  return { ok: true };
+}
+
 export type TicketLine = { ticketCode: string; qrDataUrl: string | null };
 
 async function sleep(ms: number) {

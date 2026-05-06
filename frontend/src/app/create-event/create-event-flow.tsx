@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Loader2, Search, Sparkles, Upload, X } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, Globe2, ImagePlus, Link2, Loader2, Search, Sparkles, Upload, X } from "lucide-react";
 import { eventSchema } from "@/lib/validations";
 import { MAX_DRAFT_IMAGE_BYTES, placeholderCoverUrl, readEventDraft, writeEventDraft, type EventDraftV1 } from "@/lib/event-draft";
 import { FLYER_CATEGORIES, FLYER_STOCK, filterFlyerStock, type FlyerCategory } from "@/lib/flyer-stock";
@@ -139,10 +139,131 @@ function compressToJpegDataUrl(file: File, maxStrLen: number): Promise<string> {
 }
 
 const field =
-  "h-11 w-full rounded-xl border border-white/[0.12] bg-white/[0.05] px-3.5 text-[13px] font-normal text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] placeholder:text-zinc-600 transition-all duration-200 " +
-  "focus:-translate-y-[1px] focus:border-brand-green/55 focus:bg-white/[0.08] focus:outline-none focus:ring-2 focus:ring-brand-green/25";
+  "h-12 w-full rounded-xl border border-white/[0.12] bg-white/[0.04] px-3.5 text-[14px] font-normal text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] placeholder:text-zinc-600 transition-colors duration-200 " +
+  "focus:border-brand-green/55 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-brand-green/25";
 
-const labelClass = "mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500";
+const labelClass = "mb-1.5 block text-[12.5px] font-medium text-zinc-200";
+const subLabelClass = "mb-1 block text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500";
+
+/** Section card — numbered header + subtitle + body. Visual structure only; no field changes. */
+function SectionCard({
+  step,
+  title,
+  subtitle,
+  done,
+  children,
+}: {
+  step: number;
+  title: string;
+  subtitle?: string;
+  done?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-white/[0.08] bg-white/[0.02] p-5 shadow-[0_1px_0_rgba(255,255,255,0.04)_inset] sm:p-6">
+      <header className="mb-5 flex items-start gap-3">
+        <span
+          className={cn(
+            "grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-bold transition-colors duration-300",
+            done
+              ? "bg-brand-green text-black shadow-[0_0_18px_-4px_rgba(75,250,148,0.55)]"
+              : "border border-white/15 bg-white/[0.05] text-zinc-300",
+          )}
+          aria-hidden
+        >
+          {done ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : step}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[15px] font-semibold tracking-tight text-zinc-100">{title}</h2>
+          {subtitle ? <p className="mt-0.5 text-[12px] leading-relaxed text-zinc-500">{subtitle}</p> : null}
+        </div>
+      </header>
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
+
+/** Segmented two-state toggle (Unlimited / Set capacity) — same boolean behavior, clearer UI than the action button. */
+function SegmentedToggle<T extends string>({
+  value,
+  options,
+  onChange,
+  ariaLabel,
+}: {
+  value: T;
+  options: ReadonlyArray<{ id: T; label: string }>;
+  // eslint-disable-next-line no-unused-vars -- onChange callback parameter name is part of the API
+  onChange: (next: T) => void;
+  ariaLabel?: string;
+}) {
+  return (
+    <div role="tablist" aria-label={ariaLabel} className="inline-flex w-full items-center gap-1 rounded-xl border border-white/[0.1] bg-white/[0.03] p-1">
+      {options.map((opt) => {
+        const active = opt.id === value;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(opt.id)}
+            className={cn(
+              "flex-1 rounded-lg px-3 py-2 text-[12px] font-semibold transition-colors duration-200",
+              active
+                ? "bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                : "text-zinc-400 hover:text-zinc-200",
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Switch — for binary toggles (Free event / Show capacity publicly). Same checkbox semantics with platform-correct styling. */
+function Switch({
+  checked,
+  onCheckedChange,
+  label,
+  hint,
+}: {
+  checked: boolean;
+  // eslint-disable-next-line no-unused-vars -- onCheckedChange callback parameter name is part of the API
+  onCheckedChange: (next: boolean) => void;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onCheckedChange(!checked)}
+      className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/[0.1] bg-white/[0.03] px-3.5 py-3 text-left transition-colors duration-200 hover:border-white/20"
+    >
+      <span className="min-w-0">
+        <span className="block text-[13px] font-medium text-zinc-100">{label}</span>
+        {hint ? <span className="mt-0.5 block text-[11px] text-zinc-500">{hint}</span> : null}
+      </span>
+      <span
+        className={cn(
+          "relative inline-flex h-[22px] w-[38px] shrink-0 items-center rounded-full transition-colors duration-200",
+          checked ? "bg-brand-green shadow-[0_0_16px_-4px_rgba(75,250,148,0.55)]" : "bg-white/15",
+        )}
+        aria-hidden
+      >
+        <span
+          className={cn(
+            "absolute top-[2px] left-[2px] h-[18px] w-[18px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.3)] transition-transform duration-200",
+            checked ? "translate-x-[16px]" : "translate-x-0",
+          )}
+        />
+      </span>
+    </button>
+  );
+}
 
 type CreateEventFlowProps = {
   flowMode?: CreateEventFlowMode;
@@ -443,7 +564,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       capacity: parsed.data.capacity,
       ticketPrice: parsed.data.ticketPrice,
       ticketsAvailable: parsed.data.ticketsAvailable,
-      salesEnabled: false,
+      salesEnabled: true,
       visibility: parsed.data.visibility,
       ageRestriction: parsed.data.ageRestriction,
       showCapacityPublicly,
@@ -484,7 +605,7 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             capacity: parsed.data.capacity,
             ticketPrice: parsed.data.ticketPrice,
             ticketsAvailable: parsed.data.ticketsAvailable,
-            salesEnabled: false,
+            salesEnabled: true,
             visibility: parsed.data.visibility,
             ageRestriction: parsed.data.ageRestriction,
             dressCode: parsed.data.dressCode,
@@ -518,10 +639,21 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
     router.push(`/signup?next=${next}`);
   }
 
-  const chevron =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E";
+  /** Real per-section completion — drives the progress bar and the section card check marks. */
+  const sectionDone = useMemo(() => {
+    const flyer = hasSelectedFlyer && (coverMode === "stock" || Boolean(uploadDataUrl));
+    const story =
+      title.trim().length >= 3 &&
+      Boolean(date && startTime && endTime) &&
+      location.trim().length >= 3 &&
+      organizationName.trim().length >= 2;
+    /* Tickets section has working defaults out of the box. */
+    const tickets = true;
+    return { flyer, story, tickets };
+  }, [hasSelectedFlyer, coverMode, uploadDataUrl, title, date, startTime, endTime, location, organizationName]);
+  const completedSections = (sectionDone.flyer ? 1 : 0) + (sectionDone.story ? 1 : 0) + (sectionDone.tickets ? 1 : 0);
+  const pct = Math.round((completedSections / 3) * 100);
 
-  const pct = 100;
   const ticketPriceFloat = isFreeEvent ? 0 : Number(ticketPrice) || 0;
   const ticketPriceCents = Math.max(0, Math.round(ticketPriceFloat * 100));
   const platformFeeCents = platformFeeFromGrossCents(ticketPriceCents, platformFeePercent);
@@ -556,31 +688,59 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
       </div>
 
       <div className="relative flex min-h-dvh flex-col">
-        <header className="flex items-center justify-between px-4 pb-2 pt-[max(0.85rem,env(safe-area-inset-top))] sm:px-6">
-          <Link href="/" className="flex items-center gap-2 text-zinc-500 transition hover:text-white">
-            <span className="text-xs font-black tracking-tight text-white">RAGE</span>
-            <span className="text-[11px] text-zinc-600">· create</span>
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.06] bg-[#030303]/80 px-4 pb-3 pt-[max(0.85rem,env(safe-area-inset-top))] backdrop-blur-md sm:px-6">
+          <Link href="/" className="group inline-flex items-center gap-2 transition">
+            <span className="text-[13px] font-black tracking-tight text-white transition-colors group-hover:text-zinc-300">RAGE</span>
+            <span className="hidden h-3 w-px bg-white/15 sm:inline-block" aria-hidden />
+            <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">Create event</span>
           </Link>
           {hasAuthedSession ? (
-            <Link href={NEXT_AFTER_AUTH} className="text-[12px] font-medium text-zinc-500 transition hover:text-white">
+            <Link
+              href={NEXT_AFTER_AUTH}
+              className="inline-flex h-8 items-center rounded-full border border-white/15 bg-white/[0.04] px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-white/35 hover:text-white"
+            >
               Host tools
             </Link>
           ) : (
             <Link
               href={`/login?next=${encodeURIComponent(NEXT_AFTER_AUTH)}`}
-              className="text-[12px] font-medium text-zinc-500 transition hover:text-white"
+              className="inline-flex h-8 items-center rounded-full border border-white/15 bg-white/[0.04] px-3 text-[11px] font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-white/35 hover:text-white"
             >
               Log in
             </Link>
           )}
         </header>
 
-        <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-3 sm:max-w-lg sm:px-6 sm:pb-28 sm:pt-5">
-          <div className="mb-7">
-            <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400">Create your event</p>
-            <h1 className="mt-2 text-center text-[1.62rem] font-semibold leading-[1.12] tracking-[-0.02em] text-zinc-50 sm:text-[1.95rem]">
+        <div className="mx-auto w-full max-w-md flex-1 px-4 pb-36 pt-3 sm:max-w-xl sm:px-6 sm:pb-28 sm:pt-5">
+          <div className="mb-7 text-center">
+            <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-green/80">Create your event</p>
+            <h1 className="mt-2 text-[1.62rem] font-semibold leading-[1.12] tracking-[-0.02em] text-zinc-50 sm:text-[2rem]">
               Flyer, story, and tickets, all in one place
             </h1>
+            <p className="mx-auto mt-3 max-w-md text-[12.5px] leading-relaxed text-zinc-500">
+              Three quick sections, then publish. We&apos;ll save your draft locally as you go.
+            </p>
+            {/* Section progress chips — discrete, glanceable */}
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-1.5">
+              {(
+                [
+                  { id: "flyer", label: "Flyer", done: sectionDone.flyer },
+                  { id: "story", label: "Story", done: sectionDone.story },
+                  { id: "tickets", label: "Tickets", done: sectionDone.tickets },
+                ] as const
+              ).map((s) => (
+                <span
+                  key={s.id}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors",
+                    s.done ? "bg-brand-green/15 text-brand-green" : "text-zinc-500",
+                  )}
+                >
+                  <span className={cn("inline-block h-1.5 w-1.5 rounded-full", s.done ? "bg-brand-green" : "bg-zinc-600")} />
+                  {s.label}
+                </span>
+              ))}
+            </div>
           </div>
 
           {restoredDraftStep !== null ? (
@@ -608,143 +768,174 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
             </div>
           )}
 
-          <form onSubmit={finalizeWizard} className="min-h-[320px]">
+          <form onSubmit={finalizeWizard} className="space-y-5 sm:space-y-6">
             {error && (
-              <p className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-center text-[12px] text-red-200">{error}</p>
+              <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-center text-[12px] text-red-200">{error}</p>
             )}
 
-            {/* Flyer */}
-            <div key="s0" className="animate-fadeUp space-y-4">
-                  <div className="rounded-2xl border border-white/[0.1] bg-white/[0.03] p-3">
-                    {hasSelectedFlyer ? (
-                      <div className="mx-auto w-full max-w-[360px]">
-                      <div className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-white/[0.1] bg-zinc-900">
-                        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/35 via-transparent to-black/10 opacity-90" />
-                        <div className="pointer-events-none absolute -inset-px rounded-xl ring-1 ring-white/10 transition-all duration-300 group-hover:ring-brand-green/40" />
-                        {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
-                        <img src={coverThumbSrc} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.015]" />
-                        <span className="absolute bottom-2.5 left-2.5 z-[2] inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                          Hosted by {organizationName.trim() || hostDisplayName}
-                        </span>
-                      </div>
-                      </div>
-                    ) : (
-                      <div className="mx-auto w-full max-w-[360px]">
-                      <div className="group relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-zinc-900/70">
-                        <div
-                          className="pointer-events-none absolute inset-0 opacity-80"
-                          style={{
-                            backgroundImage:
-                              "radial-gradient(circle at 50% 22%, rgba(75,250,148,0.14), transparent 42%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06), transparent 45%)",
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setFlyerPickerOpen(true)}
-                          className="relative z-[2] inline-flex h-11 items-center rounded-full bg-gradient-to-r from-brand-green to-emerald-300 px-6 text-xs font-bold uppercase tracking-wide text-black shadow-[0_0_28px_-8px_rgba(75,250,148,0.8)] transition duration-200 hover:brightness-110 active:scale-[0.98]"
-                        >
-                          Select flyer
-                        </button>
-                      </div>
-                      </div>
-                    )}
-                    <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-xs text-zinc-500">{hasSelectedFlyer ? "Tap Change to refine style or upload a new one." : "Select a vertical flyer to start."}</p>
-                      {hasSelectedFlyer ? (
-                        <button
-                          type="button"
-                          onClick={() => setFlyerPickerOpen(true)}
-                          className="inline-flex h-9 shrink-0 items-center rounded-full border border-white/20 bg-white/[0.05] px-3.5 text-[11px] font-bold uppercase tracking-wide text-white transition hover:border-white/40"
-                        >
-                          Change
-                        </button>
-                      ) : null}
-                    </div>
+            {/* ── 1. Flyer ── */}
+            <SectionCard
+              step={1}
+              title="The flyer"
+              subtitle="Vertical 4:5 — this is the first thing guests see."
+              done={sectionDone.flyer}
+            >
+              {hasSelectedFlyer ? (
+                <div className="mx-auto w-full max-w-[360px]">
+                  <div className="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/[0.1] bg-zinc-900">
+                    <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/35 via-transparent to-black/10 opacity-90" />
+                    <div className="pointer-events-none absolute -inset-px rounded-2xl ring-1 ring-white/10 transition-all duration-300 group-hover:ring-brand-green/40" />
+                    {/* eslint-disable-next-line @next/next/no-img-element -- supports stock + data URL preview reliably */}
+                    <img src={coverThumbSrc} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.015]" />
+                    <span className="absolute bottom-2.5 left-2.5 z-[2] inline-flex rounded-full border border-white/20 bg-black/65 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                      Hosted by {organizationName.trim() || hostDisplayName}
+                    </span>
                   </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,.heic,.heif"
-                  className="hidden"
-                  onChange={(ev) => {
-                    const input = ev.target;
-                    const f = input.files?.[0] ?? null;
-                    void onFileChange(f).finally(() => {
-                      input.value = "";
-                    });
-                  }}
+                </div>
+              ) : (
+                <div className="mx-auto w-full max-w-[360px]">
+                  <button
+                    type="button"
+                    onClick={() => setFlyerPickerOpen(true)}
+                    className="group relative flex aspect-[4/5] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-white/15 bg-zinc-900/70 transition-colors hover:border-brand-green/45"
+                  >
+                    <div
+                      className="pointer-events-none absolute inset-0 opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{
+                        backgroundImage:
+                          "radial-gradient(circle at 50% 22%, rgba(75,250,148,0.16), transparent 45%), radial-gradient(circle at 20% 80%, rgba(255,255,255,0.05), transparent 45%)",
+                      }}
+                    />
+                    <span className="relative z-[2] grid h-14 w-14 place-items-center rounded-2xl border border-brand-green/30 bg-brand-green/15 text-brand-green shadow-[0_0_28px_-12px_rgba(75,250,148,0.6)]">
+                      <ImagePlus className="h-6 w-6" strokeWidth={1.75} />
+                    </span>
+                    <span className="relative z-[2] mt-4 text-[15px] font-semibold text-white">Select a flyer</span>
+                    <span className="relative z-[2] mt-1.5 text-[12px] text-zinc-400">Pick from gallery or upload your own</span>
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-zinc-500">
+                  {hasSelectedFlyer ? "Want a different look? Tap Change." : "Vertical 4:5 (1080×1350) reads best."}
+                </p>
+                {hasSelectedFlyer ? (
+                  <button
+                    type="button"
+                    onClick={() => setFlyerPickerOpen(true)}
+                    className="inline-flex h-9 shrink-0 items-center rounded-full border border-white/20 bg-white/[0.05] px-3.5 text-[11px] font-bold uppercase tracking-wide text-white transition hover:border-white/40"
+                  >
+                    Change
+                  </button>
+                ) : null}
+              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,.heic,.heif"
+                className="hidden"
+                onChange={(ev) => {
+                  const input = ev.target;
+                  const f = input.files?.[0] ?? null;
+                  void onFileChange(f).finally(() => {
+                    input.value = "";
+                  });
+                }}
+              />
+            </SectionCard>
+
+            {/* ── 2. Story ── */}
+            <SectionCard
+              step={2}
+              title="The story"
+              subtitle="Title, when, where, and who's hosting."
+              done={sectionDone.story}
+            >
+              <div>
+                <label htmlFor="ce-title" className={labelClass}>Event title</label>
+                <input id="ce-title" className={field} placeholder="e.g. Rooftop sunset social" value={title} onChange={(e) => setTitle(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="ce-desc" className={labelClass}>What happens?</label>
+                <textarea
+                  id="ce-desc"
+                  className={`${field} min-h-[120px] resize-y py-2.5 leading-relaxed`}
+                  placeholder="Optional: energy, dress code hints, special guests…"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-
-            {/* Story */}
-            <div key="s1" className="animate-fadeUp mt-9 space-y-5">
-                <div>
-                  <span className={labelClass}>Event title</span>
-                  <input className={field} placeholder="e.g. Rooftop sunset social" value={title} onChange={(e) => setTitle(e.target.value)} />
-                </div>
-                <div>
-                  <span className={labelClass}>What happens?</span>
-                  <textarea
-                    className={`${field} min-h-[120px] resize-y py-2.5 leading-relaxed`}
-                    placeholder="Optional: energy, dress code hints, special guests…"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <span className={labelClass}>When</span>
-                  <p className="mb-2 text-[11px] leading-relaxed text-zinc-600">We prefilled tonight. Tweak anything.</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    <div>
-                      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Date</span>
-                      <input className={field} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Starts</span>
-                        <input className={field} type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                      </div>
-                      <div>
-                        <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Ends</span>
-                        <input className={field} type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-                      </div>
-                    </div>
+              <div>
+                <span className={labelClass}>When</span>
+                <p className="mb-2 text-[11px] leading-relaxed text-zinc-500">We prefilled tonight. Tweak anything.</p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <div className="sm:col-span-1">
+                    <span className={subLabelClass}>Date</span>
+                    <input className={field} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                  </div>
+                  <div>
+                    <span className={subLabelClass}>Starts</span>
+                    <input className={field} type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                  </div>
+                  <div>
+                    <span className={subLabelClass}>Ends</span>
+                    <input className={field} type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
                   </div>
                 </div>
-                <div>
-                  <span className={labelClass}>Venue or address</span>
-                  <LocationAutocompleteInput
-                    value={location}
-                    onChange={setLocation}
-                    placeholder="Guests need to find it"
-                    theme="dark"
-                  />
-                </div>
-                <div>
-                  <span className={labelClass}>Organizer or brand name</span>
-                  <input
-                    className={field}
-                    placeholder="What is the name of your organization?"
-                    value={organizationName}
-                    onChange={(e) => setOrganizationName(e.target.value)}
-                  />
-                  <p className="mt-1 text-[11px] leading-relaxed text-zinc-500">
-                    Guests see this as <span className="font-semibold text-zinc-300">Hosted by …</span> on your event page.
-                  </p>
-                </div>
-                <div>
-                  <span className={labelClass}>Location note (optional)</span>
-                  <input className={field} placeholder="Door code, floor, landmark…" value={locationNote} onChange={(e) => setLocationNote(e.target.value)} />
-                </div>
               </div>
+              <div>
+                <label htmlFor="ce-location" className={labelClass}>Venue or address</label>
+                <LocationAutocompleteInput
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="Guests need to find it"
+                  theme="dark"
+                />
+              </div>
+              <div>
+                <label htmlFor="ce-org" className={labelClass}>Organizer or brand name</label>
+                <input
+                  id="ce-org"
+                  className={field}
+                  placeholder="e.g. After Hours Collective"
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                />
+                <p className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                  Guests see this as <span className="font-semibold text-zinc-300">Hosted by …</span> on your event page.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="ce-locnote" className={labelClass}>Location note <span className="font-normal text-zinc-500">(optional)</span></label>
+                <input id="ce-locnote" className={field} placeholder="Door code, floor, landmark…" value={locationNote} onChange={(e) => setLocationNote(e.target.value)} />
+              </div>
+            </SectionCard>
 
-            {/* Tickets */}
-            <div key="s2" className="animate-fadeUp mt-9 space-y-5">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div>
-                    <span className={labelClass}>Ticket price (USD)</span>
+            {/* ── 3. Tickets ── */}
+            <SectionCard
+              step={3}
+              title="Tickets & access"
+              subtitle="Price, capacity, and who can find it."
+              done={sectionDone.tickets}
+            >
+              <Switch
+                checked={isFreeEvent}
+                onCheckedChange={(next) => {
+                  setIsFreeEvent(next);
+                  if (next) setTicketPrice("0");
+                  else if ((Number(ticketPrice) || 0) < 0.5) setTicketPrice("15");
+                }}
+                label="Free event (RSVP / testing)"
+                hint="Skip card checkout. Guests still get a ticket QR."
+              />
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="ce-price" className={labelClass}>Ticket price <span className="font-normal text-zinc-500">(USD)</span></label>
+                  <div className={cn("relative", isFreeEvent && "opacity-50")}>
+                    <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[14px] font-semibold text-zinc-500">$</span>
                     <input
-                      className={field}
+                      id="ce-price"
+                      className={cn(field, "pl-7 tabular-nums")}
                       type="number"
                       step="0.01"
                       min={isFreeEvent ? 0 : 0.5}
@@ -753,98 +944,140 @@ export function CreateEventFlow({ flowMode = "auto", onPublish }: CreateEventFlo
                       onChange={(e) => setTicketPrice(e.target.value)}
                     />
                   </div>
-                  <div>
-                    <span className={labelClass}>Ticket quantity</span>
-                    <div className="flex items-center justify-between rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2">
-                      <span className="text-xs text-zinc-300">{limitTicketQuantity ? "Limited" : "Unlimited"}</span>
-                      <button
-                        type="button"
-                        onClick={() => setLimitTicketQuantity((v) => !v)}
-                        className="inline-flex h-8 items-center rounded-full border border-white/20 bg-white/[0.06] px-3 text-[10px] font-bold uppercase tracking-wide text-white transition hover:border-white/40"
-                      >
-                        {limitTicketQuantity ? "Set unlimited" : "Set qty"}
-                      </button>
-                    </div>
-                    {limitTicketQuantity ? (
-                      <input
-                        className={`${field} mt-2`}
-                        type="number"
-                        min={1}
-                        value={ticketsAvailable}
-                        onChange={(e) => setTicketsAvailable(e.target.value)}
-                      />
-                    ) : (
-                      <p className="mt-2 text-xs text-zinc-500">Unlimited keeps sales open until you manually turn sales off.</p>
-                    )}
-                  </div>
                 </div>
-                <label className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-300">
-                  <span>Free event (RSVP / testing)</span>
-                  <input
-                    type="checkbox"
-                    checked={isFreeEvent}
-                    onChange={(e) => {
-                      const next = e.target.checked;
-                      setIsFreeEvent(next);
-                      if (next) setTicketPrice("0");
-                      else if ((Number(ticketPrice) || 0) < 0.5) setTicketPrice("15");
-                    }}
-                    className="h-4 w-4 accent-brand-green"
+                <div>
+                  <span className={labelClass}>Ticket quantity</span>
+                  <SegmentedToggle
+                    ariaLabel="Ticket quantity"
+                    value={limitTicketQuantity ? "limited" : "unlimited"}
+                    options={[
+                      { id: "unlimited", label: "Unlimited" },
+                      { id: "limited", label: "Set capacity" },
+                    ] as const}
+                    onChange={(next) => setLimitTicketQuantity(next === "limited")}
                   />
-                </label>
-                <div className="rounded-2xl border border-white/[0.12] bg-white/[0.04] p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">Price preview</p>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Guest pays</p>
-                      <p className="mt-1 text-lg font-black text-white">${ticketPriceFloat.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Platform fee</p>
-                      <p className="mt-1 text-lg font-black text-zinc-300">-${(platformFeeCents / 100).toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">You receive (est.)</p>
-                      <p className="mt-1 text-lg font-black text-brand-green">${(hostNetCents / 100).toFixed(2)}</p>
-                    </div>
-                  </div>
-                  {!isFreeEvent ? (
-                    <p className="mt-2 text-xs text-zinc-500">Stripe processing fees are separate and can vary by card/payment method.</p>
+                  {limitTicketQuantity ? (
+                    <input
+                      className={`${field} mt-2 tabular-nums`}
+                      type="number"
+                      min={1}
+                      value={ticketsAvailable}
+                      onChange={(e) => setTicketsAvailable(e.target.value)}
+                      placeholder="120"
+                    />
                   ) : (
-                    <p className="mt-2 text-xs text-zinc-500">Free events skip card checkout. Guests still get ticket QR codes.</p>
+                    <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">Sales stay open until you turn them off.</p>
                   )}
                 </div>
-                <div className="rounded-xl border border-white/[0.12] bg-white/[0.03] px-3 py-2.5 text-xs text-zinc-400">
-                  Sales are <span className="font-semibold text-zinc-200">OFF by default</span> after publish. Turn them on from the host event page when you are ready.
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              </div>
+
+              {/* Price preview — promoted: gradient surface, big "you receive" */}
+              <div className="overflow-hidden rounded-2xl border border-brand-green/20 bg-gradient-to-br from-brand-green/[0.08] via-white/[0.03] to-transparent p-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-green/80">Price preview</p>
+                <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
                   <div>
-                    <span className={labelClass}>Listing</span>
-                    <select
-                      className={`${field} cursor-pointer appearance-none bg-[length:0.875rem] bg-[right_0.65rem_center] bg-no-repeat pr-9`}
-                      style={{ backgroundImage: `url("${chevron}")` }}
-                      value={visibility}
-                      onChange={(e) => setVisibility(e.target.value as Visibility)}
-                    >
-                      <option value="public">Public (home page)</option>
-                      <option value="unlisted">Unlisted (link only)</option>
-                      <option value="private">Private (you only)</option>
-                    </select>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Guest pays</p>
+                    <p className="mt-1 text-base font-black tabular-nums text-white sm:text-lg">${ticketPriceFloat.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Platform fee</p>
+                    <p className="mt-1 text-base font-black tabular-nums text-zinc-300 sm:text-lg">-${(platformFeeCents / 100).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-green/80">You receive</p>
+                    <p className="mt-1 text-base font-black tabular-nums text-brand-green sm:text-lg">${(hostNetCents / 100).toFixed(2)}</p>
                   </div>
                 </div>
-                <p className="text-[11px] leading-relaxed text-zinc-500">
-                  Unlisted keeps the event off the marketing home strip; anyone with the guest link can still open the page and buy tickets. Private hides
-                  the guest page from everyone except you while signed in.
+                <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
+                  {isFreeEvent
+                    ? "Free events skip card checkout. Guests still get ticket QR codes."
+                    : "Stripe processing fees are separate and can vary by card/payment method."}
                 </p>
-                <div>
-                  <span className={labelClass}>Dress code (optional)</span>
-                  <input className={field} placeholder="Creative black tie, streetwear, etc." value={dressCode} onChange={(e) => setDressCode(e.target.value)} />
-                </div>
-                <div>
-                  <span className={labelClass}>Door / entry notes (optional)</span>
-                  <input className={field} placeholder="ID check, re-entry, accessibility…" value={instructions} onChange={(e) => setInstructions(e.target.value)} />
-                </div>
               </div>
+
+              <div className="flex items-start gap-2 rounded-xl border border-brand-green/20 bg-brand-green/[0.06] px-3.5 py-3 text-[12px] leading-relaxed text-zinc-300">
+                <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-green" strokeWidth={2} aria-hidden />
+                <span>
+                  Sales turn <span className="font-semibold text-brand-green">ON automatically</span> after publish — guests can buy right away. Pause anytime from the host event page.
+                </span>
+              </div>
+
+              {/* Listing — 3-card radio replaces the native select. Same 3 options, much clearer hierarchy. */}
+              <div>
+                <span className={labelClass}>Who can find it</span>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {(
+                    [
+                      {
+                        id: "public" as Visibility,
+                        label: "Public",
+                        hint: "Shown on the home page",
+                        Icon: Globe2,
+                      },
+                      {
+                        id: "unlisted" as Visibility,
+                        label: "Unlisted",
+                        hint: "Anyone with the link",
+                        Icon: Link2,
+                      },
+                      {
+                        id: "private" as Visibility,
+                        label: "Private",
+                        hint: "You only (signed in)",
+                        Icon: EyeOff,
+                      },
+                    ] as const
+                  ).map(({ id, label, hint, Icon }) => {
+                    const active = visibility === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setVisibility(id)}
+                        aria-pressed={active}
+                        className={cn(
+                          "group relative flex flex-col items-start gap-1 rounded-2xl border p-3.5 text-left transition-colors duration-200",
+                          active
+                            ? "border-brand-green/55 bg-brand-green/[0.08] shadow-[0_0_22px_-12px_rgba(75,250,148,0.6)]"
+                            : "border-white/[0.1] bg-white/[0.02] hover:border-white/25",
+                        )}
+                      >
+                        <span className="flex w-full items-center justify-between">
+                          <Icon className={cn("h-4 w-4", active ? "text-brand-green" : "text-zinc-400")} strokeWidth={1.75} />
+                          {active ? (
+                            <span className="grid h-5 w-5 place-items-center rounded-full bg-brand-green text-black">
+                              <Check className="h-3 w-3" strokeWidth={3} />
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className={cn("text-[13px] font-semibold", active ? "text-white" : "text-zinc-200")}>{label}</span>
+                        <span className="text-[11px] leading-snug text-zinc-500">{hint}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Eye affordance — surfaces the selected behavior in plain English */}
+                <p className="mt-2 inline-flex items-start gap-1.5 text-[11px] leading-relaxed text-zinc-500">
+                  <Eye className="mt-0.5 h-3 w-3 shrink-0 text-zinc-600" strokeWidth={1.75} aria-hidden />
+                  <span>
+                    {visibility === "public"
+                      ? "Anyone browsing RAGE can discover this event."
+                      : visibility === "unlisted"
+                        ? "Off the marketing home strip; anyone with the guest link can still buy tickets."
+                        : "Hidden from everyone except you while signed in."}
+                  </span>
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="ce-dress" className={labelClass}>Dress code <span className="font-normal text-zinc-500">(optional)</span></label>
+                <input id="ce-dress" className={field} placeholder="Creative black tie, streetwear, etc." value={dressCode} onChange={(e) => setDressCode(e.target.value)} />
+              </div>
+              <div>
+                <label htmlFor="ce-instr" className={labelClass}>Door / entry notes <span className="font-normal text-zinc-500">(optional)</span></label>
+                <input id="ce-instr" className={field} placeholder="ID check, re-entry, accessibility…" value={instructions} onChange={(e) => setInstructions(e.target.value)} />
+              </div>
+            </SectionCard>
 
             <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/[0.06] bg-[#030303]/90 px-4 py-3.5 shadow-[0_-24px_50px_-36px_rgba(0,0,0,0.9)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[#030303]/72 sm:static sm:mt-10 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none sm:backdrop-blur-none">
               <div className="mx-auto flex max-w-md items-center gap-2 sm:max-w-lg">

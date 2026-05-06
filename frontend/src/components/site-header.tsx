@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, LogOut, Menu, UserRound, X } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -83,6 +84,7 @@ function menuLinkClass(highlight?: boolean) {
 }
 
 export function SiteHeader() {
+  const pathname = usePathname();
   const supabase = getSupabaseBrowserClient();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authedEmail, setAuthedEmail] = useState<string | null>(null);
@@ -117,6 +119,9 @@ export function SiteHeader() {
     setMobileOpen(false);
     closeMenus();
   }
+
+  /** Focus mode: pages with their own task chrome should not show the marketing nav. */
+  if (pathname === "/create-event" || pathname?.startsWith("/create-event/")) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#030303]/90 backdrop-blur-xl">
